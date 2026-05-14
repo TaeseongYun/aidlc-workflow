@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+.vscode/
+
+# OMC runtime state (per-machine, not shared)
+.omc/
+
+# aidlc-docs (per-project output, not part of the framework)
+aidlc-docs/
