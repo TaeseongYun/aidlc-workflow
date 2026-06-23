@@ -30,6 +30,21 @@
 - 60~79%: 조건부 진행 (ASSUME 가정 명시 필수)
 - 80% 이상: 구현 가능
 
+## Post-Implementation Score (구현 후 — ctx-score-loop)
+
+구현 **이후** 의존성 인지 점수 루프(`/ctx-score-loop`)가 산출하는 최신 점수를 미러한다.
+Readiness Score(구현 전)와 시점·용도가 다르다. 상세 이력은 피처/모듈 디렉토리의 `dependency-check.md` Score History를 본다.
+
+| 항목 | 값 |
+|------|-----|
+| 최신 총점 | (0~100) |
+| 최신 라운드 | |
+| 축별 (의/빌/테/AC) | / / / |
+| 판정 | COMPLETE(>85) / INCOMPLETE / STALLED / EXHAUSTED / REGRESSED |
+| 최종 갱신 | (ISO 8601 UTC) |
+
+채점 기준: `core/dependency-score.md`. 완료 임계: 85점 초과(`> 85`) AND 빌드 축 ≠ 0 (GR-1).
+
 ## Scope
 - Goal:
 - In-Scope Summary:

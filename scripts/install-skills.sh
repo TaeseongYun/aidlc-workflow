@@ -42,6 +42,7 @@ SKILLS=(
   "ctx-refiner"
   "ctx-reviewer"
   "ctx-updater"
+  "ctx-score-loop"
 )
 
 for skill in "${SKILLS[@]}"; do
