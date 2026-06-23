@@ -108,3 +108,15 @@ readiness-score(구현 **전** 준비도)와 혼동하지 말 것. 이 루프는
 - 이 루프는 **GATE(사람 승인)를 자동 통과시키지 않는다.** GATE-3 이후 구현 구간에서만 동작한다.
 - 비즈니스 정책(환불/정산/권한) 미확정은 여전히 STOP 조건이다.
 - 완료는 오직 검증 통과 시에만 보고한다. 테스트 실패/스킵 시 그 사실을 명시한다.
+
+---
+
+## 8. 전체 예시 (따라 하기)
+
+`/ctx-aidlc-run`부터 `/ctx-score-loop`까지 한 기능을 끝까지 진행한 walkthrough 예시:
+
+- `examples/score-loop-walkthrough/book-borrowing/` — "도서 대출" 기능
+  - `README.md` — 단계별 흐름
+  - `requirements.md` / `requirement-verification-questions.md` / `unit-of-work.md` / `status.md` — `/ctx-aidlc-run` 산출물
+  - `dependency-check.md` — 점수 루프 채점 입력 + Score History(75→82→92)
+  - `LOOP-RUN.md` — 라운드별 진행 + 정체/거짓완료 반례
