@@ -1,0 +1,114 @@
+# Dependency Score Schema
+# 루프가 자동 채점할 때 이 스키마를 참조한다.
+# 상세 규칙과 판정 기준은 core/dependency-score.md를 따른다.
+# 시점: 구현 이후(post-implementation). readiness-score(구현 전)의 형제 스키마.
+
+version: "1.0"
+total_points: 100
+
+# 완료 임계는 85점 "초과"(strictly greater). 정확히 85점은 미완료.
+thresholds:
+  COMPLETE:
+    min_exclusive: 85
+    description: "온전히 종료(완료). 단 게이팅 규칙(GR-1) 통과 시에만."
+  INCOMPLETE:
+    max: 85
+    description: "미완료. 부족 축 보완 후 재채점."
+
+areas:
+  - id: dependency_resolution
+    name: "의존성 해결"
+    max_points: 25
+    cap_rule:
+      condition: "BLOCK으로 표시된 미해결 의존성이 1건 이상일 때 (GR-2)"
+      max_allowed: 12
+    criteria:
+      - id: functional_order_deps
+        description: "기능 간 선후관계 의존성이 모두 충족"
+        points: 8
+        check: "의존성 md의 기능 선후 체크리스트 항목이 모두 해결"
+      - id: build_library_deps
+        description: "빌드/라이브러리 의존성이 모두 설정·해결"
+        points: 8
+        check: "의존성 md의 빌드/라이브러리 체크리스트 항목이 모두 해결"
+      - id: module_deps
+        description: "모듈 간 의존성(API 호출/구현)이 모두 충족"
+        points: 9
+        check: "의존성 md의 모듈 간 체크리스트 항목이 모두 해결"
+
+  - id: build_pass
+    name: "빌드/컴파일 통과"
+    max_points: 25
+    evidence_required: true   # 실제 명령 실행 결과만 인정. 미실행 시 0점 (FR-4).
+    zero_if_not_executed: true
+    criteria:
+      - id: build_success
+        description: "빌드 명령이 성공적으로 완료"
+        points: 15
+        check: "빌드 명령 종료 코드 0 (실행 로그 증빙 필수)"
+      - id: warnings_under_threshold
+        description: "경고가 기준 이하"
+        points: 5
+        check: "빌드 경고 수가 기준 이하 (기준 미정의 시 해당 없음)"
+      - id: lint_pass
+        description: "린트/정적 분석 통과"
+        points: 5
+        check: "린트/정적 분석 명령 통과 (없으면 해당 없음)"
+
+  - id: test_pass
+    name: "테스트 통과 / 커버리지"
+    max_points: 25
+    evidence_required: true   # 실제 명령 실행 결과만 인정. 미실행 시 0점 (FR-4).
+    zero_if_not_executed: true
+    criteria:
+      - id: tests_pass
+        description: "관련 테스트가 모두 통과"
+        points: 15
+        check: "테스트 명령 결과 전부 통과 (리포트 증빙 필수)"
+      - id: coverage_target
+        description: "커버리지가 목표 기준 이상"
+        points: 5
+        check: "커버리지 목표 충족 (목표 미정의 시 해당 없음, 만점 제외)"
+      - id: edge_case_tests
+        description: "예외/엣지 케이스 테스트 존재"
+        points: 5
+        check: "예외/엣지 케이스 테스트가 1개 이상"
+
+  - id: ac_satisfaction
+    name: "요구사항 / AC 충족도"
+    max_points: 25
+    score_source: "unit-of-work.md UOW 수용 기준 + requirements.md Functional Requirements (FR-5)"
+    criteria:
+      - id: uow_acceptance
+        description: "각 UOW 수용 기준이 충족"
+        points: 15
+        check: "unit-of-work.md의 각 UOW 수용 기준이 산출물에서 충족"
+      - id: functional_requirements
+        description: "requirements Functional Requirements가 반영"
+        points: 10
+        check: "requirements.md Functional Requirements가 구현에 반영"
+
+gating_rules:
+  - id: GR-1
+    description: "총점이 85 초과라도 빌드 축(build_pass)이 0점이면 COMPLETE로 판정하지 않는다"
+    blocks_complete: true
+  - id: GR-2
+    description: "BLOCK 미해결 의존성이 1건 이상이면 dependency_resolution 영역은 최대 12점"
+    cap_area: dependency_resolution
+    cap_value: 12
+
+# 루프 제어 파라미터 (설정 가능 — ADR-5). 슬래시 명령 인자/의존성 md 헤더로 오버라이드 가능.
+loop_control:
+  complete_threshold_exclusive: 85
+  stall_rounds: 2            # N회 연속 미개선 시 정체 중단 (확정)
+  max_rounds: 10             # 기본값, 설정 가능
+  max_minutes: 30            # 기본값, 설정 가능
+  regression_action: "report_only"   # v1: 보고만, 자동 롤백 없음 (FR-10)
+  on_limit: "stop_and_report"         # 상한/정체/회귀 도달 시 즉시 중단·보고, 자동 재시작 금지 (FR-13)
+
+rules:
+  - "빌드·테스트 축은 실제 명령 실행 결과(종료 코드/리포트)만 근거. 미실행 시 0점."
+  - "점수를 올리기 위해 BLOCK 의존성을 임의 해제하지 않는다."
+  - "점수는 근거와 함께 기록한다. 숫자만 쓰지 않는다."
+  - "정의되지 않은 세부 항목(커버리지 목표 등)은 0점이 아니라 '해당 없음'으로 만점에서 제외."
+  - "완료 임계는 strictly greater than 85. 정확히 85는 미완료."
