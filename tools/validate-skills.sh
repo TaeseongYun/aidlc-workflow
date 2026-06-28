@@ -79,7 +79,13 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   done
 
   # SCOPE-01: No cross-skill references
-  cross_refs=$(grep -rn "skills/[a-z]" "$skill_dir" --include="*.md" 2>/dev/null | grep -v "_shared" | grep -v "common" || true)
+  # Repo-relative "skills/<other>/" 참조만 위반으로 본다.
+  # 설치 경로 진단(~/.claude/..., ~/.codex/skills/...)이나 글로벌 commands 경로는
+  # 다른 스킬의 소스를 의존하는 것이 아니라 "설치 여부 확인"이므로 제외한다.
+  cross_refs=$(grep -rn "skills/[a-z]" "$skill_dir" --include="*.md" 2>/dev/null \
+    | grep -v "_shared" | grep -v "common" \
+    | grep -vE '~?/?\.(claude|codex)[^ ]*skills/' \
+    | grep -vE '\.claude/|\.codex/' || true)
   if [[ -z "$cross_refs" ]]; then
     pass "SCOPE-01: $skill_name — no cross-skill references"
   else

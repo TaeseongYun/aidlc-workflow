@@ -57,8 +57,14 @@ echo "발견된 질문: ${question_count}개"
 for qid in $question_ids; do
   qnum="${qid%.}"
 
-  # 해당 질문 블록 추출 (다음 Q 또는 ## 까지)
-  block=$(sed -n "/### ${qid}/,/^### Q\|^## /p" "$QFILE" | head -30)
+  # 해당 질문 블록 추출 (시작 헤더부터 다음 ### Q / ## 헤더 직전까지).
+  # 주의: sed 주소 범위에서 '\|'는 alternation이 아니라 리터럴이므로
+  # 종료 패턴이 매치되지 않아 블록이 EOF까지 흘러간다. awk로 명시 처리한다.
+  block=$(awk -v hdr="### ${qid}" '
+    index($0, hdr) == 1 {grab=1; print; next}
+    grab && (/^### Q[0-9]/ || /^## /) {exit}
+    grab {print}
+  ' "$QFILE" | head -30)
 
   # 분류 (유형) 필드
   if echo "$block" | grep -qi '분류:\|유형:' 2>/dev/null; then
@@ -111,16 +117,32 @@ done
 echo ""
 echo "--- 4. policy 질문 AI 추천 금지 ---"
 
-# policy 질문 블록에서 AI 추천 필드가 있으면 위반
-policy_questions=$(grep -B1 '분류: *policy' "$QFILE" 2>/dev/null | grep -oE 'Q[0-9]+' || true)
-for qnum in $policy_questions; do
-  block=$(sed -n "/### ${qnum}\./,/^### Q\|^## /p" "$QFILE" | head -30)
-  if echo "$block" | grep -qi 'AI 추천:\|AI-RECOMMEND' 2>/dev/null; then
-    error "$qnum: policy 질문에 AI 추천이 포함됨 (governance 위반)"
-  else
-    pass "$qnum: policy 질문 — AI 추천 없음"
+# policy 질문 식별 → 해당 블록에 AI 추천이 있으면 위반.
+# 거버넌스 정본(question-governance.md): policy/domain/scope 분류는 '유형:' 필드가 담는다
+# ('분류:'는 ops/scope 등 영역 태그라 policy 판정에 쓰면 false negative).
+# 각 질문 블록을 추출해 블록 내부에서 'policy' 유형 여부를 판정한다.
+policy_found=0
+for qid in $question_ids; do
+  qnum="${qid%.}"
+  block=$(awk -v hdr="### ${qid}" '
+    index($0, hdr) == 1 {grab=1; print; next}
+    grab && (/^### Q[0-9]/ || /^## /) {exit}
+    grab {print}
+  ' "$QFILE" | head -30)
+
+  # 'policy' 유형 질문만 대상 ('유형: policy' 우선, 하위호환으로 '분류: policy'도 인정)
+  if echo "$block" | grep -qiE '(유형|분류): *policy' 2>/dev/null; then
+    policy_found=$((policy_found + 1))
+    if echo "$block" | grep -qi 'AI 추천:\|AI-RECOMMEND' 2>/dev/null; then
+      error "$qnum: policy 질문에 AI 추천이 포함됨 (governance 위반)"
+    else
+      pass "$qnum: policy 질문 — AI 추천 없음"
+    fi
   fi
 done
+if (( policy_found == 0 )); then
+  echo "policy 유형 질문 없음 (검사 대상 0건)"
+fi
 
 # --- 5. BLOCK 질문 현황 ---
 echo ""
