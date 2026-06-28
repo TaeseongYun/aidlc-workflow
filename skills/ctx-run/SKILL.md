@@ -205,6 +205,23 @@ RULES:
 - Do NOT modify tests, documentation, or build config
 - Never guess contracts, fields, or calculations
 
+LAZY IMPLEMENTATION (code minimization):
+- Before writing ANY new code, apply the 7-rung decision ladder
+  from `core/lazy-implementation.md` (default intensity: full):
+    1. Does it need to exist? (skip if not — YAGNI)
+    2. Already in this codebase? (reuse, don't rewrite)
+    3. Stdlib does it? 4. Native platform/framework feature?
+    5. Installed dependency? 6. One line? 7. Only then: minimum code.
+- Rung 2 MUST honor reusable components listed in `ctx/`.
+- Adding a new dependency still follows dependency-management rules
+  (justify in PR); the ladder is NOT an excuse to add deps.
+- NEVER trim safety guards to reduce code: trust-boundary validation,
+  data-loss handling, security, accessibility, Acceptance-Criteria
+  coverage, and business policy are off the chopping block.
+- Leave `// ponytail: <trimmed / revisit reason>` for deferred shortcuts
+  and append one line to `aidlc-docs/audit.md` with `[PONYTAIL]` prefix.
+- See `docs/ponytail-integration.md` for plugin/OMC usage.
+
 EXECUTION:
 - Invoke the ctx-domain-exec skill using:
   /ctx-domain-exec
@@ -298,6 +315,16 @@ RULES:
 - Do NOT perform manual review
 - Do NOT modify code, CTX, or documentation
 - The skill will validate against FEATURE, CTX, and design constraints
+
+OVER-ENGINEERING CHECK (lazy implementation, see core/lazy-implementation.md):
+- In addition to CTX violations, flag over-engineering:
+    - Code that dropped to rung 7 (hand-written) when an earlier rung worked.
+    - New code that duplicates a reusable component already in `ctx/`/codebase.
+- BLOCK FIRST (higher priority than over-engineering): a safety guard
+  (validation, security, data-loss, accessibility, AC, business policy)
+  removed under the name of "laziness" is a defect, not a simplification.
+- If the ponytail plugin is installed, `/ponytail-review` can produce a
+  delete-candidate list for the current diff; otherwise check manually.
 
 EXECUTION:
 - Invoke the ctx-reviewer skill using:
