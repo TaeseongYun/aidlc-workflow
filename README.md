@@ -124,6 +124,7 @@ ctx/
 | `/ctx-updater` | 코드/문서 갱신 |
 | `/ctx-refiner` | CTX 문서 최적화 |
 | `/ctx-commit-planner` | 커밋 구조 설계 |
+| `/ctx-score-loop` | 구현 후 의존성·4축 자동 반복 채점 (85점 초과 시 완료) |
 
 ---
 
@@ -141,6 +142,16 @@ team-ai-workflow은 "**무엇을 만들 것인가**"를 결정합니다. oh-my-c
 | **Ouroboros evolve** | 진화적 반복 설계/구현 | `/ctx-aidlc-run` → `ouroboros_evolve_step` |
 
 자세한 패턴과 설정은 [docs/omc-ouroboros-integration.md](docs/omc-ouroboros-integration.md)를 참조하세요.
+
+### 절제 레이어 — ponytail 연동
+
+team-ai-workflow가 "**무엇을**", OMC/Ouroboros가 "**어떻게 자동으로**"를 담당한다면,
+[ponytail](https://github.com/DietrichGebert/ponytail)은 "**얼마나 적게**"를 담당합니다.
+구현(`/ctx-run` ROLE 1) 직전에 7단계 절제 사다리를 적용해 과잉 엔지니어링을 막습니다.
+플러그인 설치 없이도 [core/lazy-implementation.md](core/lazy-implementation.md) 규칙만으로
+동작하며, 안전 가드(검증·보안·AC·정책)는 절대 깎지 않습니다.
+
+연동 방법: [docs/ponytail-integration.md](docs/ponytail-integration.md)
 
 ---
 
@@ -179,7 +190,8 @@ aidlc-workflow/
 │   ├── ctx-aidlc-roadmap/
 │   ├── ctx-aidlc-run/
 │   ├── ctx-run/
-│   └── ... (7개 스킬)
+│   ├── ctx-score-loop/
+│   └── ... (11개 스킬)
 ├── tools/                      # 검증 도구 (evaluator, skill-validator)
 ├── scripts/                    # 설치 및 초기화
 │   ├── install-skills.sh       # 스킬 전역 설치
@@ -259,5 +271,6 @@ MIT License. 자세한 내용은 [LICENSE](LICENSE)를 참조하세요.
 - [워크플로우 가이드](docs/workflow-guide.md) — Phase별 상세 실행 절차
 - [핵심 개념](docs/concepts.md) — CTX, aidlc-docs, 게이트, Unit of Work
 - [OMC/Ouroboros 연동](docs/omc-ouroboros-integration.md) — 자동화 레이어 연결
+- [Ponytail 연동](docs/ponytail-integration.md) — 코드 절제 레이어 연결
 - [Brownfield 가이드](docs/brownfield-guide.md) — 기존 시스템 분석
 - [FAQ](docs/faq.md) — 자주 하는 질문과 체크리스트
