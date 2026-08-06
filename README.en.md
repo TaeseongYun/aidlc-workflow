@@ -105,6 +105,7 @@ Learn more in [docs/concepts.md](docs/concepts.md).
 | `/ctx-updater` | Update code/docs |
 | `/ctx-refiner` | Optimize CTX docs |
 | `/ctx-commit-planner` | Design commit structure |
+| `/ctx-score-loop` | Post-implementation dependency + 4-axis auto-scoring loop (done at >85) |
 
 ---
 
@@ -120,6 +121,17 @@ team-ai-workflow decides **what to build**. OMC and Ouroboros handle **how to au
 | **Ouroboros evolve** | Evolutionary iteration | `/ctx-aidlc-run` → `ouroboros_evolve_step` |
 
 Details: [docs/omc-ouroboros-integration.md](docs/omc-ouroboros-integration.md)
+
+### Trimming Layer — Ponytail Integration
+
+If team-ai-workflow owns **what** and OMC/Ouroboros own **how to automate**,
+[ponytail](https://github.com/DietrichGebert/ponytail) owns **how little**. It applies a
+7-rung decision ladder right before implementation (`/ctx-run` ROLE 1) to prevent
+over-engineering. It works **without installing the plugin** via the
+[core/lazy-implementation.md](core/lazy-implementation.md) rules, and never trims safety
+guards (validation, security, AC, policy).
+
+How to integrate: [docs/ponytail-integration.md](docs/ponytail-integration.md)
 
 ---
 
@@ -173,4 +185,5 @@ MIT. See [LICENSE](LICENSE).
 - [Workflow Guide](docs/workflow-guide.md) — Phase-by-phase execution
 - [Concepts](docs/concepts.md) — CTX, gates, units of work
 - [OMC/Ouroboros](docs/omc-ouroboros-integration.md) — Automation layer
+- [Ponytail](docs/ponytail-integration.md) — Code-trimming layer
 - [FAQ](docs/faq.md) — Common questions

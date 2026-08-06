@@ -45,10 +45,12 @@ echo "--- 2. 합계 점수 ---"
 total_line=$(grep -i '합계\|total' "$STATUS_FILE" 2>/dev/null | head -1)
 if [[ -n "$total_line" ]]; then
   # 테이블 행에서 숫자 추출: | 합계 | 배점 | 점수 | 판정 |
-  # bold(**) 제거 후 파이프 구분으로 파싱
+  # bold(**) 제거 후 파이프 구분으로 파싱.
+  # 셀에 '120 (100+가점 20)'처럼 여러 숫자가 있어도 첫 정수 토큰만 사용한다
+  # (비숫자 일괄 제거 시 120,100,20 → 12010020 으로 이어붙는 버그 방지).
   clean_line=$(echo "$total_line" | sed 's/\*\*//g')
-  total_max=$(echo "$clean_line" | awk -F'|' '{gsub(/[^0-9]/,"",$3); print $3}')
-  total_score=$(echo "$clean_line" | awk -F'|' '{gsub(/[^0-9]/,"",$4); print $4}')
+  total_max=$(echo "$clean_line" | awk -F'|' '{print $3}' | grep -oE '[0-9]+' | head -1)
+  total_score=$(echo "$clean_line" | awk -F'|' '{print $4}' | grep -oE '[0-9]+' | head -1)
 
   if [[ -n "$total_score" && -n "$total_max" ]]; then
     pass "합계: ${total_score}/${total_max}"
@@ -90,8 +92,12 @@ echo ""
 echo "--- 3. BLOCK 질문 교차 검증 ---"
 
 if [[ -f "$QFILE" ]]; then
-  # OPEN 상태인 BLOCK 질문 수 (Summary 테이블에서)
-  block_open=$(grep -ci 'OPEN.*BLOCK\|BLOCK.*OPEN' "$QFILE" 2>/dev/null || echo "0")
+  # OPEN 상태인 BLOCK 질문 수 (Summary 테이블에서).
+  # grep -c 는 매치 0건일 때 stdout 에 "0" 을 찍고 exit 1 을 반환하므로
+  # "|| echo 0" 을 붙이면 "0\n0" 이 되어 (( )) 산술이 깨진다.
+  # 마지막 숫자 한 줄만 취해 정수로 정규화한다.
+  block_open=$(grep -ci 'OPEN.*BLOCK\|BLOCK.*OPEN' "$QFILE" 2>/dev/null | tail -1)
+  block_open=${block_open:-0}
 
   if (( block_open > 0 )); then
     echo "OPEN BLOCK 질문: ${block_open}건"
@@ -126,8 +132,8 @@ score_section=$(sed -n '/## Readiness Score/,/^## /p' "$STATUS_FILE")
 point_values=$(echo "$score_section" | grep -E '^\|' | grep -v '합계\|total\|영역\|--' | grep -oE '\| *[0-9]+ *\|' | head -20)
 
 if [[ -n "$point_values" ]]; then
-  # 개별 행의 배점(3번째 열) 추출 — bold(**) 제거 후 파싱
-  row_maxes=$(echo "$score_section" | sed 's/\*\*//g' | grep -E '^\|' | grep -v '합계\|total\|영역\|--' | awk -F'|' '{gsub(/[^0-9]/,"",$3); if($3!="") print $3}')
+  # 개별 행의 배점(3번째 열) 추출 — bold(**) 제거 후 첫 정수 토큰만 사용
+  row_maxes=$(echo "$score_section" | sed 's/\*\*//g' | grep -E '^\|' | grep -v '합계\|total\|영역\|--' | awk -F'|' '{print $3}' | grep -oE '[0-9]+' )
 
   calc_total=0
   for val in $row_maxes; do
