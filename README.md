@@ -125,6 +125,12 @@ ctx/
 | `/ctx-refiner` | CTX 문서 최적화 |
 | `/ctx-commit-planner` | 커밋 구조 설계 |
 | `/ctx-score-loop` | 구현 후 의존성·4축 자동 반복 채점 (85점 초과 시 완료) |
+| `/ctx-hallucination-audit` | Hallucination Guard 감사 루프. dev fact를 codegraph로 검증, refuted 격리, ≥87까지 반복 |
+
+> **Hallucination Guard (바이브 블로커, 항상 켜짐).** dev fact(경로·심볼·API·설정키·버전)를
+> 코드 그래프로 검증해 AI의 추측이 사실처럼 새어나가지 않게 막는다. `codegraph` + `graphify`는
+> **초기 세팅 필수 전제조건**이며, 없으면 `/team-ai-workflow-start`가 진행을 막고 설치 여부를
+> 대화 상자로 묻는다. 규칙: `extensions/hallucination-guard/`, 가이드: `docs/hallucination-guard.md`.
 
 ---
 
@@ -184,18 +190,23 @@ multi-account 상세 설정: [docs/omc-ouroboros-integration.md#5-멀티계정-�
 aidlc-workflow/
 ├── core/                       # 공통 분석 로직 (input validation, units generation)
 ├── common/                     # 공통 규칙 (question governance, depth levels, gates, recovery)
-├── extensions/                 # 선택적 규칙 팩 (performance, security, api-contract)
+├── extensions/                 # 규칙 팩
+│   ├── performance|security|api-contract/   # 선택적 (opt-in)
+│   └── hallucination-guard/    # 항상 켜짐 (바이브 블로커): 가드 규칙 + Linear 라우팅
 ├── skills/                     # 스킬 원본 (install-skills.sh가 배포)
 │   ├── team-ai-workflow-start/
 │   ├── ctx-aidlc-roadmap/
 │   ├── ctx-aidlc-run/
 │   ├── ctx-run/
 │   ├── ctx-score-loop/
-│   └── ... (11개 스킬)
+│   ├── ctx-hallucination-audit/
+│   └── ... (12개 스킬)
 ├── tools/                      # 검증 도구 (evaluator, skill-validator)
 ├── scripts/                    # 설치 및 초기화
 │   ├── install-skills.sh       # 스킬 전역 설치
-│   └── init-project.sh         # 프로젝트별 ctx/, aidlc-docs/ 생성
+│   ├── init-project.sh         # 프로젝트별 ctx/, aidlc-docs/ 생성 (+ 코드 그래프 전제조건 검사)
+│   ├── check-codegraph.sh      # codegraph + graphify + 인덱스 전제조건 게이트
+│   └── harvest-assumptions.sh  # 감사 루프용 불확실성 마커 수집
 ├── templates/                  # 문서 템플릿
 ├── docs/                       # 상세 가이드
 │   ├── concepts.md             # CTX, aidlc-docs, GATE 개념
