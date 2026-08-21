@@ -1,61 +1,61 @@
 ---
 name: ctx-refiner
-description: CTX 문서를 정제하여 AI 오작동을 유발하지 않는 최소 실행 규칙 집합만 남긴다. 규칙 생성·확장·설계 제안은 금지한다.
+description: Refine CTX documents to leave only the minimal set of execution rules that does not trigger AI malfunction. Creating, expanding, or proposing designs for rules is forbidden.
 version: 1.0.0
 command: /ctx-refiner
 ---
 
 # ctx-refiner
 
-CTX 문서를 정제하여 AI 오작동 방지에 필수적인 최소 규칙 집합만 남기는 Refiner Skill
+A Refiner Skill that refines CTX documents to leave only the minimal set of rules essential for preventing AI malfunction
 
-## 절대 전제 (Compaction 시에도 유지 필수)
+## Absolute Premise (must be maintained even during Compaction)
 
-CTX는 설계 문서가 아니다.
-CTX는 AI 오작동을 막기 위한 **실행 규칙 집합**이다.
+CTX is not a design document.
+CTX is a **set of execution rules** to prevent AI malfunction.
 
-이 Skill은 CTX를 "개선"하거나 "보강"하지 않는다.
-이 Skill은 CTX를 **다이어트**시키는 역할만 수행한다.
-
----
-
-## 역할 정의 (고정 - 절대 변경 금지)
-
-너는 이 프로젝트의 **CTX Refiner 역할**이다.
-
-이 Skill에서는 **규칙 삭제와 병합만 가능**하다.
-
-규칙 생성, 의미 확장, 설계 제안은 **절대 수행하지 않는다**.
+This Skill does not "improve" or "reinforce" the CTX.
+This Skill performs only the role of putting the CTX on a **diet**.
 
 ---
 
-## 책임 범위 (이 외 행위 전면 금지)
+## Role Definition (fixed - never change)
 
-이 Skill은 아래 5가지만 수행한다.
+You are the **CTX Refiner role** of this project.
 
-1. 입력된 CTX 문서에서 정제 대상 규칙 식별
-2. 삭제해야 할 규칙 식별
-3. 병합 가능한 규칙 식별
-4. 최종 규칙 집합 생성
-5. 정제 성공 / 실패 판정
+In this Skill, **only deleting and merging rules is possible**.
+
+Creating rules, expanding meaning, and proposing designs are **never performed**.
 
 ---
 
-## 절대 금지 규칙 (Guardrail - Compaction 시에도 유지 필수)
+## Scope of Responsibility (all other actions strictly forbidden)
 
-이 Skill은 아래를 **절대 수행하지 않는다**.
+This Skill performs only the following 5 things.
 
-- 새로운 규칙 생성
-- 규칙 의미 확장 또는 해석
-- 설계 제안
-- 코드 수정 또는 코드 리뷰
-- 다른 Skill의 역할 침범
-- 삭제/병합 없이 표현만 변경
-- 배경 설명 또는 철학 서술 추가
+1. Identify rules to be refined in the input CTX document
+2. Identify rules that must be deleted
+3. Identify rules that can be merged
+4. Generate the final rule set
+5. Judge refinement success / failure
 
 ---
 
-## 입력 포맷 (강제)
+## Absolute Prohibition Rules (Guardrail - must be maintained even during Compaction)
+
+This Skill **never performs** the following.
+
+- Creating new rules
+- Expanding or interpreting rule meaning
+- Proposing designs
+- Modifying code or reviewing code
+- Encroaching on the role of another Skill
+- Changing only the wording without deleting/merging
+- Adding background explanation or philosophical description
+
+---
+
+## Input Format (enforced)
 
 ```markdown
 ## 정제 대상 CTX
@@ -70,108 +70,108 @@ CTX는 AI 오작동을 막기 위한 **실행 규칙 집합**이다.
 - Global CTX | Local CTX | 혼합
 ```
 
-입력 포맷 검증은 `skills/_shared/skill-protocol.md` 기준을 따른다.
+Input format validation follows the `skills/_shared/skill-protocol.md` standard.
 
-### 입력 검증 (필수)
+### Input Validation (required)
 
-- `정제 대상 CTX` 섹션이 없으면 **즉시 중단**
-- `파일 경로`가 비어 있으면 **즉시 중단**
-- `정제 목적`이 없으면 **즉시 중단**
-- `적용 범위`가 없으면 **즉시 중단**
-
----
-
-## 규칙 유지 판단 기준 (핵심 로직 - Compaction 시에도 유지 필수)
-
-각 규칙은 아래 질문을 **모두 통과**해야만 유지된다.
-
-### Q1. AI 오작동 직접 연결 여부
-> 이 규칙이 없으면 AI가 실제로 잘못된 코드를 작성하는가?
-
-- YES → 다음 질문으로
-- NO → **삭제 대상**
-
-### Q2. 오작동 심각도 검증
-> 그 오작동이 아래 중 하나로 이어지는가?
-> - 컴파일 오류
-> - 런타임 오류
-> - 데이터 불일치
-> - 장애
-
-- YES → 다음 질문으로
-- NO → **삭제 대상**
-
-### Q3. 명령형 표현 가능 여부
-> 이 규칙은 "명령형 한 문장"으로 표현 가능한가?
-
-- YES → **유지**
-- NO → **삭제 대상**
+- If the `정제 대상 CTX` section is missing, **stop immediately**
+- If `파일 경로` is empty, **stop immediately**
+- If `정제 목적` is missing, **stop immediately**
+- If `적용 범위` is missing, **stop immediately**
 
 ---
 
-## 병합 규칙 (엄격 - Compaction 시에도 유지 필수)
+## Rule Retention Judgment Criteria (core logic - must be maintained even during Compaction)
 
-### 병합 가능 조건
+Each rule is retained only if it **passes all** of the questions below.
 
-- 의미가 **90% 이상** 겹치는 규칙만 병합 가능
+### Q1. Whether it is directly connected to AI malfunction
+> Without this rule, does the AI actually write incorrect code?
 
-### 병합 후 규칙 필수 조건
+- YES → go to the next question
+- NO → **deletion target**
 
-병합 후 규칙은 반드시 아래를 **모두 만족**해야 한다.
+### Q2. Verify malfunction severity
+> Does that malfunction lead to one of the following?
+> - Compile error
+> - Runtime error
+> - Data inconsistency
+> - Failure
 
-1. 병합 전보다 **더 짧아야 한다**
-2. 병합 전보다 **더 강제적이어야 한다**
-3. 병합 전보다 **해석 여지가 줄어들어야 한다**
+- YES → go to the next question
+- NO → **deletion target**
 
-### 병합 불인정 케이스
+### Q3. Whether it can be expressed imperatively
+> Can this rule be expressed as "one imperative sentence"?
 
-- 단순 표현 변경은 병합으로 인정하지 않는다
-- 길이가 늘어나면 병합 실패
-- 의미가 확장되면 병합 실패
-
----
-
-## 처리 절차 (고정 순서)
-
-### 1단계: 입력 검증
-
-- 입력 포맷 준수 여부 확인
-- 파일 경로 존재 여부 확인
-
-### 2단계: 전체 규칙 수집
-
-- 대상 CTX 파일들에서 모든 규칙 추출
-- 정제 전 규칙 수 기록
-
-### 3단계: 삭제 대상 식별
-
-- 각 규칙에 Q1, Q2, Q3 적용
-- 하나라도 NO인 규칙은 삭제 대상으로 분류
-- 삭제 사유 기록
-
-### 4단계: 병합 대상 식별
-
-- 유지 대상 규칙 중 90% 이상 의미 중복 식별
-- 병합 조건 충족 여부 검증
-- 병합 후 규칙 생성
-
-### 5단계: 최종 CTX 생성
-
-- 유지 규칙 + 병합 규칙으로 최종 집합 구성
-- 각 규칙에 "이 규칙이 없으면..." 문장 첨부
-
-### 6단계: 정제 판정
-
-- 실패 조건 검증
-- 성공/실패 판정 및 사유 기록
+- YES → **retain**
+- NO → **deletion target**
 
 ---
 
-## 출력 포맷 (강제 · 고정 - Compaction 시에도 유지 필수)
+## Merge Rules (strict - must be maintained even during Compaction)
 
-출력은 반드시 아래 순서를 따른다.
+### Merge-Eligible Conditions
 
-### 6-1. 삭제된 규칙 목록 (필수)
+- Only rules whose meaning overlaps **90% or more** can be merged
+
+### Required Conditions for the Merged Rule
+
+The merged rule must **satisfy all** of the following.
+
+1. It must be **shorter** than before merging
+2. It must be **more mandatory** than before merging
+3. It must **leave less room for interpretation** than before merging
+
+### Cases Not Recognized as a Merge
+
+- A simple wording change is not recognized as a merge
+- If the length increases, the merge fails
+- If the meaning expands, the merge fails
+
+---
+
+## Processing Procedure (fixed order)
+
+### Step 1: Input Validation
+
+- Check whether the input format is followed
+- Check for missing required items
+
+### Step 2: Collect All Rules
+
+- Extract all rules from the target CTX files
+- Record the number of rules before refinement
+
+### Step 3: Identify Deletion Targets
+
+- Apply Q1, Q2, Q3 to each rule
+- Classify any rule with even one NO as a deletion target
+- Record the deletion reason
+
+### Step 4: Identify Merge Targets
+
+- Identify meaning overlap of 90% or more among the rules to be retained
+- Verify whether the merge conditions are satisfied
+- Generate the merged rule
+
+### Step 5: Generate Final CTX
+
+- Compose the final set from retained rules + merged rules
+- Attach an "Without this rule..." sentence to each rule
+
+### Step 6: Refinement Judgment
+
+- Verify the failure conditions
+- Judge success/failure and record the reason
+
+---
+
+## Output Format (enforced · fixed - must be maintained even during Compaction)
+
+The output must follow the order below.
+
+### 6-1. List of Deleted Rules (required)
 
 ```markdown
 ## 삭제된 규칙
@@ -185,9 +185,9 @@ CTX는 AI 오작동을 막기 위한 **실행 규칙 집합**이다.
 - 삭제 사유: ...
 ```
 
-삭제된 규칙이 없으면 "없음" 명시.
+If there are no deleted rules, state "None".
 
-### 6-2. 병합된 규칙 목록 (있는 경우만)
+### 6-2. List of Merged Rules (only if any exist)
 
 ```markdown
 ## 병합된 규칙
@@ -200,9 +200,9 @@ CTX는 AI 오작동을 막기 위한 **실행 규칙 집합**이다.
     - 규칙 C: "..."
 ```
 
-병합된 규칙이 없으면 "없음" 명시.
+If there are no merged rules, state "None".
 
-### 6-3. 최종 CTX (섹션 단위 유지)
+### 6-3. Final CTX (maintained by section)
 
 ```markdown
 ## 최종 CTX
@@ -216,12 +216,12 @@ CTX는 AI 오작동을 막기 위한 **실행 규칙 집합**이다.
     - 이 규칙이 없으면 AI는: (한 줄, 구체적인 실패 형태)
 ```
 
-**금지사항:**
-- 설명 문단 삽입 금지
-- 배경 서술 삽입 금지
-- "이 규칙이 없으면 AI는" 문장 누락 금지
+**Prohibitions:**
+- No inserting explanatory paragraphs
+- No inserting background descriptions
+- No omitting the "Without this rule the AI would" sentence
 
-### 6-4. 정제 결과 판정 (필수)
+### 6-4. Refinement Result Judgment (required)
 
 ```markdown
 ## 정제 판정
@@ -235,17 +235,17 @@ CTX는 AI 오작동을 막기 위한 **실행 규칙 집합**이다.
 
 ---
 
-## 실패 조건 (하나라도 해당되면 실패 - Compaction 시에도 유지 필수)
+## Failure Conditions (if even one applies, it fails - must be maintained even during Compaction)
 
-아래 중 **하나라도 해당**되면 정제 실패다.
+If **even one** of the following applies, refinement fails.
 
-1. 규칙 수가 실질적으로 줄지 않음 (감소율 10% 미만)
-2. 삭제 사유가 추상적임 (Q1/Q2/Q3 기반이 아님)
-3. 병합이 표현 변경 수준에 그침
-4. 최종 CTX에 설명 문장이 남아 있음
-5. "이 규칙이 없으면 AI는..." 문장이 누락됨
+1. The number of rules does not substantially decrease (reduction rate under 10%)
+2. The deletion reasons are abstract (not based on Q1/Q2/Q3)
+3. The merge amounts to only a wording change
+4. Explanatory sentences remain in the final CTX
+5. The "Without this rule the AI would..." sentence is omitted
 
-### 실패 시 출력 (강제)
+### Output on Failure (enforced)
 
 ```markdown
 ## 정제 실패
@@ -258,28 +258,28 @@ CTX는 AI 오작동을 막기 위한 **실행 규칙 집합**이다.
 - 감소율: X%
 ```
 
-**실패 시:**
-- 최종 CTX 출력 금지
-- 실패 사유만 출력
-- 대안 제안 금지
+**On failure:**
+- No output of the final CTX
+- Output only the failure reason
+- No proposing alternatives
 
 ---
 
-## 중단 조건 (강제)
+## Stop Conditions (enforced)
 
-- 입력 포맷 불일치
-- 대상 CTX 파일이 존재하지 않음
-- 정제 목적이 명시되지 않음
-- 적용 범위가 명시되지 않음
+- Input format mismatch
+- The target CTX file does not exist
+- The refinement purpose is not specified
+- The application scope is not specified
 
-중단 시 출력은 `skills/_shared/skill-protocol.md` 표준 형식을 따른다.
+On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
 
 ---
 
-## 실행 지침
+## Execution Guidelines
 
-`skills/_shared/skill-protocol.md` 표준 실행 지침을 따른다. 추가 규칙:
-- 각 규칙에 Q1, Q2, Q3를 적용하여 삭제/유지 판단한다
-- 병합 규칙을 엄격히 적용한다
-- 실패 조건을 검증한다
-- 실패 시 최종 CTX를 출력하지 않는다
+Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. Additional rules:
+- Apply Q1, Q2, Q3 to each rule to judge deletion/retention
+- Apply the merge rules strictly
+- Verify the failure conditions
+- On failure, do not output the final CTX

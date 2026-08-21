@@ -1,25 +1,25 @@
 <!-- workflow-step: STEP-R6 | gate: GATE-0 | producer: ctx-aidlc-roadmap | condition: multi-feature prepared-requirement -->
 # Feature Roadmap
 
-이 파일은 `aidlc-docs/_roadmap.md`(프로젝트 레벨)에 생성한다. 단일 피처 작업에는 사용하지 않는다.
+Create this file at `aidlc-docs/_roadmap.md` (project level). Do not use it for single-feature work.
 
-선행 입력:
-- prepared-requirement 원본 기획서
+Prerequisite inputs:
+- prepared-requirement source planning document
 - `ctx/INDEX.md`, `ctx/project-profile.ctx.md`
 - (brownfield) `aidlc-docs/reverse-engineering/*`
 
-관련 상태 파일:
-- `aidlc-docs/aidlc-state.md` (Roadmap State, Feature Index, Cross-Feature Dependencies 동기화)
-- `aidlc-docs/audit.md` (Phase 0 STEP/GATE-0/HANDOFF 이벤트)
+Related state files:
+- `aidlc-docs/aidlc-state.md` (sync Roadmap State, Feature Index, Cross-Feature Dependencies)
+- `aidlc-docs/audit.md` (Phase 0 STEP/GATE-0/HANDOFF events)
 
 ---
 
 ## 1. Source Document
 
-- 원본 경로:
-- 분류: prepared-requirement
-- 수령일:
-- 작성 책임자(로드맵 작성자):
+- Source path:
+- Classification: prepared-requirement
+- Received date:
+- Author (roadmap author):
 - Depth Level: minimal / standard / comprehensive
 
 ## 2. Feature List
@@ -32,14 +32,14 @@
 
 Type: `domain-feature` / `foundation-*` / `integration` / `ops/admin`
 
-규칙:
-- 슬러그는 `skills/ctx-aidlc-run/SKILL.md` 명명 규칙(kebab-case)을 따른다.
-- 한 피처에 2개 이상의 독립 도메인을 묶지 않는다 (단일 도메인 원칙, `core/units-generation.md`).
-- foundation 피처(공통 기반)는 F-1로 우선 배치한다.
+Rules:
+- Slugs follow the naming rules in `skills/ctx-aidlc-run/SKILL.md` (kebab-case).
+- Do not bundle two or more independent domains into a single feature (single-domain principle, `core/units-generation.md`).
+- Place foundation features (common base) first as F-1.
 
 ## 3. Resource Matrix
 
-각 피처가 만들거나 수정하는 자원을 표로 추출한다. 동일 자원이 2개 이상 피처에 등장하면 ⚠로 표시한다.
+Extract the resources each feature creates or modifies into a table. Mark ⚠ when the same resource appears in two or more features.
 
 | Resource | Type | F-1 | F-2 | F-3 | ⚠ |
 |----------|------|-----|-----|-----|---|
@@ -47,11 +47,11 @@ Type: `domain-feature` / `foundation-*` / `integration` / `ops/admin`
 
 Type: `component` / `table` / `api` / `event` / `module` / `infra`
 
-⚠ 표시 자원은 다음 STEP R4에서 반드시 처리한다 (foundation 추출 또는 단일 소유 피처 지정).
+Resources marked ⚠ must be handled in the next STEP R4 (foundation extraction or single-owner feature assignment).
 
 ## 4. Dependency Graph
 
-### 4-1. 피처 간 의존 관계
+### 4-1. Inter-Feature Dependencies
 
 | Source Feature | Depends On | Reason | Resolution |
 |----------------|------------|--------|------------|
@@ -59,14 +59,14 @@ Type: `component` / `table` / `api` / `event` / `module` / `infra`
 
 Resolution: `foundation-extracted` / `serialized` / `parallel-safe`
 
-### 4-2. 순환 의존 검사
+### 4-2. Circular Dependency Check
 
-- 순환 의존: 예 / 아니오
-- 발견 시 해소 방안:
+- Circular dependency: yes / no
+- Resolution approach when found:
 
-### 4-3. 다이어그램 (선택)
+### 4-3. Diagram (optional)
 
-피처 수가 5개 이상이거나 의존이 복잡하면 `common/diagram-standards.md`에 따라 Mermaid 그래프를 첨부한다.
+If there are 5 or more features or the dependencies are complex, attach a Mermaid graph following `common/diagram-standards.md`.
 
 ```mermaid
 graph TD
@@ -77,52 +77,52 @@ graph TD
 
 ## 5. Allocation Recommendation
 
-### 5-1. 실행 순서
+### 5-1. Execution Order
 
-| Phase | Feature(s) | 실행 모드 | 비고 |
+| Phase | Feature(s) | Execution Mode | Notes |
 |-------|-----------|-----------|------|
-| 1     |           | 직렬 (선행 필수) |      |
-| 2     |           | 병렬 가능        |      |
-| 3     |           | 직렬 (앞 단계 필요) |      |
+| 1     |           | serial (prerequisite required) |      |
+| 2     |           | parallel-capable        |      |
+| 3     |           | serial (needs prior stage) |      |
 
-### 5-2. 분업 권고
+### 5-2. Division of Labor Recommendation
 
-| Feature | 권장 담당 (역할/스킬) | 비고 |
+| Feature | Recommended Owner (role/skill) | Notes |
 |---------|----------------------|------|
 | F-1     |                      |      |
 | F-2     |                      |      |
 
-담당자 실명은 사용자가 채운다. 본 산출물에서는 역할/스킬 기준으로만 권고한다.
+The user fills in real owner names. This artifact only recommends by role/skill.
 
-### 5-3. 병렬 안전성 노트
+### 5-3. Parallel Safety Notes
 
-- 같은 모듈을 동시에 수정해야 하는 피처가 있으면 명시한다.
-- 머지 충돌 위험이 큰 구간은 직렬화로 권고한다.
+- Specify if there are features that must modify the same module concurrently.
+- Recommend serialization for segments with high merge-conflict risk.
 
 ## 6. Handoff Plan
 
-각 피처가 Phase 0 종료 후 어떻게 `ctx-aidlc-run`으로 진입하는지 명시한다.
+Specify how each feature enters `ctx-aidlc-run` after Phase 0 ends.
 
-| Feature | 입력 발췌 위치 | 분류 | Depends On (산출물) |
+| Feature | Input Excerpt Location | Classification | Depends On (artifacts) |
 |---------|---------------|------|--------------------|
-| F-1     |               | prepared-requirement | 없음 |
-| F-2     |               | prepared-requirement | F-1의 `<산출물 경로>` |
+| F-1     |               | prepared-requirement | none |
+| F-2     |               | prepared-requirement | F-1's `<artifact path>` |
 
-- 입력 발췌: 원본 기획서에서 해당 피처에 해당하는 섹션 범위 (예: "원본 §3.2 ~ §3.4").
-- Depends On 산출물이 아직 없으면 해당 피처는 선행 피처 완료 전까지 대기한다.
+- Input excerpt: the section range in the source planning document corresponding to that feature (e.g. "source §3.2 ~ §3.4").
+- If the Depends On artifact does not exist yet, that feature waits until the prerequisite feature is completed.
 
 ## 7. Open Items
 
-해결되지 않은 항목을 나열한다. 비어 있으면 "없음".
+List unresolved items. If empty, "none".
 
 - [ ]
 
 ## 8. GATE-0 Review Pointers
 
-GATE-0 리뷰 시 사용자가 확인할 핵심 질문 (`common/stage-gate-rules.md` GATE-0 항목 참조):
-- 피처 분해가 책임 단위로 적절한가
-- ⚠ 자원이 모두 해소되었는가
-- 순환 의존이 없는가
-- 분업 권고가 병렬/직렬 구분을 갖추는가
-- 슬러그 명명 규칙 준수
-- `aidlc-state.md` 동기화 여부
+Key questions the user checks during the GATE-0 review (see the GATE-0 items in `common/stage-gate-rules.md`):
+- Is the feature decomposition appropriate as responsibility units
+- Are all ⚠ resources resolved
+- Is there no circular dependency
+- Does the division-of-labor recommendation distinguish parallel/serial
+- Slug naming rule compliance
+- Whether `aidlc-state.md` is synced

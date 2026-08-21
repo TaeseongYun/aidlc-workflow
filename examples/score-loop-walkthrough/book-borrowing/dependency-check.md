@@ -1,63 +1,63 @@
 <!-- workflow-step: post-implementation | producer: ctx-score-loop | EXAMPLE -->
 # Dependency Check — book-borrowing
 
-> walkthrough 예시. `/ctx-score-loop book-borrowing` 실행 후 **3라운드 만에 완료(92점)**된 상태를 보여준다.
-> 채점 기준: `core/dependency-score.md`. 절차: `core/dependency-score-eval.md`.
+> Walkthrough example. Shows the state after running `/ctx-score-loop book-borrowing`, **completed in 3 rounds (92 points)**.
+> Scoring criteria: `core/dependency-score.md`. Procedure: `core/dependency-score-eval.md`.
 
-## Loop Config (기본값 사용 — 비워둠)
+## Loop Config (using defaults — left blank)
 
-| 파라미터 | 기본값 | 이 피처 설정 |
+| Parameter | Default | This feature's setting |
 |----------|--------|-------------|
-| complete_threshold (초과 기준) | 85 | |
-| stall_rounds (정체 판정) | 2 | |
-| max_rounds (최대 반복) | 10 | |
-| max_minutes (최대 시간) | 30 | |
+| complete_threshold (completion cutoff) | 85 | |
+| stall_rounds (stall detection) | 2 | |
+| max_rounds (max iterations) | 10 | |
+| max_minutes (max time) | 30 | |
 
 ---
 
-## 1. 기능 간 선후관계 의존성 (Functional Order)
+## 1. Ordering Dependencies Between Features (Functional Order)
 
-| # | 선행 항목 | 기대 상태 | 해결 | BLOCK | 근거 | 출처 |
+| # | Prerequisite | Expected state | Resolved | BLOCK | Rationale | Source |
 |---|-----------|-----------|------|-------|------|------|
-| F-1 | 회원(Member) 도메인 존재 | 사용 가능 | ☑ | ☐ | 기존 회원 테이블/엔티티 확인됨 | <!-- src: human --> |
-| F-2 | 도서(Book) 도메인 존재 | 재고 필드 포함 | ☑ | ☐ | Book.availableCopies 필드 확인 | <!-- src: human --> |
+| F-1 | Member domain exists | Available | ☑ | ☐ | Existing member table/entity confirmed | <!-- src: human --> |
+| F-2 | Book domain exists | Includes stock field | ☑ | ☐ | Book.availableCopies field confirmed | <!-- src: human --> |
 
-## 2. 빌드/라이브러리 의존성 (Build / Library)
+## 2. Build / Library Dependencies (Build / Library)
 
-| # | 의존성 | 기대 버전/설정 | 해결 | BLOCK | 근거 | 출처 |
+| # | Dependency | Expected version/config | Resolved | BLOCK | Rationale | Source |
 |---|--------|----------------|------|-------|------|------|
-| B-1 | ORM/DB 트랜잭션 지원 | 비관적 락 가능 | ☑ | ☐ | SELECT FOR UPDATE 지원 확인 | <!-- src: auto --> |
+| B-1 | ORM/DB transaction support | Pessimistic lock possible | ☑ | ☐ | SELECT FOR UPDATE support confirmed | <!-- src: auto --> |
 
-## 3. 모듈 간 의존성 (Module)
+## 3. Inter-Module Dependencies (Module)
 
-| # | From → To | 기대 계약 | 해결 | BLOCK | 근거 | 출처 |
+| # | From → To | Expected contract | Resolved | BLOCK | Rationale | Source |
 |---|-----------|-----------|------|-------|------|------|
-| M-1 | loan → book | 재고 차감 API(원자적) | ☑ | ☐ | Book.decreaseStock() 호출/구현 확인 | <!-- src: auto --> |
-| M-2 | loan → member | 회원 대출 수 조회 | ☑ | ☐ | Member.activeLoanCount() 확인 | <!-- src: auto --> |
+| M-1 | loan → book | Stock decrement API (atomic) | ☑ | ☐ | Book.decreaseStock() call/implementation confirmed | <!-- src: auto --> |
+| M-2 | loan → member | Query member's loan count | ☑ | ☐ | Member.activeLoanCount() confirmed | <!-- src: auto --> |
 
 ---
 
-## 4. Current Score (최신 라운드 = 3)
+## 4. Current Score (latest round = 3)
 
-| 축 | 배점 | 점수 | 근거 (필수) |
+| Axis | Weight | Score | Rationale (required) |
 |----|------|------|-------------|
-| 1. 의존성 해결 | 25 | 25 | F-1/F-2/B-1/M-1/M-2 전부 해결, BLOCK 0건 |
-| 2. 빌드/컴파일 | 25 | 25 | `gradle build` 종료 코드 0, 경고 0 (실행 로그 기준) |
-| 3. 테스트/커버리지 | 25 | 20 | 단위·통합 12/12 통과(리포트 기준), 동시성 테스트 1건 미작성으로 -5 |
-| 4. 요구사항/AC 충족 | 25 | 22 | UOW-1~3 수용기준 충족, FR-6(중복거부) 엣지 1건 보완 여지로 -3 |
-| **총점** | **100** | **92** | |
+| 1. Dependency resolution | 25 | 25 | F-1/F-2/B-1/M-1/M-2 all resolved, 0 BLOCKs |
+| 2. Build/compile | 25 | 25 | `gradle build` exit code 0, 0 warnings (per execution log) |
+| 3. Tests/coverage | 25 | 20 | Unit/integration 12/12 passing (per report), -5 for 1 concurrency test not written |
+| 4. Requirements/AC satisfaction | 25 | 22 | UOW-1~3 acceptance criteria met, -3 for room to improve on 1 FR-6 (duplicate rejection) edge case |
+| **Total** | **100** | **92** | |
 
-**판정**: COMPLETE (92 > 85 AND 빌드 25 ≠ 0 → GR-1 통과)
+**Verdict**: COMPLETE (92 > 85 AND build 25 ≠ 0 → GR-1 passed)
 
 ---
 
 ## 5. Score History (append-only)
 
-| round | total | per_axis (의/빌/테/AC) | verdict | timestamp (UTC) |
+| round | total | per_axis (Dep/Build/Test/AC) | verdict | timestamp (UTC) |
 |-------|-------|----------------------|---------|-----------------|
 | 1 | 75 | 18 / 25 / 12 / 20 | CONTINUE | 2026-06-23T01:30:00Z |
 | 2 | 82 | 22 / 25 / 15 / 20 | CONTINUE | 2026-06-23T01:33:00Z |
 | 3 | 92 | 25 / 25 / 20 / 22 | COMPLETE | 2026-06-23T01:37:00Z |
 
-> 라운드마다 부족 축(테스트·AC)을 보완하며 75 → 82 → 92로 올라갔고, round 3에서 85를 초과해 **자동 완료**되었다.
-> 만약 round 3에서도 82에 머물러 round 4까지 82였다면 → **2회 연속 미개선 = STALLED**로 중단·보고되었을 것이다.
+> Each round improved the weak axes (tests, AC), climbing 75 → 82 → 92, and round 3 exceeded 85 so it **auto-completed**.
+> If round 3 had also stayed at 82 and round 4 was still 82 → it would have stopped and reported as **2 consecutive rounds without improvement = STALLED**.

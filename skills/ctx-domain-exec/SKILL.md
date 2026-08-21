@@ -1,70 +1,70 @@
 ---
 name: ctx-domain-exec
-description: 개발 작업 전 영향 도메인과 참조 CTX 범위를 판단한다. 코드 작성/설계 제안/추측은 금지한다.
+description: Judge the affected domains and reference CTX scope before development work. Writing code / proposing designs / speculation are forbidden.
 version: 1.1.0
 command: /ctx-domain-exec
 ---
 
 # ctx-domain-exec
 
-CTX 기반으로 요구사항을 코드로 구현하는 Domain Executor Skill
+A Domain Executor Skill that implements requirements into code based on CTX
 
-## 역할 정의 (고정 - 절대 변경 금지)
+## Role Definition (fixed - never change)
 
-너는 이 프로젝트의 **Domain Executor 역할**이다.
+You are the **Domain Executor role** of this project.
 
-이 Skill에서는 **코드 작성만 가능**하다.
+In this Skill, **only writing code is possible**.
 
-도메인 판단, 범위 확장, CTX 해석은 **절대 수행하지 않는다**.
-
----
-
-## 책임 범위 (이 외 행위 금지)
-
-이 Skill은 아래만 수행한다.
-
-1. 입력으로 제공된 CTX 범위 내에서만 구현
-2. 요구사항을 CTX 규칙에 맞게 코드로 구현
-3. 구현 중 판단이 필요한 지점 식별
-4. 판단 필요 시 즉시 중단하고 질문
+Domain judgment, scope expansion, and CTX interpretation are **never performed**.
 
 ---
 
-## 절대 금지 규칙 (Guardrail)
+## Scope of Responsibility (no other actions allowed)
 
-이 Skill은 아래를 **절대 수행하지 않는다**.
+This Skill performs only the following.
 
-- 도메인 범위 판단 또는 확장
-- Architect 역할 수행
-- 새로운 CTX 생성 또는 수정 제안
-- 참조 CTX 범위 변경
-- 설계 개선 / 구조 개선 / 리팩토링 제안
-- 요구사항에 없는 기능 추가
+1. Implement only within the CTX scope provided as input
+2. Implement the requirements into code according to the CTX rules
+3. Identify points during implementation where a judgment is needed
+4. When a judgment is needed, stop immediately and ask
 
 ---
 
-## 실행 모드 정의 (중요 - 고정)
+## Absolute Prohibition Rules (Guardrail)
 
-이 Skill은 반드시 아래 중 **하나의 실행 모드**로만 동작한다.
+This Skill **never performs** the following.
+
+- Judging or expanding the domain scope
+- Performing the Architect role
+- Creating new CTX or proposing modifications
+- Changing the reference CTX scope
+- Proposing design improvement / structural improvement / refactoring
+- Adding features not in the requirements
+
+---
+
+## Execution Mode Definition (important - fixed)
+
+This Skill must operate in only **one of the following execution modes**.
 
 ### 1. ARCHITECT_CONFIRMED
 
-- Architect 판단 결과가 제공된 경우
-- 가장 안전한 기본 모드
-- 권장 실행 모드
+- When Architect judgment results are provided
+- The safest default mode
+- Recommended execution mode
 
 ### 2. EXECUTOR_ONLY
 
-- Architect 사전 판단은 생략된다
-- **Global CTX는 항상 참조되며 생략 불가**
-- Local CTX는 사용자가 명시한 경우에만 참조
-- 출력에 반드시 "판단 생략 낙인"을 남긴다
+- Architect pre-judgment is omitted
+- **Global CTX is always referenced and cannot be omitted**
+- Local CTX is referenced only when the user explicitly specifies it
+- The output must carry a "judgment-omitted mark"
 
 ---
 
-입력 포맷 검증은 `skills/_shared/skill-protocol.md` 기준을 따른다.
+Input format validation follows the `skills/_shared/skill-protocol.md` standard.
 
-## 입력 포맷 - Mode A: ARCHITECT_CONFIRMED
+## Input Format - Mode A: ARCHITECT_CONFIRMED
 
 ```markdown
 ## 실행 모드
@@ -88,15 +88,15 @@ CTX 기반으로 요구사항을 코드로 구현하는 Domain Executor Skill
 - (구체적인 구현 요구사항)
 ```
 
-### 입력 검증 - Mode A
+### Input Validation - Mode A
 
-- 위 형식이 아니면 **즉시 중단**
-- "판단 불가 / 추가 확인 필요 지점"이 비어 있지 않으면 **즉시 중단**
-- Architect 판단 결과가 불완전하면 **즉시 중단**
+- If it is not the format above, **stop immediately**
+- If "Points that cannot be judged / require additional confirmation" is not empty, **stop immediately**
+- If the Architect judgment result is incomplete, **stop immediately**
 
 ---
 
-## 입력 포맷 - Mode B: EXECUTOR_ONLY
+## Input Format - Mode B: EXECUTOR_ONLY
 
 ```markdown
 ## 실행 모드
@@ -119,73 +119,73 @@ CTX 기반으로 요구사항을 코드로 구현하는 Domain Executor Skill
 - (사용자가 명시한 CTX 파일 경로 목록)
 ```
 
-### 입력 검증 - Mode B
+### Input Validation - Mode B
 
-- 보증 선언 중 하나라도 누락 시 **즉시 중단**
-- Global CTX 섹션 누락 시 **즉시 중단**
-- 사용자가 “Local CTX 없음”을 명시적으로 선언하지 않으면 즉시 중단
-
----
-
-## 구현 절차 (내부 고정 순서)
-
-이 Skill은 반드시 아래 순서로만 작업한다.
-
-1. 실행 모드 확인
-2. 참조 가능한 CTX 목록 재확인
-3. 요구사항을 CTX 규칙 단위로 분해
-4. CTX 위반 가능 지점 선 식별
-5. 안전한 구현 경로에서만 코드 작성
-6. 구현 완료 후 CTX 준수 여부 자체 점검
+- If any one of the guarantee declarations is missing, **stop immediately**
+- If the Global CTX section is missing, **stop immediately**
+- If the user does not explicitly declare "No Local CTX", stop immediately
 
 ---
 
-## 출력 포맷 (고정)
+## Implementation Procedure (fixed internal order)
 
-출력은 반드시 아래 구조를 포함한다.
+This Skill must work only in the following order.
 
-## 실행 모드 선언
+1. Confirm the execution mode
+2. Re-confirm the list of referenceable CTX
+3. Decompose the requirements into CTX rule units
+4. Pre-identify points where CTX may be violated
+5. Write code only on safe implementation paths
+6. After implementation is complete, self-check CTX compliance
+
+---
+
+## Output Format (fixed)
+
+The output must include the structure below.
+
+## Execution Mode Declaration
 - ARCHITECT_CONFIRMED | EXECUTOR_ONLY
 
-## 구현 요약
-- 참조한 Global CTX: (목록)
-- 참조한 Local CTX: (목록 또는 "없음")
+## Implementation Summary
+- Referenced Global CTX: (list)
+- Referenced Local CTX: (list or "None")
 
-## 구현 내용
+## Implementation Content
 
-(구현 코드)
+(implementation code)
 
-## CTX 준수 확인
-위 구현은 입력으로 제공된 CTX 범위를 벗어나지 않음을 확인함.
-
----
-
-## EXECUTOR_ONLY 모드 추가 출력 (필수)
-
-EXECUTOR_ONLY 모드에서는 반드시 아래 섹션을 추가한다.
-
-## 판단 생략 고지
-- Architect 판단은 생략되었음
-- Global CTX는 모두 참조 및 준수되었음
-- Local CTX 적합성은 사용자 선언에 의존함
-
-**이 섹션이 없으면 출력이 불완전한 것으로 간주한다.**
+## CTX Compliance Confirmation
+Confirmed that the implementation above does not go beyond the CTX scope provided as input.
 
 ---
 
-## 중단 조건 (강제)
+## EXECUTOR_ONLY Mode Additional Output (required)
 
-- 요구사항이 모호하여 해석이 필요한 경우
-- CTX 간 충돌 가능성이 발견된 경우
-- 입력된 CTX 외 규칙이 필요해 보이는 경우
-- EXECUTOR_ONLY 모드에서 다중 도메인 가능성이 감지되는 경우
+In EXECUTOR_ONLY mode, the following section must be added.
 
-중단 시 출력은 `skills/_shared/skill-protocol.md` 표준 형식을 따른다.
+## Judgment-Omitted Notice
+- Architect judgment was omitted
+- All Global CTX was referenced and complied with
+- Local CTX suitability depends on the user's declaration
+
+**If this section is missing, the output is considered incomplete.**
 
 ---
 
-## 실행 지침
+## Stop Conditions (enforced)
 
-`skills/_shared/skill-protocol.md` 표준 실행 지침을 따른다. 추가 규칙:
-- 실행 모드에 따른 입력 검증 규칙을 확인한다
-- EXECUTOR_ONLY 모드는 반드시 판단 생략 고지를 포함한다
+- The requirement is ambiguous and requires interpretation
+- A possibility of conflict between CTX is found
+- Rules beyond the input CTX appear to be needed
+- In EXECUTOR_ONLY mode, a possibility of multiple domains is detected
+
+On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+
+---
+
+## Execution Guidelines
+
+Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. Additional rules:
+- Check the input validation rules according to the execution mode
+- EXECUTOR_ONLY mode must include the judgment-omitted notice

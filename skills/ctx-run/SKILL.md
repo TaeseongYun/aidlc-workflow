@@ -131,14 +131,14 @@ EXECUTION:
 - Invoke the ctx-architect-judge skill using:
   /ctx-architect-judge
 - Provide input format:
-    - 작업 요구사항: FEATURE 내용
-    - 제공된 Global CTX: 프로젝트의 모든 Global CTX 경로
-    - 제공된 Local CTX: FEATURE에서 명시된 CTX 경로
-    - 코드베이스 탐색 결과: (parallel exploration output, if available)
+    - Task requirements: FEATURE content
+    - Provided Global CTX: all Global CTX paths of the project
+    - Provided Local CTX: CTX paths specified in FEATURE
+    - Codebase exploration results: (parallel exploration output, if available)
 - Receive skill output
 
 DECISION GATE:
-- Check "판단 불가 / 추가 확인 필요 지점" section in skill output
+- Check "Cannot judge / points requiring further confirmation" section in skill output
 - If NOT empty:
     - STOP execution immediately
     - Output the questions from skill
@@ -234,14 +234,14 @@ EXECUTION:
 - Invoke the ctx-domain-exec skill using:
   /ctx-domain-exec
 - Provide input in ARCHITECT_CONFIRMED mode format:
-    - 실행 모드: ARCHITECT_CONFIRMED
-    - Architect 판단 결과: (ROLE 0 output)
-        - 영향 도메인 목록
-        - 반드시 참조해야 할 Local CTX
-        - Global CTX 영향 여부
-        - 판단 불가 지점: 없음
-    - 작업 요구사항: FEATURE 내용
-    - 기술 설계 참조: (technical-design.md 경로, 존재하는 경우)
+    - Execution mode: ARCHITECT_CONFIRMED
+    - Architect judgment result: (ROLE 0 output)
+        - List of affected domains
+        - Local CTX that MUST be referenced
+        - Whether Global CTX is affected
+        - Points that cannot be judged: none
+    - Task requirements: FEATURE content
+    - Technical design reference: (technical-design.md path, if it exists)
 - If `technical-design.md` exists, the implementor MUST follow:
     - API specifications (Section 3) for endpoint contracts
     - Data model (Section 4) for entity/field structures

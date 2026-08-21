@@ -1,100 +1,100 @@
 # Diagram Standards
 
-## 목적
-산출물에 포함되는 다이어그램의 품질과 호환성을 보장한다.
+## Purpose
+Ensures the quality and compatibility of diagrams included in artifacts.
 
-## 사용 시점
-- requirements.md: 상태 전이, 사용자 플로우가 복잡할 때
-- unit-of-work.md: 의존성 관계도
-- planning-draft.md: 핵심 시나리오 흐름이 시각화가 필요할 때
-- technical-design.md: 모듈 간 상호작용, 시퀀스 다이어그램, ERD
+## When to Use
+- requirements.md: When state transitions or user flows are complex
+- unit-of-work.md: Dependency relationship diagrams
+- planning-draft.md: When core scenario flows need visualization
+- technical-design.md: Inter-module interactions, sequence diagrams, ERD
 
-다이어그램은 필수가 아니다. 텍스트로 충분히 전달되면 생략한다.
+Diagrams are not mandatory. Omit them when text conveys the information sufficiently.
 
-## ASCII 다이어그램
+## ASCII Diagrams
 
-### 허용 문자
-`+` `-` `|` `^` `v` `<` `>` 및 영숫자/한글 텍스트, 공백
+### Allowed Characters
+`+` `-` `|` `^` `v` `<` `>` and alphanumeric/Korean text, whitespace
 
-### 금지 문자
-유니코드 박스 문자: `┌` `─` `│` `└` `┐` `┘` `├` `┤` `┬` `┴` `┼`
-- 이유: 폰트/플랫폼별 렌더링 불일치
+### Forbidden Characters
+Unicode box-drawing characters: `┌` `─` `│` `└` `┐` `┘` `├` `┤` `┬` `┴` `┼`
+- Reason: rendering inconsistency across fonts/platforms
 
-### 폭 규칙
-박스 내 모든 줄은 동일한 문자 수를 유지한다 (공백 포함).
+### Width Rule
+Every line within a box maintains the same character count (including whitespace).
 
-### 패턴
+### Patterns
 
-#### 박스
+#### Box
 ```
 +-------------------------------------------+
 |                                           |
 |              Component Name               |
 |                                           |
-|  설명 텍스트                                |
+|  Description text                         |
 |                                           |
 +-------------------------------------------+
 ```
 
-#### 중첩 박스
+#### Nested Box
 ```
 +-----------------------------------------------+
 |              Outer Component                  |
 |  +-----------------------------------------+  |
 |  |  Inner Component                        |  |
-|  |  - 항목 1                                |  |
-|  |  - 항목 2                                |  |
+|  |  - Item 1                               |  |
+|  |  - Item 2                               |  |
 |  +-----------------------------------------+  |
 +-----------------------------------------------+
 ```
 
-#### 수직 플로우
+#### Vertical Flow
 ```
 +----------+
-|  입력    |
+|  Input   |
 +----------+
      |
-     | 검증
+     | Validate
      v
 +----------+
-|  처리    |
+| Process  |
 +----------+
      |
-     | 반환
+     | Return
      v
 +----------+
-|  출력    |
+|  Output  |
 +----------+
 ```
 
-#### 수평 플로우
+#### Horizontal Flow
 ```
 +-------+     +-------+     +-------+
 | Step1 | --> | Step2 | --> | Step3 |
 +-------+     +-------+     +-------+
 ```
 
-### 검증 체크리스트
-- [ ] 기본 ASCII 문자만 사용
-- [ ] 유니코드 박스 문자 없음
-- [ ] 정렬에 공백만 사용 (탭 금지)
-- [ ] 모서리에 `+` 사용
-- [ ] 박스 내 모든 줄 동일 폭
+### Validation Checklist
+- [ ] Uses only basic ASCII characters
+- [ ] No Unicode box-drawing characters
+- [ ] Uses only whitespace for alignment (no tabs)
+- [ ] Uses `+` at corners
+- [ ] Every line within a box is the same width
 
-## Mermaid 다이어그램
+## Mermaid Diagrams
 
-복잡한 관계나 상태 전이는 Mermaid를 사용할 수 있다.
+You may use Mermaid for complex relationships or state transitions.
 
-### 검증 규칙
-1. 노드 ID는 영숫자 + 밑줄만 사용
-2. 라벨 내 특수문자 이스케이프: `"` -> `\"`, `'` -> `\'`
-3. 문법 오류가 없는지 확인 후 파일에 기록
+### Validation Rules
+1. Node IDs use only alphanumerics + underscores
+2. Escape special characters within labels: `"` -> `\"`, `'` -> `\'`
+3. Confirm there are no syntax errors before writing to the file
 
-### 폴백 규칙
-Mermaid 다이어그램을 포함할 때는 반드시 텍스트 대안을 함께 제공한다.
+### Fallback Rule
+When including a Mermaid diagram, always provide a text alternative alongside.
 
 ```markdown
-### 상태 전이도
+### State Transition Diagram
 
 ```mermaid
 stateDiagram-v2
@@ -104,21 +104,21 @@ stateDiagram-v2
     Active --> Cancelled
 ```
 
-### 텍스트 대안
-- [시작] -> Created -> Active -> Expired
+### Text Alternative
+- [Start] -> Created -> Active -> Expired
 - Active -> Cancelled
 ```
 
-### 권장 다이어그램 유형
+### Recommended Diagram Types
 
-| 상황 | 다이어그램 유형 |
+| Situation | Diagram Type |
 |------|----------------|
-| 상태 변화가 있는 엔티티 | `stateDiagram-v2` |
-| 작업 의존성 | `flowchart TD` |
-| 시스템 간 호출 순서 | `sequenceDiagram` |
-| 엔티티 관계 | `erDiagram` |
+| Entity with state changes | `stateDiagram-v2` |
+| Task dependencies | `flowchart TD` |
+| Call order between systems | `sequenceDiagram` |
+| Entity relationships | `erDiagram` |
 
-## 규칙
-- 다이어그램은 이해를 돕기 위한 보조 수단이다. 텍스트 설명을 대체하지 않는다.
-- 다이어그램이 5개 이상의 노드를 포함하면 텍스트 대안을 반드시 제공한다.
-- ASCII와 Mermaid 중 상황에 맞는 것을 선택한다. 단순 플로우는 ASCII, 복잡한 관계는 Mermaid.
+## Rules
+- A diagram is a supporting aid to understanding. It does not replace textual explanation.
+- If a diagram contains 5 or more nodes, always provide a text alternative.
+- Choose between ASCII and Mermaid depending on the situation. ASCII for simple flows, Mermaid for complex relationships.

@@ -1,65 +1,65 @@
-# 2026-04-29: prepared-requirement에서 STEP 4/GATE-2 스킵 차단
+# 2026-04-29: Blocking STEP 4/GATE-2 Skips on prepared-requirement
 
-## 배경
+## Background
 
-실전 사용 중, `prepared-requirement` 입력 시 AI가 STEP 1-C(입력 검증) 통과 후 곧장 STEP 6(UOW)으로 직진하여 STEP 4 질문 답변을 받지 않고 GATE-2까지 묵시적으로 통과시키는 문제가 보고됨.
+During hands-on use, a problem was reported where, on `prepared-requirement` input, the AI passed STEP 1-C (input validation) and then jumped straight to STEP 6 (UOW), implicitly passing through GATE-2 without receiving STEP 4 question answers.
 
-원인 분석:
-1. `SKILL.md`의 "Prepared requirements should skip raw-request artifacts" 표현이 모호하여 모델이 "prepared면 사전 단계 전반을 스킵"으로 확장 해석
-2. STEP 1-A의 "skip rounds 1-3"(Discovery 한정)이 STEP 4(검증 질문)까지 스킵하는 것으로 일반화될 여지
-3. `stage-gate-rules.md`의 "게이트 건너뛰기"가 블랙리스트형 나열이라, GATE-2가 명시적으로 스킵 불가임을 강제하지 못함
-4. `input-validation.md`의 검증 통과 메시지("STEP 2로 진행합니다")가 자동 직진을 부추기고, STEP 4/GATE-2가 별도 진행됨을 안내하지 않음
-5. STEP 4에서 질문 0개로 통과하는 경우의 가드레일 부재
+Cause analysis:
+1. The `SKILL.md` phrasing "Prepared requirements should skip raw-request artifacts" was ambiguous, so the model over-interpreted it as "if prepared, skip the pre-stages entirely"
+2. STEP 1-A's "skip rounds 1-3" (Discovery-only) could be generalized as skipping all the way to STEP 4 (verification questions)
+3. The "gate skipping" in `stage-gate-rules.md` was a blacklist-style enumeration, so it could not enforce that GATE-2 is explicitly non-skippable
+4. The validation-pass message in `input-validation.md` ("Proceeding to STEP 2") encouraged auto-jumping and did not indicate that STEP 4/GATE-2 proceed separately
+5. Absence of a guardrail for the case of passing STEP 4 with 0 questions
 
-## 변경 사항
+## Changes
 
-### 1. SKILL.md / CLAUDE_COMMAND.md — prepared 스킵 범위 한정 + STEP 4 강제
+### 1. SKILL.md / CLAUDE_COMMAND.md — limit prepared skip scope + enforce STEP 4
 
-**파일**: `skills/ctx-aidlc-run/SKILL.md`, `skills/ctx-aidlc-run/CLAUDE_COMMAND.md`
+**Files**: `skills/ctx-aidlc-run/SKILL.md`, `skills/ctx-aidlc-run/CLAUDE_COMMAND.md`
 
-- "Prepared requirements should skip raw-request artifacts." → 스킵 대상을 `request-intake.md`, `planning-draft.md`, GATE-1로 한정. STEP 4와 GATE-2는 계속 수행됨을 명시.
-- STEP 4에 "분류별 강제 규칙" 블록 추가 (SKILL.md / CLAUDE_COMMAND.md 동기):
-  - `prepared-requirement` / `change-on-existing-feature`여도 STEP 4 필수 실행
-  - STEP 1-C에서 식별한 빈 영역은 STEP 4에서 BLOCK 질문으로 전환
-  - P0/P1 질문 0개 산출 시 단독 통과 금지 — 누락 감지 재수행 또는 사용자 명시 확인 후 audit.md 기록
-- GATE-2에 스킵 불가 명시 라인 추가 (SKILL.md / CLAUDE_COMMAND.md 동기):
-  - 모든 요청 분류에서 스킵 불가, STEP 6 직접 진입 금지
-  - 미답변 BLOCK 질문이 1건이라도 있으면 통과 금지
+- "Prepared requirements should skip raw-request artifacts." → limit the skip target to `request-intake.md`, `planning-draft.md`, and GATE-1. State that STEP 4 and GATE-2 are still performed.
+- Added a "per-classification enforcement rule" block to STEP 4 (SKILL.md / CLAUDE_COMMAND.md in sync):
+  - STEP 4 is mandatory even for `prepared-requirement` / `change-on-existing-feature`
+  - Empty areas identified in STEP 1-C are converted into BLOCK questions in STEP 4
+  - If 0 P0/P1 questions are produced, no standalone pass — re-run omission detection or record in audit.md after explicit user confirmation
+- Added an explicit non-skippable line to GATE-2 (SKILL.md / CLAUDE_COMMAND.md in sync):
+  - Non-skippable in any request classification; direct entry to STEP 6 prohibited
+  - No pass if even one unanswered BLOCK question exists
 
-> 두 파일은 표면(스킬 하니스 vs Claude 슬래시 명령)이 다르므로 항상 병행 갱신해야 한다. 한쪽만 수정하면 `scripts/install-skills.sh` 재설치 후에도 한쪽 표면에서 옛 규칙이 그대로 노출된다.
+> The two files have different surfaces (skill harness vs. Claude slash command), so they must always be updated together. If only one is modified, the old rule remains exposed on one surface even after `scripts/install-skills.sh` reinstall.
 
-### 2. stage-gate-rules.md — 게이트 스킵 화이트리스트화
+### 2. stage-gate-rules.md — whitelist gate skipping
 
-**파일**: `common/stage-gate-rules.md`
+**File**: `common/stage-gate-rules.md`
 
-- "게이트 건너뛰기" 섹션을 화이트리스트 표로 변환. 표에 명시되지 않은 게이트는 어떤 분류·조건에서도 스킵 불가.
-- 스킵 가능 게이트: GATE-1 / GATE-2.5 / GATE-2.7 / GATE-4 / GATE-5
-- "명시적 스킵 불가 게이트" 항목 신설: GATE-2 / GATE-3 / GATE-3.5
-- "사용자 일괄 승인" 규칙 보강: "skip gate" 또는 "전체 승인" 명시 시에도 스킵 불가 게이트는 일괄 스킵 대상에서 제외.
+- Converted the "gate skipping" section into a whitelist table. Any gate not listed in the table is non-skippable under any classification or condition.
+- Skippable gates: GATE-1 / GATE-2.5 / GATE-2.7 / GATE-4 / GATE-5
+- New "explicitly non-skippable gates" item: GATE-2 / GATE-3 / GATE-3.5
+- Reinforced the "user bulk approval" rule: even when "skip gate" or "approve all" is stated, non-skippable gates are excluded from bulk skipping.
 
-### 3. input-validation.md — 후속 단계 안내 추가
+### 3. input-validation.md — add follow-up-stage guidance
 
-**파일**: `core/input-validation.md`
+**File**: `core/input-validation.md`
 
-- 검증 통과 메시지를 "검증 통과. STEP 2로 진행합니다. 단, STEP 4 질문 생성과 GATE-2는 별도로 수행됩니다."로 수정.
-- "후속 단계 안내 (필수)" 섹션 신설:
-  - 검증 결과와 무관하게 STEP 2 → 3 → 4 → 5 → GATE-2 흐름은 모두 수행됨을 명시
-  - 입력 문서가 충분해 보여도 STEP 4 질문 생성을 건너뛰지 않음
-  - GATE-2는 prepared-requirement에서도 스킵 불가, 사용자 승인 없이 STEP 6 진입 금지
-  - "검증 통과 = 결정 완료"가 아니며, 검증은 형태 점검일 뿐 정책/설계 합의가 아님을 명시
+- Changed the validation-pass message to "Validation passed. Proceeding to STEP 2. However, STEP 4 question generation and GATE-2 are performed separately."
+- New "Follow-up-stage guidance (required)" section:
+  - Regardless of the validation result, the STEP 2 → 3 → 4 → 5 → GATE-2 flow is all performed
+  - Even if the input document looks sufficient, do not skip STEP 4 question generation
+  - GATE-2 is non-skippable even for prepared-requirement; entering STEP 6 without user approval is prohibited
+  - "Validation passed = decision complete" is false; validation is only a form check, not a policy/design agreement
 
-## 수정된 파일 전체 목록
+## Full list of modified files
 
-| 파일 | 변경 유형 |
-|------|----------|
-| `skills/ctx-aidlc-run/SKILL.md` | 스킵 범위 한정 + STEP 4 분류별 강제 규칙 + GATE-2 스킵 불가 |
-| `skills/ctx-aidlc-run/CLAUDE_COMMAND.md` | 동일 규칙 병행 갱신 (Claude 슬래시 명령 표면) |
-| `common/stage-gate-rules.md` | 게이트 건너뛰기 화이트리스트화 |
-| `core/input-validation.md` | 검증 통과 메시지 수정 + 후속 단계 안내 추가 |
-| `README.md` | 변경 이력 갱신 |
+| File | Change type |
+|------|------------|
+| `skills/ctx-aidlc-run/SKILL.md` | Limit skip scope + STEP 4 per-classification enforcement rule + GATE-2 non-skippable |
+| `skills/ctx-aidlc-run/CLAUDE_COMMAND.md` | Same rules updated in parallel (Claude slash-command surface) |
+| `common/stage-gate-rules.md` | Whitelist gate skipping |
+| `core/input-validation.md` | Fixed validation-pass message + added follow-up-stage guidance |
+| `README.md` | Updated changelog |
 
-## 기대 효과
+## Expected effect
 
-- prepared 입력에서 AI가 STEP 1-C 통과 후 곧장 STEP 6으로 점프하는 경로가 SKILL.md / stage-gate-rules.md 양쪽에서 차단된다.
-- "skip"의 범위가 화이트리스트로 고정되어 모델이 임의 확장 해석할 여지가 줄어든다.
-- STEP 4에서 질문 0개로 통과하는 경우 사용자 명시 확인이 필요하므로, 사전 검토 누락이 audit.md에 가시화된다.
+- The path where the AI jumps straight to STEP 6 after passing STEP 1-C on prepared input is blocked on both the SKILL.md and stage-gate-rules.md sides.
+- The scope of "skip" is fixed by whitelist, reducing the room for the model to arbitrarily over-interpret it.
+- Since passing STEP 4 with 0 questions requires explicit user confirmation, a missing pre-review becomes visible in audit.md.

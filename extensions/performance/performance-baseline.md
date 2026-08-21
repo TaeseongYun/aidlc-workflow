@@ -1,109 +1,109 @@
 # Performance Baseline
 
-성능 요구사항 6개 항목의 전체 규칙이다.
-이 파일은 사용자가 opt-in한 경우에만 로드한다.
+The complete set of rules for the 6 performance requirement items.
+This file is loaded only when the user opts in.
 
-## 적용 규칙
+## Application Rules
 
-- opt-in 시 모든 항목은 **blocking constraint**로 취급한다.
-- FAIL 항목은 해당 UOW에서 반드시 해소해야 한다.
-- 산출물은 `aidlc-docs/features/<feature-slug>/extensions/performance-baseline.md`에 생성한다.
-
----
-
-## PERF-01. API 응답 시간 기준
-
-**평가 기준**:
-- PASS: 주요 API의 목표 응답 시간이 명시되어 있다 (예: p95 < 200ms). 측정 방법이 정의되어 있다.
-- FAIL: 응답 시간 목표 미정의, 측정 방법 미정의.
-- N/A: API가 없는 기능 (배치 전용 등).
-
-**일반적 조치**: API별 SLO 정의, APM 도구 연동, 느린 쿼리 알림 설정.
-**Brownfield 고려**: 기존 API의 현재 응답 시간 측정 후 목표 설정.
-
-## PERF-02. 처리량 (Throughput) 기준
-
-**평가 기준**:
-- PASS: 동시 사용자 수 또는 TPS 목표가 명시되어 있다. 피크 시간 대비 용량이 확인되었다.
-- FAIL: 처리량 목표 미정의, 용량 계획 미수립.
-- N/A: 단일 사용자 도구, 내부 관리 기능.
-
-**일반적 조치**: 예상 TPS 산출, 커넥션 풀/스레드 풀 크기 검토, 오토스케일링 정책.
-**Brownfield 고려**: 현재 트래픽 패턴 분석, 병목 지점 식별.
-
-## PERF-03. 배치/비동기 처리 성능
-
-**평가 기준**:
-- PASS: 배치 처리 대상 데이터량과 완료 시간 목표가 명시되어 있다. chunk 크기와 병렬도가 정의되어 있다.
-- FAIL: 처리 시간 목표 미정의, 대량 데이터 시나리오 미고려.
-- N/A: 배치/비동기 처리가 없는 기능.
-
-**일반적 조치**: chunk 크기 결정, 병렬 처리 전략, 타임아웃 설정, 재시도 정책.
-**Brownfield 고려**: 기존 배치 스케줄과의 충돌 확인, DB 부하 분산.
-
-## PERF-04. DB 쿼리 최적화
-
-**평가 기준**:
-- PASS: 주요 쿼리에 인덱스 전략이 정의되어 있다. N+1 문제가 식별/해결되었다. 대량 조회에 페이징이 적용되어 있다.
-- FAIL: 인덱스 전략 미정의, N+1 문제 미확인, 전체 조회(full scan) 존재.
-- N/A: DB 접근이 없는 기능.
-
-**일반적 조치**: 쿼리 실행 계획 검토, 복합 인덱스 설계, 읽기 전용 복제본 활용.
-**Brownfield 고려**: 기존 인덱스와의 충돌 확인, 마이그레이션 시 락 영향.
-
-## PERF-05. 캐싱 전략
-
-**평가 기준**:
-- PASS: 캐싱이 필요한 데이터가 식별되어 있다. 캐시 만료/무효화 전략이 정의되어 있다.
-- FAIL: 반복 조회되는 데이터에 캐싱 미적용, 무효화 전략 미정의.
-- N/A: 캐싱이 불필요한 기능 (일회성 처리 등).
-
-**일반적 조치**: 로컬/분산 캐시 선택, TTL 설정, 캐시 워밍 전략.
-**Brownfield 고려**: 기존 캐시 계층과의 일관성, 캐시 키 네임스페이스 분리.
-
-## PERF-06. 부하 테스트 계획
-
-**평가 기준**:
-- PASS: 부하 테스트 시나리오가 정의되어 있다 (목표 TPS, 램프업, 지속 시간). 테스트 환경이 명시되어 있다.
-- FAIL: 부하 테스트 계획 미수립, 성능 검증 방법 미정의.
-- N/A: 성능 임계값이 없는 내부 도구.
-
-**일반적 조치**: k6/JMeter 시나리오 작성, 스테이징 환경 기준, 기준선(baseline) 측정 후 비교.
-**Brownfield 고려**: 기존 성능 기준선 확보, 회귀 테스트 포함.
+- On opt-in, every item is treated as a **blocking constraint**.
+- FAIL items must be resolved within the corresponding UOW.
+- The artifact is generated at `aidlc-docs/features/<feature-slug>/extensions/performance-baseline.md`.
 
 ---
 
-## 산출물 포맷
+## PERF-01. API Response Time Criteria
+
+**Evaluation criteria**:
+- PASS: Target response times for key APIs are specified (e.g., p95 < 200ms). The measurement method is defined.
+- FAIL: No response time targets defined, no measurement method defined.
+- N/A: A feature with no APIs (batch-only, etc.).
+
+**Typical action**: Define per-API SLOs, integrate an APM tool, set up slow-query alerts.
+**Brownfield consideration**: Measure the current response times of existing APIs before setting targets.
+
+## PERF-02. Throughput Criteria
+
+**Evaluation criteria**:
+- PASS: Concurrent user count or TPS targets are specified. Capacity against peak time is confirmed.
+- FAIL: No throughput targets defined, no capacity plan established.
+- N/A: Single-user tool, internal admin feature.
+
+**Typical action**: Estimate expected TPS, review connection pool/thread pool sizes, autoscaling policy.
+**Brownfield consideration**: Analyze current traffic patterns, identify bottlenecks.
+
+## PERF-03. Batch/Async Processing Performance
+
+**Evaluation criteria**:
+- PASS: The volume of data to be batch-processed and the target completion time are specified. Chunk size and parallelism are defined.
+- FAIL: No processing time target defined, large-data scenarios not considered.
+- N/A: A feature with no batch/async processing.
+
+**Typical action**: Determine chunk size, parallel processing strategy, timeout settings, retry policy.
+**Brownfield consideration**: Check for conflicts with existing batch schedules, distribute DB load.
+
+## PERF-04. DB Query Optimization
+
+**Evaluation criteria**:
+- PASS: An index strategy is defined for key queries. N+1 problems are identified/resolved. Paging is applied to large lookups.
+- FAIL: No index strategy defined, N+1 problems unverified, full scans present.
+- N/A: A feature with no DB access.
+
+**Typical action**: Review query execution plans, design composite indexes, use read-only replicas.
+**Brownfield consideration**: Check for conflicts with existing indexes, lock impact during migration.
+
+## PERF-05. Caching Strategy
+
+**Evaluation criteria**:
+- PASS: Data that needs caching is identified. A cache expiration/invalidation strategy is defined.
+- FAIL: No caching applied to repeatedly-looked-up data, no invalidation strategy defined.
+- N/A: A feature that does not need caching (one-time processing, etc.).
+
+**Typical action**: Choose local/distributed cache, set TTL, cache warming strategy.
+**Brownfield consideration**: Consistency with the existing cache layer, separating cache key namespaces.
+
+## PERF-06. Load Test Plan
+
+**Evaluation criteria**:
+- PASS: Load test scenarios are defined (target TPS, ramp-up, duration). The test environment is specified.
+- FAIL: No load test plan established, no performance verification method defined.
+- N/A: An internal tool with no performance thresholds.
+
+**Typical action**: Write k6/JMeter scenarios, base on a staging environment, measure a baseline and compare against it.
+**Brownfield consideration**: Secure the existing performance baseline, include regression tests.
+
+---
+
+## Artifact Format
 
 ```markdown
 # Performance Baseline
 
-> **Request Anchor**: {최초 요청 요약}
+> **Request Anchor**: {summary of the initial request}
 
 ## Performance Checklist
 
-| ID | 항목 | 상태 | 비고 |
+| ID | Item | Status | Notes |
 |----|------|------|------|
-| PERF-01 | API 응답 시간 기준 | PASS / FAIL / N/A | |
-| PERF-02 | 처리량 기준 | PASS / FAIL / N/A | |
-| PERF-03 | 배치/비동기 성능 | PASS / FAIL / N/A | |
-| PERF-04 | DB 쿼리 최적화 | PASS / FAIL / N/A | |
-| PERF-05 | 캐싱 전략 | PASS / FAIL / N/A | |
-| PERF-06 | 부하 테스트 계획 | PASS / FAIL / N/A | |
+| PERF-01 | API response time criteria | PASS / FAIL / N/A | |
+| PERF-02 | Throughput criteria | PASS / FAIL / N/A | |
+| PERF-03 | Batch/async performance | PASS / FAIL / N/A | |
+| PERF-04 | DB query optimization | PASS / FAIL / N/A | |
+| PERF-05 | Caching strategy | PASS / FAIL / N/A | |
+| PERF-06 | Load test plan | PASS / FAIL / N/A | |
 
 ## Findings
 
-### PERF-{NN}. {항목명}
-- 상태: PASS / FAIL / N/A
-- 현재 상태: {현재 적용 현황}
-- 목표: {정의된 성능 목표}
-- 조치 필요: {필요한 조치 또는 "없음"}
-- 관련 UOW: UOW-{N} / 해당 없음
+### PERF-{NN}. {item name}
+- Status: PASS / FAIL / N/A
+- Current state: {current application status}
+- Target: {defined performance target}
+- Action required: {required action or "none"}
+- Related UOW: UOW-{N} / not applicable
 
 ## Summary
-- 전체 항목: 6
+- Total items: 6
 - PASS: {N}
 - FAIL: {N}
 - N/A: {N}
-- FAIL 항목이 있으면 해당 UOW의 구현에서 반드시 해소해야 한다.
+- If any item is FAIL, it must be resolved during the implementation of the corresponding UOW.
 ```

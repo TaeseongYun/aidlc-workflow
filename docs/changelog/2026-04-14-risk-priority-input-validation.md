@@ -1,108 +1,108 @@
-# 2026-04-14: Risk-Based Priority, Input Validation, AI 주도 유닛 분해, 세션 분리
+# 2026-04-14: Risk-Based Priority, Input Validation, AI-Driven Unit Decomposition, Session Separation
 
-## 배경
+## Background
 
-AIDLC 워크숍 5일간 회고록 분석 결과, 실전에서 발생한 문제 중 방법론 수준에서 해결 가능한 4가지를 식별하여 반영.
+After analyzing the retrospectives from 5 days of the AIDLC workshop, we identified and reflected 4 problems that occurred in practice and are solvable at the methodology level.
 
-회고에서 도출한 핵심 문제:
-1. AI가 저위험 세부사항(배치 크기)에 질문을 집중하고 고위험 영역(외부 API)을 간과
-2. 인간이 유닛을 강제 지정하여 이질적 기능이 하나의 유닛에 묶임
-3. 입력 문서(prepared_doc)의 정책 구멍이 인셉션 전체로 전파
-4. LLM 컨텍스트 한계로 단계별 답변 불일치 발생
+Core problems derived from the retrospective:
+1. AI concentrates questions on low-risk details (batch size) and overlooks high-risk areas (external APIs)
+2. Humans forcibly assign units, so heterogeneous features get bundled into a single unit
+3. Policy holes in the input document (prepared_doc) propagate across the entire inception
+4. Step-by-step answer inconsistency occurs due to LLM context limits
 
-## 변경 사항
+## Changes
 
-### 1. Risk-Based Priority (질문 우선순위 시스템)
+### 1. Risk-Based Priority (question priority system)
 
-**파일**: `common/question-governance.md` 섹션 4 신규
+**File**: `common/question-governance.md` section 4, new
 
-- 모든 질문에 `P0-CRITICAL` / `P1-IMPORTANT` / `P2-DEFERRABLE` 우선순위 부여
-- P0: 외부 시스템 통합, 보안 경계, 데이터 정합성 — 반드시 인간 확인
-- P1: 비즈니스 정책, 예외 처리, 데이터 모델 — 표준 질문 흐름
-- P2: 배치 크기, 로깅 레벨, 재시도 횟수 — AI가 디폴트로 결정, 인간에게 알림만
-- 리스크 태그(`⚠️ RISK:`) 입력 메커니즘으로 인간이 고위험 영역을 사전 표시 가능
-- P2 질문은 질문 예산에 포함하지 않음
-- 중요도 정렬 기준을 P0/P1/P2 기반으로 변경
-- 금지 사항 3건 추가 (P0→P2 격하 금지, P2→BLOCK 제시 금지, 스키마/인증/API 계약의 P2 분류 금지)
+- Assign a `P0-CRITICAL` / `P1-IMPORTANT` / `P2-DEFERRABLE` priority to every question
+- P0: external system integration, security boundaries, data integrity — must have human confirmation
+- P1: business policy, exception handling, data model — standard question flow
+- P2: batch size, log level, retry count — AI decides by default, only notifies humans
+- Risk-tag (`⚠️ RISK:`) input mechanism lets humans pre-mark high-risk areas
+- P2 questions are not counted in the question budget
+- Changed the importance sort order to be based on P0/P1/P2
+- Added 3 prohibitions (no demoting P0→P2, no presenting P2→BLOCK, no classifying schema/auth/API contracts as P2)
 
-**파일**: `templates/requirement-verification-questions.md`
+**File**: `templates/requirement-verification-questions.md`
 
-- Summary 테이블에 `우선순위` 컬럼 추가
-- 질문 포맷에 `우선순위` 필드 추가
-- "AI 자동 결정 (P2)" 섹션 신설
+- Added a `Priority` column to the Summary table
+- Added a `Priority` field to the question format
+- Added a new "AI auto-decision (P2)" section
 
-### 2. Input Validation (사전 문서 검증)
+### 2. Input Validation (pre-document validation)
 
-**파일**: `core/input-validation.md` 신규, `core/core-workflow.md` STEP 1-C 추가
+**Files**: `core/input-validation.md`, new; `core/core-workflow.md` STEP 1-C, added
 
-- `prepared-requirement` 입력 시 STEP 2 진입 전에 문서 검증 수행
-- 검증 항목: 완전성 검사(6개 영역), 모순 탐지, 미정의 용어 탐지, 리스크 태그 수집
-- 검증 후 사용자에게 3가지 선택지 제시 (문서 보완 / 현재 상태로 진행 / 범위 축소)
-- 예상 BLOCK 질문 수를 사전 경고
+- On `prepared-requirement` input, perform document validation before entering STEP 2
+- Validation items: completeness check (6 areas), contradiction detection, undefined-term detection, risk-tag collection
+- After validation, present the user 3 options (supplement the document / proceed as-is / reduce scope)
+- Pre-warn the expected number of BLOCK questions
 
-**파일**: `templates/aidlc-state.md`
+**File**: `templates/aidlc-state.md`
 
-- `Input Validation Result` 필드 추가
-- STEP 1-C 체크박스 추가
+- Added an `Input Validation Result` field
+- Added a STEP 1-C checkbox
 
-### 3. AI 주도 유닛 분해
+### 3. AI-Driven Unit Decomposition
 
-**파일**: `core/units-generation.md` 전면 강화
+**File**: `core/units-generation.md`, fully strengthened
 
-- "분해 주체" 섹션 신규: AI가 먼저 제안 → 인간이 승인/조정
-- 인간이 유닛을 직접 지정하는 것을 비권장으로 명시
-- 응집도 검증 규칙 3가지:
-  - 단일 도메인 원칙: 유닛 내 독립 도메인 2개 이상이면 분리 검토
-  - 질문 수 기반 크기 검증: 3개 이하 적정, 8개 이상 반드시 분리
-  - 외부 연동 분리: 외부 API는 별도 유닛
+- New "Decomposition owner" section: AI proposes first → human approves/adjusts
+- States that having humans directly assign units is discouraged
+- 3 cohesion-verification rules:
+  - Single-domain principle: if a unit contains 2 or more independent domains, review for splitting
+  - Question-count-based size check: 3 or fewer is appropriate, 8 or more must be split
+  - External-integration separation: an external API is a separate unit
 
-### 4. 세션 분리 가이드 (점진적 컨텍스트)
+### 4. Session-separation guide (progressive context)
 
-**파일**: `docs/workflow-guide.md` 섹션 신규
+**File**: `docs/workflow-guide.md`, new section
 
-- Phase A(Discovery) / B(Definition) / C(Design)로 워크플로우를 3개 Phase로 구분
-- 각 Phase는 이전 Phase의 산출물만 참조 — 대화 내용은 참조하지 않음
-- comprehensive depth에서 세션 분리 강력 권장
-- 세션 재개 시 aidlc-state.md를 먼저 읽는 규칙
+- Split the workflow into 3 phases: Phase A (Discovery) / B (Definition) / C (Design)
+- Each Phase references only the previous Phase's deliverables — it does not reference conversation content
+- Strongly recommend session separation at comprehensive depth
+- Rule to read aidlc-state.md first on session resume
 
-**파일**: `templates/aidlc-state.md`
+**File**: `templates/aidlc-state.md`
 
-- `Current Phase` 필드 추가 (A/B/C)
+- Added a `Current Phase` field (A/B/C)
 
-### 5. 스킬 반영
+### 5. Skill reflection
 
-**파일**: `skills/ctx-aidlc-run/SKILL.md`
+**File**: `skills/ctx-aidlc-run/SKILL.md`
 
-- PRIMARY INPUTS에 `core/input-validation.md` 추가
-- STEP 1-C 실행 흐름 전체 추가 (조건 판정, 검증, 리스크 태그 수집, 사용자 선택지)
-- STEP 4에 Risk-Based Priority 규칙 전체 추가 (P0/P1/P2 분류, 리스크 태그 승격, P2 자동 결정)
-- STEP 6에 AI 주도 분해 + 응집도 검증 규칙 추가
+- Added `core/input-validation.md` to PRIMARY INPUTS
+- Added the entire STEP 1-C execution flow (condition check, validation, risk-tag collection, user options)
+- Added the entire Risk-Based Priority rule to STEP 4 (P0/P1/P2 classification, risk-tag promotion, P2 auto-decision)
+- Added AI-driven decomposition + cohesion-verification rules to STEP 6
 
-**파일**: `skills/ctx-aidlc-run/CLAUDE_COMMAND.md`
+**File**: `skills/ctx-aidlc-run/CLAUDE_COMMAND.md`
 
-- Mission에 STEP 1-C 참조 추가
-- Required Reading Order에 `input-validation.md` 추가
-- Question Rules에 P0/P1/P2 전체 규칙 추가
+- Added a STEP 1-C reference to the Mission
+- Added `input-validation.md` to the Required Reading Order
+- Added the entire P0/P1/P2 rule to the Question Rules
 
-## 수정된 파일 전체 목록
+## Full list of modified files
 
-| 파일 | 변경 유형 |
-|------|----------|
-| `common/question-governance.md` | 섹션 추가 + 기존 섹션 번호 조정 |
-| `core/core-workflow.md` | STEP 1-C 라인 추가 |
-| `core/input-validation.md` | 신규 |
-| `core/units-generation.md` | 전면 강화 |
-| `docs/workflow-guide.md` | 섹션 추가 |
-| `templates/aidlc-state.md` | 필드/체크박스 추가 |
-| `templates/requirement-verification-questions.md` | 컬럼/필드/섹션 추가 |
-| `skills/ctx-aidlc-run/SKILL.md` | 입력 목록, 실행 흐름, 규칙 추가 |
-| `skills/ctx-aidlc-run/CLAUDE_COMMAND.md` | 미션, 읽기 목록, 질문 규칙 추가 |
-| `README.md` | 워크플로우 흐름, 문서 링크, 변경 이력 갱신 |
+| File | Change type |
+|------|------------|
+| `common/question-governance.md` | Added section + adjusted existing section numbers |
+| `core/core-workflow.md` | Added STEP 1-C line |
+| `core/input-validation.md` | New |
+| `core/units-generation.md` | Fully strengthened |
+| `docs/workflow-guide.md` | Added section |
+| `templates/aidlc-state.md` | Added field/checkbox |
+| `templates/requirement-verification-questions.md` | Added column/field/section |
+| `skills/ctx-aidlc-run/SKILL.md` | Added input list, execution flow, rules |
+| `skills/ctx-aidlc-run/CLAUDE_COMMAND.md` | Added mission, reading list, question rules |
+| `README.md` | Updated workflow flow, documentation links, changelog |
 
-## 참조 출처
+## Reference sources
 
-| 출처 | 가져온 패턴 |
+| Source | Pattern borrowed |
 |------|-----------|
-| AIDLC 워크숍 회고 | 질문 우선순위 문제, 유닛 강제 지정 문제, 문서 미검토 문제, 컨텍스트 붕괴 |
-| BMAD-METHOD | Phase별 문서 기반 컨텍스트 전달 (세션 분리 근거) |
-| aidlc-workflows | 입력 검증의 필요성 (prepared_doc 투입 시 정합성 문제) |
+| AIDLC workshop retrospective | Question-priority problem, forced-unit-assignment problem, undocumented-review problem, context collapse |
+| BMAD-METHOD | Per-phase document-based context handoff (basis for session separation) |
+| aidlc-workflows | Need for input validation (integrity issue when injecting prepared_doc) |

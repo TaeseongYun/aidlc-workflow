@@ -11,39 +11,39 @@
 
 ## Readiness Score
 
-| 영역 | 배점 | 점수 | 상태 |
+| Area | Points | Score | Status |
 |------|------|------|------|
-| 기능 범위 정의 | 15 | | |
-| 정책/예외 확정 | 20 | | |
-| 사용자 시나리오 | 15 | | |
-| NFR 확인 | 15 | | |
-| 승인 항목 해결 | 20 | | |
-| 리스크 평가 | 15 | | |
-| 사용자 스토리 품질 (조건부) | 10 | | 해당 없음 / 채점 |
-| 시스템 구조 설계 (조건부) | 10 | | 해당 없음 / 채점 |
-| **합계** | **100 (+가점)** | | |
+| Functional scope definition | 15 | | |
+| Policy/exception finalization | 20 | | |
+| User scenarios | 15 | | |
+| NFR confirmation | 15 | | |
+| Approval item resolution | 20 | | |
+| Risk assessment | 15 | | |
+| User story quality (conditional) | 10 | | Not applicable / scored |
+| System structure design (conditional) | 10 | | Not applicable / scored |
+| **Total** | **100 (+bonus)** | | |
 
-판정 기준:
-- 기본 만점 100점. 조건부 영역 활성화 시 만점이 증가한다.
-- 판정 임계값은 실제 만점의 80%/60% 비율로 환산한다.
-- 60% 미만: 구현 금지 (BLOCK 질문 잔존 가능성 높음)
-- 60~79%: 조건부 진행 (ASSUME 가정 명시 필수)
-- 80% 이상: 구현 가능
+Judgment criteria:
+- Base full score is 100. When conditional areas are activated, the full score increases.
+- Judgment thresholds are converted to 80%/60% ratios of the actual full score.
+- Below 60%: implementation forbidden (high likelihood of remaining BLOCK questions)
+- 60~79%: conditional proceed (ASSUME assumptions must be stated)
+- 80% or above: implementation allowed
 
-## Post-Implementation Score (구현 후 — ctx-score-loop)
+## Post-Implementation Score (after implementation — ctx-score-loop)
 
-구현 **이후** 의존성 인지 점수 루프(`/ctx-score-loop`)가 산출하는 최신 점수를 미러한다.
-Readiness Score(구현 전)와 시점·용도가 다르다. 상세 이력은 피처/모듈 디렉토리의 `dependency-check.md` Score History를 본다.
+Mirrors the latest score produced by the dependency-awareness score loop (`/ctx-score-loop`) **after** implementation.
+Its timing and purpose differ from the Readiness Score (before implementation). For detailed history, see the Score History in the feature/module directory's `dependency-check.md`.
 
-| 항목 | 값 |
+| Item | Value |
 |------|-----|
-| 최신 총점 | (0~100) |
-| 최신 라운드 | |
-| 축별 (의/빌/테/AC) | / / / |
-| 판정 | COMPLETE(>85) / INCOMPLETE / STALLED / EXHAUSTED / REGRESSED |
-| 최종 갱신 | (ISO 8601 UTC) |
+| Latest total | (0~100) |
+| Latest round | |
+| Per axis (dep/build/test/AC) | / / / |
+| Verdict | COMPLETE(>85) / INCOMPLETE / STALLED / EXHAUSTED / REGRESSED |
+| Last updated | (ISO 8601 UTC) |
 
-채점 기준: `core/dependency-score.md`. 완료 임계: 85점 초과(`> 85`) AND 빌드 축 ≠ 0 (GR-1).
+Scoring criteria: `core/dependency-score.md`. Completion threshold: over 85 points (`> 85`) AND build axis ≠ 0 (GR-1).
 
 ## Scope
 - Goal:
@@ -56,12 +56,12 @@ Readiness Score(구현 전)와 시점·용도가 다르다. 상세 이력은 피
 |------|----------|-----------|-------|
 | GATE-1 (Planning Draft) | - | - | raw-request only |
 | GATE-2 (Requirements) | - | - | |
-| GATE-2.5 (User Stories) | - | - | 조건부 |
-| GATE-2.7 (Application Design) | - | - | 조건부 |
+| GATE-2.5 (User Stories) | - | - | conditional |
+| GATE-2.7 (Application Design) | - | - | conditional |
 | GATE-3 (Unit-of-Work) | - | - | |
 | GATE-3.5 (Technical Design) | - | - | M/L only |
-| GATE-4 (Infrastructure Design) | - | - | 조건부 |
-| GATE-5 (Build & Test) | - | - | 조건부 |
+| GATE-4 (Infrastructure Design) | - | - | conditional |
+| GATE-5 (Build & Test) | - | - | conditional |
 
 ## Approval
 - Requirement Status:

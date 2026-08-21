@@ -206,7 +206,7 @@ Phase 0 로드맵 기준으로 F-1(<slug>) 작업을 시작한다.
 …
 ```
 
-Features in different phases (R5 결과)는 Phase 1 → Phase 2 순서로 그룹화하여 표시한다.
+Features in different phases (R5 result) are grouped and displayed in Phase 1 → Phase 2 order.
 
 ────────────────────────────────────
 WHEN TO STOP

@@ -1,41 +1,41 @@
-# OMC · Ouroboros 연동 가이드
+# OMC · Ouroboros Integration Guide
 
-team-ai-workflow은 "**무엇을 만들 것인가**"를 결정하는 워크플로우다.
-`oh-my-claudecode`(OMC)와 Ouroboros는 "**어떻게 자동으로 굴릴 것인가**"를 담당하는 오케스트레이션 레이어다.
-두 영역을 분리해 사용하면 동일한 요구사항 산출물을 여러 실행 전략으로 돌릴 수 있다.
+team-ai-workflow is the workflow that decides "**what to build**".
+`oh-my-claudecode` (OMC) and Ouroboros are the orchestration layer responsible for "**how to run it automatically**".
+Using the two areas separately lets you run the same requirements outputs with multiple execution strategies.
 
 ```text
 ┌────────────────────────────┐    ┌──────────────────────────┐
 │ team-ai-workflow           │    │ OMC / Ouroboros          │
-│ - 요구사항 분석             │    │ - 자동화 루프            │
-│ - 멀티피처 로드맵           │ →  │ - 진화적 구현            │
-│ - UOW 분해                  │    │ - 반복 검증              │
-│ - 사람 GATE                 │    │ - 병렬 에이전트           │
+│ - Requirements analysis    │    │ - Automation loop        │
+│ - Multi-feature roadmap    │ →  │ - Evolutionary impl.     │
+│ - UOW decomposition        │    │ - Iterative verification │
+│ - Human GATE               │    │ - Parallel agents        │
 └────────────────────────────┘    └──────────────────────────┘
         (What)                            (How)
 ```
 
-GATE 승인은 항상 사람이 한다. OMC/Ouroboros가 GATE를 자동 통과시키지 않는다.
+GATE approval is always done by a human. OMC/Ouroboros does not auto-pass a GATE.
 
-> **절제 레이어(ponytail)**: "어떻게(How)"를 자동화하는 위 두 시스템과 달리, ponytail은
-> "**얼마나 적게(How little)**" 만들지를 담당한다. 구현 단계(`/ctx-run` ROLE 1)에 7단계 절제
-> 사다리를 적용하며, OMC autopilot/ralph 프롬프트에도 주입할 수 있다.
-> 연동: [ponytail-integration.md](ponytail-integration.md), 규칙: [../core/lazy-implementation.md](../core/lazy-implementation.md)
+> **Restraint layer (ponytail)**: Unlike the two systems above that automate "how (How)", ponytail is responsible for
+> "**how little (How little)**" to build. It applies a 7-step restraint ladder in the implementation stage (`/ctx-run` ROLE 1),
+> and can also be injected into OMC autopilot/ralph prompts.
+> Integration: [ponytail-integration.md](ponytail-integration.md), rules: [../core/lazy-implementation.md](../core/lazy-implementation.md)
 
 ---
 
-## 1. 진입점: `/team-ai-workflow-start`
+## 1. Entry point: `/team-ai-workflow-start`
 
-새 계정·새 레포에서 처음 시작할 때 이 스킬을 부르면 다음을 자동 진단한다.
+When you first start on a new account or a new repo, calling this skill auto-diagnoses the following.
 
-- 본체 클론 위치 (`$TEAM_AI_WORKFLOW_DIR` 또는 표준 경로)
-- 글로벌 스킬 설치 상태
-- 현재 프로젝트 `ctx/` · `aidlc-docs/` 초기화 상태
-- 진행 중 feature 목록
-- `.omc/` · `.ouroboros/` 디렉토리 감지
+- Main-body clone location (`$TEAM_AI_WORKFLOW_DIR` or the standard path)
+- Global skill installation status
+- Current project `ctx/` · `aidlc-docs/` initialization status
+- List of in-progress features
+- `.omc/` · `.ouroboros/` directory detection
 
-진단 후 적절한 후속 명령(`/ctx-aidlc-roadmap`, `/ctx-aidlc-run`, `/ctx-run`,
-또는 OMC/Ouroboros 핸드오프)을 추천한다.
+After diagnosis, it recommends the appropriate follow-up command (`/ctx-aidlc-roadmap`, `/ctx-aidlc-run`, `/ctx-run`,
+or an OMC/Ouroboros handoff).
 
 ```text
 /team-ai-workflow-start
@@ -43,238 +43,238 @@ GATE 승인은 항상 사람이 한다. OMC/Ouroboros가 GATE를 자동 통과�
 
 ---
 
-## 2. team-ai-workflow → OMC 패턴
+## 2. team-ai-workflow → OMC patterns
 
-### 2-1. autopilot — 끝까지 자동 실행
+### 2-1. autopilot — automatic execution to the end
 
 ```text
-사용자 요청
+User request
   ↓
-/ctx-aidlc-run                ← 요구사항/설계 (GATE-2/3 사람 승인)
+/ctx-aidlc-run                ← requirements/design (GATE-2/3 human approval)
   ↓
-/oh-my-claudecode:autopilot   ← 구현 → 테스트 → 검증 자동 반복
+/oh-my-claudecode:autopilot   ← implement → test → verify, auto-repeat
 ```
 
-OMC autopilot 호출 시 입력 컨텍스트로 다음을 전달한다.
+When calling OMC autopilot, pass the following as input context.
 
 - `aidlc-docs/features/<slug>/requirements.md`
 - `aidlc-docs/features/<slug>/unit-of-work.md`
-- `aidlc-docs/features/<slug>/technical-design.md` (M/L 사이즈 시)
+- `aidlc-docs/features/<slug>/technical-design.md` (for M/L sizes)
 - `ctx/INDEX.md`, `ctx/project-profile.ctx.md`
 
-권장 호출 예:
+Recommended call example:
 
 ```text
 /oh-my-claudecode:autopilot
 
-다음 산출물 기반으로 구현해라. GATE-3 통과한 상태.
+Implement based on the following outputs. GATE-3 has passed.
 - aidlc-docs/features/coupon-feature/requirements.md
 - aidlc-docs/features/coupon-feature/unit-of-work.md
 
-unit-of-work.md의 각 UOW Acceptance Criteria가 통과할 때까지 반복.
-구현 후 ctx-reviewer로 검증할 것.
+Repeat until each UOW's Acceptance Criteria in unit-of-work.md passes.
+Verify with ctx-reviewer after implementation.
 ```
 
-### 2-2. ralph — 단일 feature 완성 루프
+### 2-2. ralph — single-feature completion loop
 
-S 사이즈(작은 단위) feature에 적합. UOW의 verification method를 종료 조건으로 사용한다.
+Suitable for S-size (small-unit) features. Uses the UOW's verification method as the termination condition.
 
 ```text
-/ctx-aidlc-run                ← UOW 1~2개로 분해 (S 사이즈만)
+/ctx-aidlc-run                ← decompose into 1~2 UOWs (S size only)
   ↓
-/oh-my-claudecode:ralph       ← 검증 통과까지 반복
+/oh-my-claudecode:ralph       ← repeat until verification passes
 ```
 
 ```text
 /oh-my-claudecode:ralph
 
-목표: aidlc-docs/features/<slug>/unit-of-work.md의 모든 UOW가 통과.
-검증: 각 UOW의 Verification 섹션의 명령을 실행해 성공.
-참조: ctx/, aidlc-docs/features/<slug>/
+Goal: all UOWs in aidlc-docs/features/<slug>/unit-of-work.md pass.
+Verification: run the commands in each UOW's Verification section and succeed.
+Reference: ctx/, aidlc-docs/features/<slug>/
 ```
 
-### 2-2-S. ctx-score-loop — 의존성 인지 점수 루프 (구현 후 자동 검증)
+### 2-2-S. ctx-score-loop — dependency-aware score loop (automatic verification after implementation)
 
-구현 **이후** 의존성과 4축 검증을 자동 반복 채점하여 **85점 초과 시에만 완료**로 판정한다.
-ralph의 종료 조건을 "UOW Verification 명령 통과"에서 "**의존성 md 4축 점수 > 85 & 빌드축 ≠ 0**"으로 확장한다.
+**After** implementation, it automatically and repeatedly scores dependencies and 4-axis verification, and judges **complete only when the score exceeds 85**.
+It extends ralph's termination condition from "UOW Verification command passes" to "**dependency md 4-axis score > 85 & build axis ≠ 0**".
 
 ```text
-/ctx-aidlc-run                ← GATE-3 통과 (구현 승인)
+/ctx-aidlc-run                ← GATE-3 passed (implementation approved)
   ↓
-/ctx-score-loop <slug>        ← 한 번 요청으로 구현→채점→보완 자율 반복
-  (내부적으로 ralph 엔진 위임 가능)
+/ctx-score-loop <slug>        ← one request autonomously repeats implement→score→improve
+  (can delegate to the ralph engine internally)
 ```
 
-4축(각 25점): 의존성 해결 / 빌드·컴파일 / 테스트·커버리지 / 요구사항·AC 충족.
-채점 기준: `core/dependency-score.md`. 절차: `core/dependency-score-eval.md`.
+4 axes (25 points each): dependency resolution / build·compile / test·coverage / requirements·AC fulfillment.
+Scoring criteria: `core/dependency-score.md`. Procedure: `core/dependency-score-eval.md`.
 
-ralph 핸드오프에 종료조건을 주입하는 예:
+Example of injecting the termination condition into a ralph handoff:
 
 ```text
 /oh-my-claudecode:ralph
 
-목표: aidlc-docs/features/<slug>/dependency-check.md의 4축 점수 > 85.
-검증: core/dependency-score-eval.md 절차로 매 라운드 채점.
-  - 빌드·테스트 축은 실제 명령 실행 결과만 인정(미실행 0점).
-  - 빌드 축 0점이면 85 초과라도 완료 아님(GR-1).
-종료: total > 85 → 완료 보고. 2회 정체 / 10회·30분 상한 / 점수 하락 → 즉시 중단·사유 보고.
-참조: ctx/, aidlc-docs/features/<slug>/, core/dependency-score.md
+Goal: the 4-axis score in aidlc-docs/features/<slug>/dependency-check.md > 85.
+Verification: score every round using the core/dependency-score-eval.md procedure.
+  - The build·test axes count only actual command execution results (unrun = 0 points).
+  - If the build axis is 0 points, it is not complete even if it exceeds 85 (GR-1).
+Termination: total > 85 → report complete. 2 rounds stalled / 10-round·30-minute cap / score drop → stop immediately and report the reason.
+Reference: ctx/, aidlc-docs/features/<slug>/, core/dependency-score.md
 ```
 
-종료/중단 동작:
-- `COMPLETE`(>85 & 빌드≠0): 완료 보고 후 종료.
-- `STALLED`(2회 미개선) / `EXHAUSTED`(10회·30분) / `REGRESSED`(하락): 즉시 중단, 막힌 축·점수·사유 보고, 자동 재시작 없음.
+Termination/stop behavior:
+- `COMPLETE` (>85 & build≠0): report complete, then terminate.
+- `STALLED` (no improvement over 2 rounds) / `EXHAUSTED` (10 rounds·30 minutes) / `REGRESSED` (drop): stop immediately, report the stuck axis·score·reason, no automatic restart.
 
-### 2-3. team — 병렬 분업
+### 2-3. team — parallel division of labor
 
-`_roadmap.md`로 분해된 멀티피처를 병렬로 처리할 때.
+When processing multi-features decomposed by `_roadmap.md` in parallel.
 
 ```text
-/ctx-aidlc-roadmap            ← Phase 0 분해 + GATE-0
-  ↓ (각 feature는 독립)
-/oh-my-claudecode:team        ← N 에이전트가 feature 별로 동시 진행
+/ctx-aidlc-roadmap            ← Phase 0 decomposition + GATE-0
+  ↓ (each feature is independent)
+/oh-my-claudecode:team        ← N agents proceed per feature concurrently
 ```
 
-`_roadmap.md`의 dependency graph에 따라 직렬/병렬 그룹을 OMC team에 전달한다.
+Pass the serial/parallel groups to OMC team according to the dependency graph in `_roadmap.md`.
 
 ---
 
-## 3. team-ai-workflow → Ouroboros 패턴
+## 3. team-ai-workflow → Ouroboros patterns
 
-### 3-1. Seed 생성 + evolve
+### 3-1. Seed generation + evolve
 
 ```text
-/ctx-aidlc-run                ← requirements.md 확정
+/ctx-aidlc-run                ← finalize requirements.md
   ↓
 /ouroboros:seed                ← requirements.md → Seed spec
   ↓
-/ouroboros:evolve              ← 진화 루프
+/ouroboros:evolve              ← evolution loop
 ```
 
-Ouroboros는 측정 가능한 목표(테스트 통과율, 성능 지표, 정확도)가 있을 때 효과적이다.
-`unit-of-work.md`의 Acceptance Criteria를 Seed의 verification으로 변환한다.
+Ouroboros is effective when there is a measurable goal (test pass rate, performance metric, accuracy).
+Convert the Acceptance Criteria in `unit-of-work.md` into the Seed's verification.
 
-권장 호출 예:
+Recommended call example:
 
 ```text
 /ouroboros:seed
 
-기반 문서: aidlc-docs/features/<slug>/requirements.md
-검증 기준: aidlc-docs/features/<slug>/unit-of-work.md의 각 UOW Verification
-종료 조건: 모든 Acceptance Criteria 통과
+Base document: aidlc-docs/features/<slug>/requirements.md
+Verification criteria: each UOW Verification in aidlc-docs/features/<slug>/unit-of-work.md
+Termination condition: all Acceptance Criteria pass
 ```
 
-### 3-2. evaluate로 산출물 평가
+### 3-2. Evaluate outputs with evaluate
 
-이미 구현된 코드를 team-ai-workflow의 산출물 기준으로 평가하려면:
+To evaluate already-implemented code against team-ai-workflow's outputs:
 
 ```text
 /ouroboros:evaluate
 
-대상: <repo>
-기준: aidlc-docs/features/<slug>/requirements.md
+Target: <repo>
+Criteria: aidlc-docs/features/<slug>/requirements.md
 verification: aidlc-docs/features/<slug>/unit-of-work.md
 ```
 
 ---
 
-## 4. 충돌 방지 규칙
+## 4. Conflict-prevention rules
 
-세 시스템이 같은 레포에서 동작할 때 따라야 할 규칙.
+Rules to follow when the three systems operate in the same repo.
 
-### 4-1. 상태 디렉토리 분리
+### 4-1. State directory separation
 
-| 시스템 | 상태 위치 | 역할 |
+| System | State location | Role |
 |--------|-----------|------|
-| team-ai-workflow | `aidlc-docs/` | 요구사항·설계·UOW (Source of Truth) |
-| OMC | `.omc/state/`, `.omc/notepad.md` | 실행 상태·런타임 메모 |
-| Ouroboros | `.ouroboros/`, 세션 파일 | Seed·진화 이력 |
+| team-ai-workflow | `aidlc-docs/` | Requirements·design·UOW (Source of Truth) |
+| OMC | `.omc/state/`, `.omc/notepad.md` | Execution state·runtime notes |
+| Ouroboros | `.ouroboros/`, session files | Seed·evolution history |
 
-서로 다른 디렉토리만 쓴다. 절대 덮어쓰지 않는다.
+Each uses only its own directory. Never overwrite.
 
-### 4-2. audit.md는 append-only
+### 4-2. audit.md is append-only
 
-- team-ai-workflow가 `aidlc-docs/audit.md`의 형식과 소유권을 가진다.
-- OMC/Ouroboros가 추가 이벤트를 기록할 때는 `[OMC]` 또는 `[OUR]` 프리픽스로
-  명확히 구분한다.
-- 기존 엔트리를 절대 수정하지 않는다.
+- team-ai-workflow owns the format and ownership of `aidlc-docs/audit.md`.
+- When OMC/Ouroboros records additional events, it clearly distinguishes them with an `[OMC]` or `[OUR]`
+  prefix.
+- Never modify existing entries.
 
-### 4-3. GATE는 사람만 통과시킨다
+### 4-3. Only humans pass GATEs
 
-| GATE | 의미 | 자동 통과 가능? |
+| GATE | Meaning | Can auto-pass? |
 |------|------|----------------|
-| GATE-0 | Roadmap Review | 불가 |
-| GATE-1 | Planning Draft (raw만) | 불가 |
-| GATE-2 | Requirements Review | 불가 |
-| GATE-2.5/2.7 | User Stories / Application Design | 불가 |
-| GATE-3 | Unit-of-Work Review | 불가 |
-| GATE-3.5 | Technical Design | 불가 |
-| GATE-4 | Infrastructure | 불가 |
-| GATE-5 | Build & Test Instructions | 불가 |
+| GATE-0 | Roadmap Review | No |
+| GATE-1 | Planning Draft (raw only) | No |
+| GATE-2 | Requirements Review | No |
+| GATE-2.5/2.7 | User Stories / Application Design | No |
+| GATE-3 | Unit-of-Work Review | No |
+| GATE-3.5 | Technical Design | No |
+| GATE-4 | Infrastructure | No |
+| GATE-5 | Build & Test Instructions | No |
 
-OMC/Ouroboros가 자동으로 GATE 통과 메시지를 만들지 않도록 프롬프트에 명시한다.
+Specify in the prompt so that OMC/Ouroboros does not automatically create a GATE-pass message.
 
-### 4-4. 한 번에 한 시스템만 쓰기 (권장)
+### 4-4. Use only one system at a time (recommended)
 
-GATE-3 이전 단계는 team-ai-workflow가 전담한다.
-GATE-3 통과 이후 구현 단계에서 OMC 또는 Ouroboros를 선택적으로 사용한다.
+team-ai-workflow handles the stages before GATE-3 exclusively.
+After GATE-3 passes, use OMC or Ouroboros optionally in the implementation stage.
 
 ---
 
-## 5. 다른 계정 · 다른 레포지토리에서 동일하게 사용하기
+## 5. Using it the same way on a different account · different repository
 
-### 5-1. 본체 클론과 환경변수
+### 5-1. Main-body clone and environment variables
 
 ```bash
-# 권장 위치
+# recommended location
 git clone https://github.com/TaeseongYun/aidlc-workflow.git \
   ~/workspace/aidlc-workflow
 
-# 다른 위치 사용 시 환경변수 명시
+# when using a different location, specify the environment variable
 echo 'export TEAM_AI_WORKFLOW_DIR="$HOME/workspace/aidlc-workflow"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-### 5-2. 글로벌 스킬 설치
+### 5-2. Global skill installation
 
 ```bash
 bash "$TEAM_AI_WORKFLOW_DIR/scripts/install-skills.sh"
 ```
 
-설치 결과:
+Installation results:
 
 - `~/.claude/commands/ctx-*.md` (Claude Code)
-- `~/.claude/commands/team-ai-workflow-start.md` (진입 스킬)
-- `~/.codex/skills/ctx-*/` (Codex CLI, 선택)
+- `~/.claude/commands/team-ai-workflow-start.md` (entry skill)
+- `~/.codex/skills/ctx-*/` (Codex CLI, optional)
 
-### 5-3. multi-account 환경
+### 5-3. multi-account environment
 
-Claude Code multi-account를 사용해 `~/.claude-personal/` 같은 별도 홈 경로가 있는 경우,
-각 홈마다 install-skills.sh를 실행하거나 심볼릭 링크를 건다.
+If you use Claude Code multi-account and have a separate home path such as `~/.claude-personal/`,
+run install-skills.sh for each home or set up a symbolic link.
 
 ```bash
-# 예: personal 계정 홈에도 설치
+# e.g., also install into the personal account home
 CLAUDE_HOME="$HOME/.claude-personal" \
   bash "$TEAM_AI_WORKFLOW_DIR/scripts/install-skills.sh"
 ```
 
-(install-skills.sh가 `CLAUDE_HOME` 환경변수를 지원하지 않는 경우, 심볼릭 링크 사용:
+(If install-skills.sh does not support the `CLAUDE_HOME` environment variable, use a symbolic link:
 `ln -s ~/.claude/commands ~/.claude-personal/commands`)
 
-### 5-4. 레포지토리 초기화
+### 5-4. Repository initialization
 
-각 레포에서 한 번만 실행한다.
+Run once per repo.
 
 ```bash
 cd /path/to/new-repo
 bash "$TEAM_AI_WORKFLOW_DIR/scripts/init-project.sh"
 ```
 
-생성되는 구조:
+Structure created:
 
 ```text
 <repo>/
-├── CLAUDE.md (없으면)
+├── CLAUDE.md (if missing)
 ├── ctx/
 │   ├── INDEX.md
 │   ├── project-profile.ctx.md
@@ -285,61 +285,61 @@ bash "$TEAM_AI_WORKFLOW_DIR/scripts/init-project.sh"
     └── features/
 ```
 
-이미 있는 파일은 건드리지 않는다.
+Existing files are left untouched.
 
-### 5-5. 본체 업데이트
+### 5-5. Updating the main body
 
 ```bash
 cd "$TEAM_AI_WORKFLOW_DIR" && git pull
 bash scripts/install-skills.sh
 ```
 
-install 스크립트는 멱등하므로 안전하게 재실행 가능하다.
+The install script is idempotent, so it is safe to re-run.
 
 ---
 
-## 6. 트러블슈팅
+## 6. Troubleshooting
 
-### `/ctx-aidlc-run`이 인식되지 않는다
+### `/ctx-aidlc-run` is not recognized
 
 ```bash
 ls -la ~/.claude/commands/ctx-aidlc-run.md
 ```
 
-파일이 없으면 install-skills.sh를 다시 실행한다.
+If the file is missing, run install-skills.sh again.
 
-### 스킬은 있는데 `{{TEAM_AI_WORKFLOW_DIR}}` 치환이 안 됐다
+### The skill exists but `{{TEAM_AI_WORKFLOW_DIR}}` was not substituted
 
-설치 시점의 본체 경로가 박혀야 하는데 플레이스홀더가 그대로 남아 있다면
-install-skills.sh를 다시 돌린다. `sed -i ''`는 macOS BSD sed 기준이므로
-Linux에서는 `sed -i`로 수정 필요.
+The main-body path at install time should be embedded, but if the placeholder remains as-is,
+re-run install-skills.sh. `sed -i ''` is for macOS BSD sed, so
+on Linux you need to fix it to `sed -i`.
 
-### 두 계정에서 동일 레포를 동시에 작업 중인데 audit.md가 충돌난다
+### Two accounts are working on the same repo at once and audit.md conflicts
 
-`audit.md`는 append-only지만 동시 작성 시 race condition이 생길 수 있다.
-서로 다른 feature-slug를 쓰고, 같은 feature를 동시에 수정하지 않는다.
+`audit.md` is append-only, but a race condition can occur on simultaneous writes.
+Use different feature-slugs, and do not modify the same feature at the same time.
 
-### OMC autopilot이 requirements를 무시한다
+### OMC autopilot ignores the requirements
 
-autopilot 프롬프트에 `requirements.md`와 `unit-of-work.md` 경로를 명시했는지 확인.
-"파일 경로를 따른다"가 아니라 "이 파일에 적힌 Acceptance Criteria가 통과해야 한다"
-라고 검증 조건을 명시한다.
+Check that the `requirements.md` and `unit-of-work.md` paths are specified in the autopilot prompt.
+Specify the verification condition as "the Acceptance Criteria written in this file must pass",
+not "follow the file path".
 
-### Ouroboros evolve가 무한 루프
+### Ouroboros evolve loops infinitely
 
-종료 조건이 측정 불가능하면 그렇다. UOW의 Verification 섹션이 구체적 명령
-(예: `./gradlew :module:test --tests CouponTest`)으로 작성되어 있는지 확인.
+That happens when the termination condition is not measurable. Check that the UOW's Verification section
+is written with a concrete command (e.g., `./gradlew :module:test --tests CouponTest`).
 
 ---
 
-## 7. 권장 사용 시나리오
+## 7. Recommended usage scenarios
 
-| 시나리오 | 추천 조합 |
+| Scenario | Recommended combination |
 |---------|-----------|
-| 한 명이 작은 feature(S) 빠르게 끝내기 | `/ctx-aidlc-run` → `/oh-my-claudecode:ralph` |
-| 구현 후 의존성·다축 검증을 점수로 자동 완료 판정 | `/ctx-aidlc-run` → `/ctx-score-loop`(85점 초과까지 자율 반복) |
-| 중간 크기(M) feature, 사람이 PR 단위로 검토 | `/ctx-aidlc-run` → `/oh-my-claudecode:autopilot` |
-| 큰 기획서, 팀 분업 | `/ctx-aidlc-roadmap` → 각자 `/ctx-aidlc-run` → `/oh-my-claudecode:team` |
-| 측정 가능한 목표(테스트 통과율 등) | `/ctx-aidlc-run` → `/ouroboros:seed` → `/ouroboros:evolve` |
-| 기존 코드 평가 | `/ctx-aidlc-run` (요구사항 정리만) → `/ouroboros:evaluate` |
-| 단순 변경(change-on-existing-feature) | `/ctx-aidlc-run`만으로 충분, 외부 도구 불필요 |
+| One person finishing a small feature (S) quickly | `/ctx-aidlc-run` → `/oh-my-claudecode:ralph` |
+| Auto-judging completion by score with dependency·multi-axis verification after implementation | `/ctx-aidlc-run` → `/ctx-score-loop` (autonomous repeat until score exceeds 85) |
+| Medium-size (M) feature, human reviews per PR | `/ctx-aidlc-run` → `/oh-my-claudecode:autopilot` |
+| Large planning document, team division of labor | `/ctx-aidlc-roadmap` → each `/ctx-aidlc-run` → `/oh-my-claudecode:team` |
+| Measurable goal (test pass rate, etc.) | `/ctx-aidlc-run` → `/ouroboros:seed` → `/ouroboros:evolve` |
+| Evaluating existing code | `/ctx-aidlc-run` (requirements organization only) → `/ouroboros:evaluate` |
+| Simple change (change-on-existing-feature) | `/ctx-aidlc-run` alone is enough, no external tools needed |

@@ -1,18 +1,18 @@
 # Contributing to aidlc-workflow
 
-이 워크플로우는 많은 팀이 공유하는 도구입니다. 개선 사항과 버그 리포트를 환영합니다.
+This workflow is a tool shared by many teams. Improvements and bug reports are welcome.
 
 ---
 
-## 기여 방법
+## How to Contribute
 
 ### Issues
 
-기능 요청, 버그 리포트, 질문은 [GitHub Issues](https://github.com/TaeseongYun/aidlc-workflow/issues)로 제출해주세요.
+Please submit feature requests, bug reports, and questions via [GitHub Issues](https://github.com/TaeseongYun/aidlc-workflow/issues).
 
-- 명확한 제목과 설명
-- 재현 가능한 단계 (버그인 경우)
-- 사용 중인 스킬과 프로젝트 타입
+- A clear title and description
+- Reproducible steps (for bugs)
+- The skill and project type you are using
 
 ### Pull Requests
 
@@ -112,7 +112,7 @@ WORKFLOW
 (Step-by-step execution)
 ```
 
-- Use Korean for user-facing text
+- Use English for user-facing text
 - Use English for code, commands, variable names
 - Keep roles focused (one skill = one job)
 
@@ -168,21 +168,21 @@ When updating a rule:
 
 ## Style Guide
 
-### Korean Conventions
+### Conventions
 
-- Headers: 한국어 주제 + 선택적 영문 부제 `(English Subtitle)`
-- Content: 한국어
+- Headers: English topic + optional subtitle `(Subtitle)`
+- Content: English
 - Code/commands: English only
 - Filenames: `kebab-case`, English
 
 ### Examples
 
 ```markdown
-# CTX 문서 작성 (Writing Context Documents)
+# Writing Context Documents
 
-## 기술 스택 (Tech Stack)
+## Tech Stack
 
-이 섹션에서는 프로젝트의 기술 스택을 정의한다.
+This section defines the project's tech stack.
 
 ```bash
 npm install
@@ -229,7 +229,7 @@ Before committing, update `docs/changelog/YYYY-MM-DD-<topic>.md` with:
 Link from main `README.md`:
 
 ```markdown
-| 2026-05-15 | Changelog title | [상세](docs/changelog/2026-05-15-topic.md) |
+| 2026-05-15 | Changelog title | [Details](docs/changelog/2026-05-15-topic.md) |
 ```
 
 ---
@@ -245,15 +245,15 @@ Before submitting a PR, ensure:
 - [ ] No NHN-internal references or jargon
 - [ ] Tested on at least one project
 - [ ] Updated CHANGELOG if it's a feature/rule change
-- [ ] Used Korean for user text, English for code/commands
+- [ ] Used English for user text, English for code/commands
 
 ---
 
 ## Language Policy
 
-- **Documentation content**: Korean (사용자 가이드, 규칙, 개념)
+- **Documentation content**: English (user guides, rules, concepts)
 - **Code, commands, commit messages**: English
-- **Skill prompts/output**: Korean (사용자와 상호작용)
+- **Skill prompts/output**: English (interaction with the user)
 - **Comments in skill files**: English preferred (international readability)
 
 ---

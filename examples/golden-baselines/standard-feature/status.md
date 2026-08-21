@@ -3,31 +3,31 @@
 
 ## Identity
 - Feature Slug: standard-feature
-- Title: 재구매 고객 할인 쿠폰
+- Title: Repeat-Customer Discount Coupon
 
 ## Readiness Score
 
-| 영역 | 배점 | 점수 | 상태 |
+| Area | Points | Score | Status |
 |------|------|------|------|
-| 기능 범위 정의 | 15 | 15 | OK |
-| 정책/예외 확정 | 20 | 5 | BLOCK 2건 |
-| 사용자 시나리오 | 15 | 15 | OK |
-| NFR 확인 | 15 | 12 | OK |
-| 승인 항목 해결 | 20 | 5 | BLOCK 2건 |
-| 리스크 평가 | 15 | 12 | OK |
-| **합계** | **100** | **64** | **CONDITIONAL** |
+| Functional scope definition | 15 | 15 | OK |
+| Policy/exception finalization | 20 | 5 | BLOCK 2 items |
+| User scenarios | 15 | 15 | OK |
+| NFR confirmation | 15 | 12 | OK |
+| Approval item resolution | 20 | 5 | BLOCK 2 items |
+| Risk assessment | 15 | 12 | OK |
+| **Total** | **100** | **64** | **CONDITIONAL** |
 
 ## Scope
-- 재구매 기준 정의 및 쿠폰 자동 발급
-- 쿠폰 사용 제한 (1인 1회, 유효기간)
-- 관리자 캠페인 ON/OFF
+- Repeat-purchase criterion definition and automatic coupon issuance
+- Coupon usage limits (one per person, validity period)
+- Administrator campaign ON/OFF
 
 ## Gate Approval History
 
-| 게이트 | 결정 | 일시 | 비고 |
+| Gate | Decision | Timestamp | Notes |
 |--------|------|------|------|
-| GATE-2 | approved | 2026-03-20T15:30:00Z | BLOCK 2건 잔여, 조건부 승인 |
-| GATE-3 | approved | 2026-03-20T16:00:00Z | UOW 6건 확인 |
+| GATE-2 | approved | 2026-03-20T15:30:00Z | 2 BLOCK items remaining, conditional approval |
+| GATE-3 | approved | 2026-03-20T16:00:00Z | 6 UOWs confirmed |
 
 ## Approval
 - Status: questions-open

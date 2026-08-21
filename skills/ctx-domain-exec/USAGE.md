@@ -1,23 +1,23 @@
-# ctx-domain-exec 사용 방법
+# How to Use ctx-domain-exec
 
-## 사용 방법 요약
+## Usage Summary
 
-### 실행 모드별 선택 기준
+### Selection Criteria by Execution Mode
 
-| 모드 | 사용 시점 | Global CTX | Local CTX |
+| Mode | When to Use | Global CTX | Local CTX |
 |------|----------|------------|-----------|
-| ARCHITECT_CONFIRMED | Architect 판단 결과가 있을 때 | 판단 결과에 따름 | 판단 결과에 따름 |
-| EXECUTOR_ONLY | Architect 판단 생략 시 | 강제 참조 | 사용자 명시 |
+| ARCHITECT_CONFIRMED | When Architect judgment results exist | Per the judgment result | Per the judgment result |
+| EXECUTOR_ONLY | When Architect judgment is omitted | Forced reference | User-specified |
 
-### 워크플로우
+### Workflow
 
-1. **권장**: `/ctx-architect-judge`로 먼저 판단 수행
-2. 판단 결과를 `/ctx-domain-exec`에 전달하여 구현
-3. **예외적**: 단일 도메인이 확실한 경우에만 EXECUTOR_ONLY 사용
+1. **Recommended**: Perform judgment first with `/ctx-architect-judge`
+2. Pass the judgment result to `/ctx-domain-exec` for implementation
+3. **Exceptional**: Use EXECUTOR_ONLY only when a single domain is certain
 
 ---
 
-## ARCHITECT_CONFIRMED 호출 예시
+## ARCHITECT_CONFIRMED Invocation Example
 
 ```
 /ctx-domain-exec
@@ -45,16 +45,16 @@
 - 등급이 없으면 기본 등급(BRONZE) 반환
 ```
 
-**예상 출력:**
+**Expected output:**
 
-## 실행 모드 선언
+## Execution Mode Declaration
 - ARCHITECT_CONFIRMED
 
-## 구현 요약
-- 참조한 Global CTX: ctx/back-end/api/api-response.ctx.md
-- 참조한 Local CTX: ctx/back-end/domain/grade.ctx.md
+## Implementation Summary
+- Referenced Global CTX: ctx/back-end/api/api-response.ctx.md
+- Referenced Local CTX: ctx/back-end/domain/grade.ctx.md
 
-## 구현 내용
+## Implementation Content
 
 ```java
 @Service
@@ -70,12 +70,12 @@ public class GradeService {
 }
 ```
 
-## CTX 준수 확인
-위 구현은 입력으로 제공된 CTX 범위를 벗어나지 않음을 확인함.
+## CTX Compliance Confirmation
+Confirmed that the implementation above does not go beyond the CTX scope provided as input.
 
 ---
 
-## EXECUTOR_ONLY 호출 예시
+## EXECUTOR_ONLY Invocation Example
 
 ```
 /ctx-domain-exec
@@ -100,16 +100,16 @@ public class GradeService {
 - ctx/back-end/domain/notification.ctx.md
 ```
 
-**예상 출력:**
+**Expected output:**
 
-## 실행 모드 선언
+## Execution Mode Declaration
 - EXECUTOR_ONLY
 
-## 구현 요약
-- 참조한 Global CTX: ctx/back-end/api/api-design.ctx.md, ctx/back-end/api/api-response.ctx.md, ctx/back-end/api/error-handling.ctx.md
-- 참조한 Local CTX: ctx/back-end/domain/notification.ctx.md
+## Implementation Summary
+- Referenced Global CTX: ctx/back-end/api/api-design.ctx.md, ctx/back-end/api/api-response.ctx.md, ctx/back-end/api/error-handling.ctx.md
+- Referenced Local CTX: ctx/back-end/domain/notification.ctx.md
 
-## 구현 내용
+## Implementation Content
 
 ```java
 @Transactional
@@ -120,19 +120,19 @@ public void markAsRead(Long notificationId) {
 }
 ```
 
-## CTX 준수 확인
-위 구현은 입력으로 제공된 CTX 범위를 벗어나지 않음을 확인함.
+## CTX Compliance Confirmation
+Confirmed that the implementation above does not go beyond the CTX scope provided as input.
 
-## 판단 생략 고지
-- Architect 판단은 생략되었음
-- Global CTX는 모두 참조 및 준수되었음
-- Local CTX 적합성은 사용자 선언에 의존함
+## Judgment-Omitted Notice
+- Architect judgment was omitted
+- All Global CTX was referenced and complied with
+- Local CTX suitability depends on the user's declaration
 
 ---
 
-## 잘못된 호출 예시 (중단되는 경우)
+## Incorrect Invocation Examples (cases that stop)
 
-### 예시 1: EXECUTOR_ONLY에서 Global CTX 섹션 누락
+### Example 1: Global CTX section missing in EXECUTOR_ONLY
 
 ```
 /ctx-domain-exec
@@ -151,21 +151,21 @@ public void markAsRead(Long notificationId) {
 - ctx/back-end/domain/kcp-payment.ctx.md
 ```
 
-**예상 출력:**
+**Expected output:**
 
-## 실행 중단
+## Execution Stopped
 
-중단 사유:
-- EXECUTOR_ONLY 모드에서 Global CTX 섹션이 누락됨
-- Global CTX는 항상 참조되어야 하며 생략 불가
+Stop reason:
+- The Global CTX section is missing in EXECUTOR_ONLY mode
+- Global CTX must always be referenced and cannot be omitted
 
-확인이 필요한 질문:
-1. Global CTX (강제 참조) 섹션을 추가하여 다시 요청해 주세요
-2. 프로젝트의 Global CTX 목록을 포함해 주세요
+Questions that need confirmation:
+1. Please add the Global CTX (forced reference) section and request again
+2. Please include the project's Global CTX list
 
 ---
 
-### 예시 2: ARCHITECT_CONFIRMED에서 판단 불가 지점 존재
+### Example 2: Points that cannot be judged exist in ARCHITECT_CONFIRMED
 
 ```
 /ctx-domain-exec
@@ -194,24 +194,24 @@ public void markAsRead(Long notificationId) {
 - 정산 완료 시 결제 상태 변경
 ```
 
-**예상 출력:**
+**Expected output:**
 
-## 실행 중단
+## Execution Stopped
 
-중단 사유:
-- Architect 판단 결과에 "판단 불가 / 추가 확인 필요 지점"이 존재함
-- 미해결 지점:
-  1. Settlement과 Payment 도메인 간 트랜잭션 경계가 불명확함
-  2. 정산 실패 시 결제 롤백 정책이 CTX에 명시되지 않음
+Stop reason:
+- The Architect judgment result contains "Points that cannot be judged / require additional confirmation"
+- Unresolved points:
+  1. The transaction boundary between the Settlement and Payment domains is unclear
+  2. The payment rollback policy on settlement failure is not specified in the CTX
 
-확인이 필요한 질문:
-1. 두 도메인 간 트랜잭션 경계를 명확히 정의해 주세요
-2. 정산 실패 시 결제 롤백 정책을 결정하여 CTX에 추가해 주세요
-3. 위 사항이 해결된 후 Architect 판단을 다시 수행해 주세요
+Questions that need confirmation:
+1. Please clearly define the transaction boundary between the two domains
+2. Please decide the payment rollback policy on settlement failure and add it to the CTX
+3. After the above items are resolved, please perform the Architect judgment again
 
 ---
 
-### 예시 3: 다중 도메인 가능성 감지 (EXECUTOR_ONLY)
+### Example 3: Possibility of multiple domains detected (EXECUTOR_ONLY)
 
 ```
 /ctx-domain-exec
@@ -235,18 +235,18 @@ public void markAsRead(Long notificationId) {
 - ctx/back-end/domain/friends.ctx.md
 ```
 
-**예상 출력:**
+**Expected output:**
 
-## 실행 중단
+## Execution Stopped
 
-중단 사유:
-- EXECUTOR_ONLY 모드에서 다중 도메인 가능성이 감지됨
-- 요구사항 "프렌즈가 프로그램을 등록하면 알림 발송"은 다음 도메인에 영향을 미침:
-  1. Friends 도메인 (프렌즈)
-  2. Program 도메인 (프로그램 등록)
-  3. Notification 도메인 (알림 발송)
-- 단일 도메인 보증이 실제 요구사항과 일치하지 않음
+Stop reason:
+- A possibility of multiple domains was detected in EXECUTOR_ONLY mode
+- The requirement "send a notification when a friend registers a program" affects the following domains:
+  1. Friends domain (friends)
+  2. Program domain (program registration)
+  3. Notification domain (notification sending)
+- The single-domain guarantee does not match the actual requirement
 
-확인이 필요한 질문:
-1. `/ctx-architect-judge`를 사용하여 도메인 범위를 먼저 판단해 주세요
-2. 또는 요구사항을 단일 도메인 범위로 분리하여 다시 요청해 주세요
+Questions that need confirmation:
+1. Please use `/ctx-architect-judge` to judge the domain scope first
+2. Or split the requirement into a single-domain scope and request again

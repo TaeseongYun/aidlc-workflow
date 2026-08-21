@@ -1,236 +1,236 @@
 # Question Governance
 
-질문의 **형식**은 `question-rules.md`가 정의한다.
-이 문서는 질문의 **거버넌스** — 범위 통제, 유형 분류, 확신도 추적, 질문 예산 — 를 정의한다.
+The **format** of questions is defined by `question-rules.md`.
+This document defines the **governance** of questions — scope control, type classification, confidence tracking, and question budget.
 
-## 배경
+## Background
 
-워크숍 실전 경험에서 질문 중심 워크플로우의 3대 문제를 발견했다.
+From real-world workshop experience, three major problems with question-driven workflows were found.
 
-1. **초점 이탈** — 질문이 원래 요청 범위를 넘어 확장되어 사용자가 최초 의도를 놓침
-2. **결정권자 부재** — 누가 어떤 질문에 답할 권한인지 정의되지 않아 답변이 흔들림
-3. **지식 부족 답변 누적** — 낮은 확신의 답변이 확정된 것처럼 취급되어 결과물이 엉성해짐
+1. **Focus drift** — Questions expand beyond the original request scope, causing the user to lose the initial intent
+2. **No decision owner** — Who has the authority to answer which question is undefined, so answers waver
+3. **Accumulation of low-knowledge answers** — Low-confidence answers are treated as if settled, making the deliverable sloppy
 
-이 문서의 규칙은 위 3가지 문제를 직접 해결한다.
+The rules in this document directly address the three problems above.
 
 ---
 
-## 1. Focus Anchor (초점 유지)
+## 1. Focus Anchor
 
 ### Request Anchor
-- 모든 질문 파일(`requirement-verification-questions.md` 등) 상단에 **Request Anchor**를 고정한다.
-- Request Anchor는 최초 요청을 1-2줄로 요약한 것이다.
-- STEP 2(요청 캡처) 시점에 확정하며, 이후 변경하지 않는다.
+- Fix a **Request Anchor** at the top of every question file (`requirement-verification-questions.md`, etc.).
+- The Request Anchor is a 1-2 line summary of the original request.
+- It is finalized at STEP 2 (Request Capture) and is not changed thereafter.
 
 ```markdown
-> **Request Anchor**: {최초 요청 1-2줄 요약}
+> **Request Anchor**: {1-2 line summary of the original request}
 ```
 
 ### Scope Tag
-- 각 질문에 `범위` 필드를 필수로 추가한다.
-- 이 필드는 해당 질문이 Request Anchor의 어느 부분과 관련되는지 명시한다.
+- Add a `Scope` field to every question as a required field.
+- This field states which part of the Request Anchor the question relates to.
 
 ```markdown
-- 범위: [원래 요청] {관련 부분 설명}
+- Scope: [Original Request] {description of the relevant part}
 ```
 
-### Scope Drift Detection (범위 이탈 감지)
-- 질문 생성 시, 해당 질문이 Request Anchor 범위 안인지 판단한다.
-- 범위 밖이라고 판단되면:
-  1. 질문을 생성하지 않는다.
-  2. 대신 사용자에게 안내한다: "이 항목은 현재 요청 범위 밖입니다. 별도 feature로 분리하시겠습니까?"
-  3. 사용자가 범위 확장을 승인하면 Request Anchor를 갱신하고 질문을 추가한다.
-  4. 사용자가 분리를 선택하면 해당 항목을 `aidlc-state.md`의 Parked Features에 기록한다.
+### Scope Drift Detection
+- When generating a question, judge whether the question falls within the Request Anchor scope.
+- If judged to be out of scope:
+  1. Do not generate the question.
+  2. Instead, inform the user: "This item is outside the current request scope. Would you like to split it into a separate feature?"
+  3. If the user approves scope expansion, update the Request Anchor and add the question.
+  4. If the user chooses to split, record the item in the Parked Features of `aidlc-state.md`.
 
 ### Progress Line
-- 게이트 메시지(`stage-gate-rules.md` 포맷)에 아래 한 줄을 추가한다.
+- Add the following single line to the gate message (`stage-gate-rules.md` format).
 
 ```markdown
-> **진행 상황**: {Request Anchor 요약} → 현재: {현재 단계} → 다음: {다음 단계}
+> **Progress**: {Request Anchor summary} → Current: {current step} → Next: {next step}
 ```
 
 ---
 
-## 2. Question Classification (질문 유형 분류)
+## 2. Question Classification
 
-기존 `question-rules.md`의 BLOCK/ASSUME는 **미응답 시 대응**을 정의한다.
-여기서는 별도 차원으로 **질문의 성격**을 분류한다.
+The existing BLOCK/ASSUME in `question-rules.md` defines **the response when unanswered**.
+Here, on a separate dimension, we classify **the nature of the question**.
 
-### 유형 정의
+### Type Definitions
 
-| 유형 | 설명 | 누가 답하나 | 미응답 시 대응 |
+| Type | Description | Who Answers | Response When Unanswered |
 |------|------|-----------|-------------|
-| `policy` | 비즈니스 정책 결정. 환불/정산/권한/할인/알림 등 | 사업 결정권자 (사람 필수) | BLOCK만 허용 |
-| `domain` | 도메인/기술 지식 기반 판단. 인증 방식, 데이터 모델, API 설계 등 | 도메인 전문가 또는 AI 추천 수용 | BLOCK / ASSUME / **AI-RECOMMEND** |
-| `scope` | 현재 작업 범위 안팎 판단 | 요청자 | BLOCK / **DEFER-TO-FEATURE** |
+| `policy` | Business policy decisions. Refunds/settlement/permissions/discounts/notifications, etc. | Business decision owner (a human is required) | BLOCK only |
+| `domain` | Judgment based on domain/technical knowledge. Authentication method, data model, API design, etc. | Domain expert, or accept the AI recommendation | BLOCK / ASSUME / **AI-RECOMMEND** |
+| `scope` | Judgment of whether it is inside or outside the current work scope | Requester | BLOCK / **DEFER-TO-FEATURE** |
 
-### AI-RECOMMEND (신규 미응답 대응)
+### AI-RECOMMEND (New No-Response Handling)
 
-`domain` 유형 질문에만 적용한다.
+Applies only to `domain`-type questions.
 
-**작동 방식**:
-1. AI가 업계 표준, 베스트 프랙티스, 프로젝트 컨텍스트(CTX) 기반으로 추천안을 제시한다.
-2. 추천안에는 반드시 **근거**를 명시한다.
-3. 사용자 응답 시나리오:
-   - **승인** → 해당 선택지로 확정. `[확신: 확실]`
-   - **수정** → 수정 내용 반영. `[확신: 확실]`
-   - **"모름, AI추천 수용"** → AI 추천안으로 확정. `[확신: AI추천]`
-   - **"모름, 보류"** → DEFER 처리. `[확신: 미정]`
+**How it works**:
+1. The AI presents a recommendation based on industry standards, best practices, and project context (CTX).
+2. The recommendation must always state its **rationale**.
+3. User response scenarios:
+   - **Approve** → finalize with that choice. `[Confidence: Certain]`
+   - **Modify** → reflect the modification. `[Confidence: Certain]`
+   - **"Don't know, accept the AI recommendation"** → finalize with the AI recommendation. `[Confidence: AI-Recommended]`
+   - **"Don't know, hold"** → handle as DEFER. `[Confidence: Undecided]`
 
-**포맷**:
+**Format**:
 ```markdown
-- AI 추천: {선택지}) {추천 내용} — 근거: {판단 근거}
-- 미응답 시: AI-RECOMMEND-{선택지} ({추천 근거 요약})
+- AI Recommendation: {choice}) {recommended content} — Rationale: {basis for the judgment}
+- If unanswered: AI-RECOMMEND-{choice} ({summary of recommendation rationale})
 ```
 
-### DEFER-TO-FEATURE (신규 미응답 대응)
+### DEFER-TO-FEATURE (New No-Response Handling)
 
-`scope` 유형 질문에만 적용한다.
+Applies only to `scope`-type questions.
 
-- 해당 항목을 현재 feature에서 제외하고 `aidlc-state.md`의 Parked Features에 기록한다.
-- 현재 워크플로우는 중단 없이 진행한다.
+- Exclude the item from the current feature and record it in the Parked Features of `aidlc-state.md`.
+- The current workflow proceeds without interruption.
 
 ---
 
-## 3. Confidence Tagging (확신도 태깅)
+## 3. Confidence Tagging
 
-모든 질문의 답변에 확신도를 표기한다.
+Tag the confidence on every question's answer.
 
-### 확신도 레벨
+### Confidence Levels
 
-| 태그 | 의미 | Readiness Score 영향 |
+| Tag | Meaning | Readiness Score Impact |
 |------|------|-------------------|
-| `[확신: 확실]` | 명확한 근거. 결정권자 확인 또는 CTX 명시 | 없음 |
-| `[확신: 추정]` | 근거 있지만 불확실. 재검토 필요 가능 | 해당 도메인에 **경고 마크** |
-| `[확신: AI추천]` | AI 추천을 수용. 추후 전문가 검토 권장 | 해당 도메인에 **경고 마크** |
-| `[확신: 미정]` | 결정 보류(DEFER). 리스크로 추적 | 해당 도메인 점수 차감 |
+| `[Confidence: Certain]` | Clear grounding. Confirmed by the decision owner or stated in CTX | None |
+| `[Confidence: Estimated]` | Grounded but uncertain. May need re-review | **Warning mark** on the relevant domain |
+| `[Confidence: AI-Recommended]` | AI recommendation accepted. Expert review recommended later | **Warning mark** on the relevant domain |
+| `[Confidence: Undecided]` | Decision deferred (DEFER). Tracked as a risk | Score deduction for the relevant domain |
 
-### 경고 마크의 의미
-- `[확신: 추정]`과 `[확신: AI추천]`이 포함된 답변은 Readiness Score 산출 시 해당 도메인에 경고 마크를 부착한다.
-- 경고 마크는 점수를 차감하지 않지만, `status.md`에 "불확실 영역" 섹션으로 가시화한다.
-- 추후 도메인 전문가가 합류하면 경고 마크 항목부터 검토할 수 있다.
+### Meaning of the Warning Mark
+- Answers containing `[Confidence: Estimated]` and `[Confidence: AI-Recommended]` attach a warning mark to the relevant domain when computing the Readiness Score.
+- The warning mark does not deduct points, but it is made visible as an "Uncertain Areas" section in `status.md`.
+- When a domain expert joins later, they can review the warning-marked items first.
 
 ### Confidence Summary
-- `aidlc-state.md`에 확신도 통계를 기록한다.
+- Record confidence statistics in `aidlc-state.md`.
 
 ```markdown
 ## Confidence Summary
-- 확실: N개
-- 추정: N개
-- AI추천: N개
-- 미정: N개
+- Certain: N
+- Estimated: N
+- AI-Recommended: N
+- Undecided: N
 ```
 
 ---
 
-## 4. Risk-Based Priority (위험도 기반 우선순위)
+## 4. Risk-Based Priority
 
-질문의 성격뿐 아니라 **구현 리스크**에 따라 우선순위를 부여한다.
-워크숍 실전에서 AI가 저위험 세부사항(배치 크기, 로깅 레벨)에 질문을 집중하고,
-고위험 영역(외부 API 통합, 알려진 제약)을 간과하는 문제가 반복 발생했다.
+Assign priority not only by the nature of the question but also by **implementation risk**.
+In real-world workshops, the AI repeatedly concentrated questions on low-risk details (batch size, logging level)
+while overlooking high-risk areas (external API integration, known constraints).
 
-### 우선순위 레벨
+### Priority Levels
 
-| 레벨 | 대상 | 처리 방식 |
+| Level | Target | Handling |
 |------|------|----------|
-| `P0-CRITICAL` | 외부 시스템 통합, 알려진 기술 제약, 데이터 유실 가능성, 보안 경계 | 반드시 질문. 인간 확인 필수. |
-| `P1-IMPORTANT` | 비즈니스 정책, 예외 처리, 데이터 모델 설계, 상태 전이 | 질문 생성. BLOCK 또는 ASSUME. |
-| `P2-DEFERRABLE` | 배치 크기, 로깅 레벨, 기본값 조정, 포맷/정렬, 재시도 횟수 | AI가 디폴트로 결정. 인간에게 알림만. |
+| `P0-CRITICAL` | External system integration, known technical constraints, possibility of data loss, security boundaries | Must ask. Human confirmation required. |
+| `P1-IMPORTANT` | Business policy, exception handling, data model design, state transitions | Generate a question. BLOCK or ASSUME. |
+| `P2-DEFERRABLE` | Batch size, logging level, default value tuning, format/alignment, retry count | AI decides by default. Notify the human only. |
 
-### P0 판정 기준
-아래 조건 중 하나라도 해당하면 P0이다:
-- 외부 API/시스템 연동이 포함되며, 해당 시스템의 제약/불안정성이 알려져 있거나 의심됨
-- 데이터 유실, 이중 처리, 정합성 훼손 가능성이 있음
-- 보안 경계(인증, 권한, 암호화)에 영향을 줌
-- 장애 발생 시 롤백이 불가능하거나 매우 어려움
+### P0 Determination Criteria
+It is P0 if any of the following conditions applies:
+- External API/system integration is involved, and constraints/instability of that system are known or suspected
+- There is a possibility of data loss, double processing, or integrity corruption
+- It affects a security boundary (authentication, permission, encryption)
+- Rollback is impossible or very difficult if a failure occurs
 
-### P2 자동 결정 규칙
-- P2 질문은 AI가 업계 표준 또는 프로젝트 컨텍스트 기반으로 디폴트 값을 선택한다.
-- 선택한 디폴트와 근거를 `requirement-verification-questions.md`의 **"AI 자동 결정 (P2)"** 섹션에 기록한다.
-- 인간은 이 섹션을 사후 검토할 수 있으나, 응답하지 않아도 워크플로우가 진행된다.
-- 운영 환경 배포 후 조정이 가능한 항목만 P2로 분류한다. 배포 후 변경이 어려운 항목은 P1 이상이다.
+### P2 Automatic Decision Rules
+- For P2 questions, the AI selects a default value based on industry standards or project context.
+- Record the chosen default and its rationale in the **"AI Automatic Decisions (P2)"** section of `requirement-verification-questions.md`.
+- The human may review this section after the fact, but the workflow proceeds even without a response.
+- Classify as P2 only items that can be adjusted after deployment to the operating environment. Items hard to change after deployment are P1 or higher.
 
-### 리스크 정보 입력
-- `prepared_doc` 또는 `request-intake.md`에 알려진 리스크를 명시할 수 있다.
-- 포맷: `> ⚠️ RISK: {영역} — {설명}` (예: `> ⚠️ RISK: 네이버 API — 문서와 실제 동작이 다른 경우가 빈번함`)
-- AI는 이 리스크 태그가 붙은 영역의 질문을 자동으로 P0으로 승격한다.
-- 리스크 태그가 없더라도 외부 연동은 최소 P1로 분류한다.
+### Risk Information Input
+- Known risks may be stated in `prepared_doc` or `request-intake.md`.
+- Format: `> ⚠️ RISK: {area} — {description}` (e.g., `> ⚠️ RISK: Naver API — documentation and actual behavior frequently differ`)
+- The AI automatically promotes questions in areas tagged with this risk to P0.
+- Even without a risk tag, classify external integration as at least P1.
 
-### 질문 포맷 확장
-기존 질문 포맷에 `우선순위` 필드를 추가한다:
+### Question Format Extension
+Add a `Priority` field to the existing question format:
 
 ```markdown
-### Q{N}. {질문 제목}
-- 우선순위: P0-CRITICAL / P1-IMPORTANT / P2-DEFERRABLE
-- 범위: [원래 요청] {관련 부분 설명}
-- 유형: policy / domain / scope
+### Q{N}. {question title}
+- Priority: P0-CRITICAL / P1-IMPORTANT / P2-DEFERRABLE
+- Scope: [Original Request] {description of the relevant part}
+- Type: policy / domain / scope
 ...
 ```
 
-### P2 자동 결정 섹션 포맷
+### P2 Automatic Decision Section Format
 
 ```markdown
-## AI 자동 결정 (P2)
+## AI Automatic Decisions (P2)
 
-| # | 항목 | 디폴트 값 | 근거 | 변경 시 영향 |
+| # | Item | Default Value | Rationale | Impact of Change |
 |---|------|----------|------|-------------|
-| 1 | 배치 크기 | 100건 | 일반적 초기값, 운영 후 조정 가능 | 처리 속도만 영향 |
-| 2 | 재시도 횟수 | 3회 (exponential backoff) | AWS 권장 패턴 | 장애 복구 시간 |
+| 1 | Batch size | 100 items | Typical initial value, adjustable after operation | Affects processing speed only |
+| 2 | Retry count | 3 (exponential backoff) | AWS recommended pattern | Failure recovery time |
 ```
 
 ---
 
-## 5. Question Budget (질문 예산)
+## 5. Question Budget
 
-질문 과다로 인한 초점 이탈을 방지한다.
+Prevents focus drift caused by excessive questions.
 
-### 라운드당 질문 상한
+### Per-Round Question Cap
 
-| Depth Level | 상한 |
+| Depth Level | Cap |
 |-------------|-----|
-| minimal | 3개 |
-| standard | 7개 |
-| comprehensive | 12개 |
+| minimal | 3 |
+| standard | 7 |
+| comprehensive | 12 |
 
-Depth Level은 `common/depth-levels.md`에서 정의한다.
+Depth Level is defined in `common/depth-levels.md`.
 
-### 초과 시 처리
-1. 모든 질문을 중요도(영향도 × policy 여부) 순으로 정렬한다.
-2. 상한 내 질문만 현재 라운드에 제시한다.
-3. 나머지는 질문 파일 하단 **"추가 질문 (다음 라운드)"** 섹션에 보관한다.
-4. 현재 라운드 질문이 모두 답변되면, 추가 질문 섹션을 다음 라운드로 승격한다.
+### Handling When Exceeded
+1. Sort all questions by importance (impact × whether policy).
+2. Present only the questions within the cap in the current round.
+3. Keep the rest in the **"Additional Questions (Next Round)"** section at the bottom of the question file.
+4. Once all current-round questions are answered, promote the additional-questions section to the next round.
 
-### 중요도 정렬 기준
-1. `P0-CRITICAL` + `policy` → 최우선
-2. `P0-CRITICAL` + `domain` → 2순위
-3. `P1-IMPORTANT` + `policy` → 3순위
-4. `P1-IMPORTANT` + `domain` → 4순위
-5. `P1-IMPORTANT` + `scope` → 5순위
-6. `P2-DEFERRABLE` → 라운드에 포함하지 않음 (AI 자동 결정 섹션으로 이동)
+### Importance Sorting Criteria
+1. `P0-CRITICAL` + `policy` → highest priority
+2. `P0-CRITICAL` + `domain` → 2nd priority
+3. `P1-IMPORTANT` + `policy` → 3rd priority
+4. `P1-IMPORTANT` + `domain` → 4th priority
+5. `P1-IMPORTANT` + `scope` → 5th priority
+6. `P2-DEFERRABLE` → not included in the round (moved to the AI Automatic Decisions section)
 
 ---
 
-## 6. 질문 포맷
+## 6. Question Format
 
-질문 포맷은 `question-rules.md`를 따른다. 이 문서에서 추가된 필드(우선순위, 확신도)는 해당 포맷에 포함되어 있다.
+The question format follows `question-rules.md`. The fields added in this document (Priority, Confidence) are included in that format.
 
-### 유형별 미응답 대응 제한
+### Per-Type No-Response Handling Restrictions
 
-| 유형 | BLOCK | ASSUME | AI-RECOMMEND | DEFER-TO-FEATURE | AI 추천 필드 |
+| Type | BLOCK | ASSUME | AI-RECOMMEND | DEFER-TO-FEATURE | AI Recommendation Field |
 |------|-------|--------|-------------|-----------------|------------|
-| policy | ✓ | ✗ | ✗ | ✗ | 금지 |
-| domain | ✓ | ✓ | ✓ | ✗ | 필수 |
+| policy | ✓ | ✗ | ✗ | ✗ | Forbidden |
+| domain | ✓ | ✓ | ✓ | ✗ | Required |
 | scope | ✓ | ✗ | ✗ | ✓ | ✗ |
 
 ---
 
-## 7. 금지 사항
+## 7. Prohibitions
 
-- `policy` 유형 질문에 AI 추천을 제시하지 않는다. 비즈니스 정책은 사람만 결정한다.
-- Request Anchor 없이 질문을 생성하지 않는다.
-- 범위 밖 질문을 사용자 확인 없이 추가하지 않는다.
-- 질문 예산을 초과하여 한 번에 제시하지 않는다.
-- `[확신: 미정]` 답변을 확정된 것처럼 설계에 반영하지 않는다.
-- P0 질문을 P2로 격하하지 않는다. 외부 연동, 보안 경계, 데이터 정합성은 항상 P0 이상이다.
-- P2 질문을 인간에게 BLOCK으로 제시하지 않는다. 디폴트 결정 후 알림만 한다.
-- 배포 후 변경이 어려운 항목(데이터 스키마, 인증 방식, API 계약)을 P2로 분류하지 않는다.
+- Do not present an AI recommendation for a `policy`-type question. Business policy is decided only by a human.
+- Do not generate a question without a Request Anchor.
+- Do not add an out-of-scope question without user confirmation.
+- Do not present more than the question budget at once.
+- Do not reflect a `[Confidence: Undecided]` answer in the design as if it were settled.
+- Do not downgrade a P0 question to P2. External integration, security boundaries, and data integrity are always P0 or higher.
+- Do not present a P2 question to a human as BLOCK. Notify only after deciding the default.
+- Do not classify items hard to change after deployment (data schema, authentication method, API contract) as P2.

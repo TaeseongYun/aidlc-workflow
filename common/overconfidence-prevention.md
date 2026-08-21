@@ -1,88 +1,88 @@
 # Overconfidence Prevention
 
-AI가 질문 없이 진행하거나, 불확실한 판단을 확정처럼 취급하는 것을 방지하는 규칙이다.
+Rules that prevent the AI from proceeding without asking questions, or treating an uncertain judgment as if it were settled.
 
-## 배경
+## Background
 
-워크숍 실전에서 AI 과신의 3가지 패턴이 반복 발생했다.
+Three patterns of AI overconfidence recurred in real-world workshops.
 
-1. **질문 회피** — 복잡한 요청인데도 질문 없이 바로 설계에 진입
-2. **근거 없는 확정** — "~일 것이다", "보통 ~한다"를 확정 사실처럼 취급
-3. **누락 무시** — 정보가 부족한 영역을 건너뛰고 있는 정보만으로 진행
+1. **Question avoidance** — Entering design directly without asking questions even for a complex request
+2. **Ungrounded certainty** — Treating "it will probably be ~" or "usually it does ~" as established fact
+3. **Ignoring gaps** — Skipping areas where information is insufficient and proceeding with only the available information
 
-## 적용 범위
+## Scope of Application
 
-이 규칙은 **질문 생성 구간이 아닌 STEP**에서 특히 중요하다.
+This rule is especially important in **STEPs that are not question-generation segments**.
 
-| STEP | 과신 위험 | 이유 |
+| STEP | Overconfidence Risk | Reason |
 |------|----------|------|
-| STEP 1 (Project Detection) | 중간 | greenfield/brownfield 오판 시 전체 흐름이 틀어짐 |
-| STEP 1-B (Depth Level) | 중간 | 깊이를 낮게 잡으면 핵심 질문이 생략됨 |
-| STEP 6 (Unit Decomposition) | **높음** | AI 주도 단계. 질문 없이 분해하므로 과신 가능성 최대 |
-| STEP 6.5 (Technical Design) | **높음** | 기술 결정을 근거 없이 확정할 위험 |
-| STEP 7 (Readiness Score) | 중간 | 점수를 관대하게 매겨 NOT_READY를 READY로 판단 |
+| STEP 1 (Project Detection) | Medium | A greenfield/brownfield misjudgment throws off the entire flow |
+| STEP 1-B (Depth Level) | Medium | Setting the depth too low omits core questions |
+| STEP 6 (Unit Decomposition) | **High** | AI-driven step. Decomposes without questions, so overconfidence is most likely |
+| STEP 6.5 (Technical Design) | **High** | Risk of settling technical decisions without grounds |
+| STEP 7 (Readiness Score) | Medium | Scoring leniently and judging NOT_READY as READY |
 
-## 규칙
+## Rules
 
-### 1. 불확실성 명시 의무
+### 1. Duty to State Uncertainty
 
-확실하지 않은 판단에는 반드시 불확실성 마커를 붙인다.
+Always attach an uncertainty marker to any judgment that is not certain.
 
-**마커 포맷**:
+**Marker format**:
 ```markdown
-> ⚠️ UNCERTAIN: {영역} — {불확실한 이유}
+> ⚠️ UNCERTAIN: {area} — {reason for uncertainty}
 ```
 
-**발동 조건** — 아래 중 하나라도 해당하면 마커를 붙인다:
-- CTX에 관련 정보가 없고, 코드에서도 단일 해석이 불가능한 경우
-- 2개 이상의 설계안이 가능한데 선택 근거가 프로젝트 문서에 없는 경우
-- 외부 시스템의 동작을 가정하고 있는 경우
+**Trigger conditions** — attach the marker if any of the following applies:
+- CTX has no relevant information and the code also does not allow a single interpretation
+- 2 or more design options are possible but the basis for the choice is not in the project documents
+- The behavior of an external system is being assumed
 
-### 2. 자체 검증 (Self-Verification)
+### 2. Self-Verification
 
-아래 STEP에서는 산출물 작성 후, 게이트 제시 전에 자체 검증을 수행한다.
+In the STEPs below, perform self-verification after writing the artifact and before presenting the gate.
 
-**대상 STEP**: 6 (Unit Decomposition), 6.5 (Technical Design), 6.7 (Infrastructure Design)
+**Target STEPs**: 6 (Unit Decomposition), 6.5 (Technical Design), 6.7 (Infrastructure Design)
 
-**검증 질문 3개** (산출물에 대해 스스로 답한다):
-1. "이 결정에 CTX 또는 코드 기반 근거가 있는가?" — 없으면 `⚠️ UNCERTAIN` 마커
-2. "다른 합리적인 대안이 존재하는가?" — 있으면 대안을 산출물에 병기
-3. "이 결정이 틀렸을 때 영향 범위는?" — 영향이 크면 게이트 메시지에 경고 포함
+**3 verification questions** (answer them yourself about the artifact):
+1. "Is there CTX- or code-based grounding for this decision?" — if not, add a `⚠️ UNCERTAIN` marker
+2. "Does another reasonable alternative exist?" — if so, note the alternative in the artifact
+3. "What is the impact scope if this decision is wrong?" — if the impact is large, include a warning in the gate message
 
-### 3. 질문 누락 감지
+### 3. Question Gap Detection
 
-STEP 3 (Analysis & Planning Draft) 완료 시, 아래 체크를 수행한다.
+When STEP 3 (Analysis & Planning Draft) completes, perform the checks below.
 
-- 요청에 **외부 연동, 결제/정산, 권한/보안** 키워드가 포함되어 있는데 관련 질문이 0개인가?
-- Depth Level이 standard 이상인데 생성된 질문이 2개 이하인가?
-- brownfield인데 기존 시스템 영향 관련 질문이 0개인가?
+- Does the request contain **external integration, payment/settlement, or permission/security** keywords but there are 0 related questions?
+- Is the Depth Level standard or higher but 2 or fewer questions were generated?
+- Is it brownfield but there are 0 questions related to existing-system impact?
 
-하나라도 해당하면:
-1. `audit.md`에 `[OVERCONFIDENCE-CHECK] 질문 누락 감지` 이벤트를 기록한다.
-2. 누락된 영역에 대한 질문을 추가 생성한다 (질문 예산 내).
+If any applies:
+1. Record an `[OVERCONFIDENCE-CHECK] question gap detected` event in `audit.md`.
+2. Generate additional questions for the missing areas (within the question budget).
 
-### 4. Readiness Score 관대 판정 방지
+### 4. Preventing Lenient Readiness Score Judgments
 
-STEP 7에서 Readiness Score를 산출할 때:
+When computing the Readiness Score in STEP 7:
 
-- `⚠️ UNCERTAIN` 마커가 붙은 항목이 포함된 도메인은 해당 도메인 만점의 **80%를 상한**으로 한다.
-- `[확신: 추정]` 또는 `[확신: AI추천]` 답변이 3개 이상인 도메인은 경고 마크와 함께 상한을 적용한다.
-- 상한 적용 사실을 `status.md`의 "불확실 영역" 섹션에 명시한다.
+- For a domain that includes an item with a `⚠️ UNCERTAIN` marker, cap that domain at **80% of its maximum**.
+- For a domain with 3 or more `[Confidence: Estimated]` or `[Confidence: AI-Recommended]` answers, apply the cap along with a warning mark.
+- State the fact that a cap was applied in the "Uncertain Areas" section of `status.md`.
 
-### 5. 모호한 표현 금지
+### 5. No Ambiguous Expressions
 
-산출물에서 아래 표현을 확정 진술로 사용하지 않는다.
+Do not use the expressions below as definitive statements in artifacts.
 
-| 금지 패턴 | 대체 방법 |
+| Forbidden pattern | Replacement |
 |----------|----------|
-| "~일 것이다", "보통 ~한다" | 근거를 명시하거나 `⚠️ UNCERTAIN` 마커 |
-| "당연히", "명백하게" | 근거를 명시 |
-| "간단하게 처리 가능" | 구체적 구현 방법 또는 `⚠️ UNCERTAIN` 마커 |
-| "별도 검토 불필요" | 검토 불필요 판단의 근거를 명시 |
+| "it will be ~", "usually it does ~" | State the grounds or add a `⚠️ UNCERTAIN` marker |
+| "obviously", "clearly" | State the grounds |
+| "can be handled simply" | Concrete implementation method or `⚠️ UNCERTAIN` marker |
+| "no separate review needed" | State the grounds for judging that review is unnecessary |
 
-## 금지 사항
+## Prohibitions
 
-- 자체 검증 단계를 건너뛰지 않는다.
-- `⚠️ UNCERTAIN` 마커를 게이트 제시 전에 제거하지 않는다 (사용자가 확인해야 한다).
-- 질문 누락 감지 결과를 무시하지 않는다.
-- Readiness Score 상한 규칙을 우회하지 않는다.
+- Do not skip the self-verification step.
+- Do not remove `⚠️ UNCERTAIN` markers before presenting the gate (the user must confirm them).
+- Do not ignore question-gap detection results.
+- Do not bypass the Readiness Score cap rule.

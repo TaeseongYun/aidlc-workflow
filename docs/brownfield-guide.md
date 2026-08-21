@@ -1,73 +1,73 @@
 # Brownfield Guide
 
-기존 시스템이 있는 프로젝트에서 요구사항 분석과 영향 범위 파악을 수행하는 가이드다.
+A guide for performing requirements analysis and impact-scope assessment on a project that has an existing system.
 
-## 판별 기준
+## Detection criteria
 
-아래 중 하나라도 해당하면 brownfield다.
-- 기존 코드베이스가 존재한다
-- 운영 중인 DB 스키마가 있다
-- 외부 시스템과 연동 중이다
-- 배포 파이프라인이 구성되어 있다
-- 기존 사용자가 사용 중인 API가 있다
+If any one of the following applies, it is brownfield.
+- An existing codebase exists
+- There is a DB schema in operation
+- It is integrated with an external system
+- A deployment pipeline is configured
+- There is an API already in use by existing users
 
-## 탐색 순서
+## Exploration order
 
-brownfield에서 `/ctx-aidlc-run` 실행 시 아래 순서로 기존 시스템을 파악한다.
+When running `/ctx-aidlc-run` on a brownfield project, understand the existing system in the following order.
 
-### 1단계: 프로젝트 컨텍스트 읽기
+### Stage 1: Read the project context
 ```
 ctx/INDEX.md → ctx/project-profile.ctx.md → AGENTS.md → CLAUDE.md → README.md
 ```
-- 프로젝트 유형, 스택, 모듈 구조, 도메인 파악
-- 금지 규칙, 재사용 컴포넌트 확인
+- Understand the project type, stack, module structure, and domain
+- Confirm prohibition rules and reusable components
 
-### 2단계: 영향 도메인 식별
-- 새 요구사항이 터치하는 기존 모듈/패키지 목록화
-- 기존 테이블/엔티티 중 변경 또는 참조가 필요한 것 식별
-- 기존 API 중 수정이 필요하거나 호환성을 유지해야 하는 것 식별
+### Stage 2: Identify affected domains
+- List the existing modules/packages the new requirement touches
+- Identify existing tables/entities that need to be changed or referenced
+- Identify existing APIs that need modification or that must maintain compatibility
 
-### 3단계: 기존 패턴 확인
-- 기존 코드에서 유사 기능이 어떻게 구현되어 있는지 확인
-- 네이밍 규칙, 패키지 구조, 에러 처리 패턴 파악
-- 기존 테스트 전략 (단위/통합/E2E) 확인
+### Stage 3: Confirm existing patterns
+- Confirm how similar functionality is implemented in the existing code
+- Understand naming conventions, package structure, and error-handling patterns
+- Confirm the existing test strategy (unit/integration/E2E)
 
-### 4단계: 충돌 지점 선별
-- 새 요구사항과 기존 규칙/정책이 충돌하는 지점 목록화
-- CTX에 명시된 금지 규칙과 새 요구사항 간 모순 확인
-- 충돌 발견 시 → STOP, 질문으로 올림
+### Stage 4: Screen for conflict points
+- List the points where the new requirement conflicts with existing rules/policies
+- Confirm contradictions between prohibition rules stated in the CTX and the new requirement
+- On finding a conflict → STOP, raise it as a question
 
-### 5단계: 영향 범위 문서화
-- `requirements.md`의 Background에 기존 시스템 맥락 기술
-- `unit-of-work.md`의 예상 위치에 기존 파일 경로 명시
-- `technical-design.md`의 Data Model에 기존 스키마와의 관계 기술
+### Stage 5: Document the impact scope
+- Describe the existing system context in the Background of `requirements.md`
+- Specify existing file paths in the expected locations of `unit-of-work.md`
+- Describe the relationship with the existing schema in the Data Model of `technical-design.md`
 
-## 예시: 기존 쿠폰 시스템에 캠페인 쿠폰 추가
+## Example: Adding campaign coupons to an existing coupon system
 
 ```
-기존 구조:
-  domains/domain-rds/src/.../coupon/    ← 기존 수동 발급 쿠폰
-  center/back-end/src/.../payment/      ← 기존 결제 서비스
+Existing structure:
+  domains/domain-rds/src/.../coupon/    ← existing manually-issued coupons
+  center/back-end/src/.../payment/      ← existing payment service
 
-새 요구사항: 재구매 자동 쿠폰
+New requirement: automatic repurchase coupons
 
-영향 도메인:
-  - coupon 도메인: 테이블 추가 (campaign, coupon_issue)
-  - order 도메인: 재구매 판정 쿼리 추가 (읽기 전용)
-  - payment 도메인: 쿠폰 적용 로직 수정
+Affected domains:
+  - coupon domain: add tables (campaign, coupon_issue)
+  - order domain: add repurchase-detection query (read-only)
+  - payment domain: modify coupon-application logic
 
-기존 패턴 확인:
-  - 기존 coupon 엔티티는 JPA + Spring Data 패턴
-  - 기존 결제는 Strategy 패턴으로 할인 적용
-  - 기존 배치는 Spring Batch 사용
+Confirm existing patterns:
+  - existing coupon entity uses the JPA + Spring Data pattern
+  - existing payment applies discounts via the Strategy pattern
+  - existing batch uses Spring Batch
 
-충돌 지점:
-  - 기존 쿠폰과 캠페인 쿠폰의 중복 적용 → 정책 질문 필요 (BLOCK)
-  - 기존 coupon 테이블에 campaign_id 추가 vs 별도 테이블 → 설계 판단 필요
+Conflict points:
+  - overlapping application of existing coupons and campaign coupons → policy question needed (BLOCK)
+  - add campaign_id to the existing coupon table vs. a separate table → design decision needed
 ```
 
-## 주의사항
-- 기존 구조를 이해하지 않고 새 구조를 강요하지 않는다
-- "더 나은 방법"을 제안하기 전에 기존 패턴을 먼저 따른다
-- 기존 코드와 다른 패턴을 도입해야 할 때는 ADR로 근거를 남긴다
-- 기존 테이블을 수정할 때는 마이그레이션 전략을 반드시 포함한다
+## Cautions
+- Do not force a new structure without first understanding the existing one
+- Follow the existing patterns first, before proposing a "better way"
+- When you must introduce a pattern different from the existing code, leave the rationale as an ADR
+- When modifying an existing table, always include a migration strategy

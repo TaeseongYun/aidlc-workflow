@@ -1,12 +1,12 @@
 # Performance Baseline Opt-In
 
-성능 요구사항 기준을 적용하시겠습니까?
+Would you like to apply the performance requirement criteria?
 
-## 설명
-PERF-01~06 항목을 기준으로 응답 시간, 처리량, 배치 성능, DB 쿼리, 캐싱, 부하 테스트 계획을 검증합니다.
-활성화하면 GATE-2 이후 성능 기준 평가가 추가됩니다.
+## Description
+Validates response time, throughput, batch performance, DB queries, caching, and load test plan against items PERF-01–06.
+When enabled, a performance criteria evaluation is added after GATE-2.
 
-## 질문
-> 이 feature에 Performance Baseline을 적용하시겠습니까?
-> A) 적용 — 사용자 대면 API, 대량 데이터 처리, 배치 작업 포함
-> B) 미적용 — 관리 도구, 저빈도 기능, 성능 비관련 변경
+## Question
+> Would you like to apply the Performance Baseline to this feature?
+> A) Apply — user-facing APIs, large-volume data processing, batch jobs included
+> B) Don't apply — admin tools, low-frequency features, performance-unrelated changes

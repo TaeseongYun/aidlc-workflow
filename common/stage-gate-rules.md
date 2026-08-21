@@ -1,172 +1,172 @@
 # Stage Gate Rules
 
-## 목적
-각 주요 산출물 완료 시 명시적 승인 게이트를 두어, 미확인 상태로 다음 단계에 진입하는 것을 방지한다.
+## Purpose
+Place an explicit approval gate at the completion of each major artifact to prevent entering the next stage in an unconfirmed state.
 
-## 승인 필요 항목
+## Items Requiring Approval
 
-다음 항목은 인간 승인 전 확정하지 않는다.
+The following items are not finalized before human approval.
 
-- API 응답 형태
-- 환불/취소 정책
-- 정산 기준
-- 할인 우선순위
-- 권한/역할 규칙
-- 운영자 수동 개입 지점
-- 외부 연동 방식
-- `ctx/`에 없는 신규 프로젝트 정책
+- API response shape
+- Refund/cancellation policy
+- Settlement criteria
+- Discount priority
+- Permission/role rules
+- Operator manual-intervention points
+- External integration methods
+- New project policies not present in `ctx/`
 
-승인이 필요한 단계:
-- requirements 확정
-- application design 확정
-- NFR 확정
-- 구현 범위 확정
+Stages requiring approval:
+- Requirements finalization
+- Application design finalization
+- NFR finalization
+- Implementation scope finalization
 
-## 게이트 목록
+## Gate List
 
-| 게이트 | 발동 시점 | 리뷰 대상 | 통과 조건 |
+| Gate | Trigger Timing | Review Target | Pass Condition |
 |--------|----------|----------|----------|
-| GATE-0 | _roadmap.md 작성 완료 | _roadmap.md | multi-feature prepared-requirement일 때만 발동. 사용자가 피처 분해/의존/공유 자원을 확인하고 승인 또는 수정 요청. 미승인 시 피처별 ctx-aidlc-run 진입 차단. |
-| GATE-1 | planning-draft 작성 완료 | planning-draft.md | raw-request일 때만 발동. 사용자가 초안을 확인하고 승인 또는 수정 요청. |
-| GATE-2 | requirements + questions 작성 완료 | requirements.md, requirement-verification-questions.md | BLOCK 질문이 모두 해결되었거나, 사용자가 조건부 진행을 명시적으로 승인. |
-| GATE-2.5 | user-stories 작성 완료 | personas.md, stories.md | 조건부 발동. User Scenarios >= 3 또는 신규 사용자 유형일 때. 사용자가 페르소나와 스토리를 확인하고 승인 또는 수정 요청. |
-| GATE-2.7 | application-design 작성 완료 | components.md, services.md, component-dependency.md | 조건부 발동. UOW >= 3 예상 또는 신규 컴포넌트 생성 시. 사용자가 시스템 구조를 확인하고 승인 또는 수정 요청. |
-| GATE-3 | unit-of-work 작성 완료 | unit-of-work.md | 사용자가 작업 분해를 확인하고 승인 또는 수정 요청. |
-| GATE-3.5 | technical-design 작성 완료 | technical-design.md | M/L 규모 단위가 있을 때만 발동. 사용자가 기술 설계를 확인하고 승인 또는 수정 요청. |
-| GATE-4 | infrastructure-design 작성 완료 | infrastructure-design.md, deployment-architecture.md | 조건부 발동. 인프라 변경이 필요할 때. 사용자가 인프라 설계를 확인하고 승인 또는 수정 요청. |
-| GATE-5 | build/test-instructions 작성 완료 | build-instructions.md, test-instructions.md | 조건부 발동. M/L 규모 단위가 있을 때. 사용자가 빌드/테스트 가이드를 확인하고 승인 또는 수정 요청. |
+| GATE-0 | _roadmap.md writing complete | _roadmap.md | Triggered only for a multi-feature prepared-requirement. The user confirms the feature decomposition/dependencies/shared resources and approves or requests changes. Without approval, per-feature entry into ctx-aidlc-run is blocked. |
+| GATE-1 | planning-draft writing complete | planning-draft.md | Triggered only for a raw-request. The user confirms the draft and approves or requests changes. |
+| GATE-2 | requirements + questions writing complete | requirements.md, requirement-verification-questions.md | All BLOCK questions are resolved, or the user has explicitly approved conditional progress. |
+| GATE-2.5 | user-stories writing complete | personas.md, stories.md | Conditionally triggered. When User Scenarios >= 3 or a new user type exists. The user confirms the personas and stories and approves or requests changes. |
+| GATE-2.7 | application-design writing complete | components.md, services.md, component-dependency.md | Conditionally triggered. When UOW >= 3 is expected or new components are created. The user confirms the system structure and approves or requests changes. |
+| GATE-3 | unit-of-work writing complete | unit-of-work.md | The user confirms the work decomposition and approves or requests changes. |
+| GATE-3.5 | technical-design writing complete | technical-design.md | Triggered only when there are M/L-sized units. The user confirms the technical design and approves or requests changes. |
+| GATE-4 | infrastructure-design writing complete | infrastructure-design.md, deployment-architecture.md | Conditionally triggered. When infrastructure changes are needed. The user confirms the infrastructure design and approves or requests changes. |
+| GATE-5 | build/test-instructions writing complete | build-instructions.md, test-instructions.md | Conditionally triggered. When there are M/L-sized units. The user confirms the build/test guide and approves or requests changes. |
 
-## 게이트 규칙
+## Gate Rules
 
-### 진행 금지 조건
-- 게이트에서 사용자가 명시적으로 승인하지 않으면 다음 단계로 진행하지 않는다.
-- "계속 진행해" 등 명시적 승인 없이 침묵으로 넘어가지 않는다.
-- 승인 전 산출물 내용을 요약하여 사용자에게 제시한다.
+### Do-Not-Proceed Conditions
+- If the user does not explicitly approve at a gate, do not proceed to the next stage.
+- Do not move on with silence in place of explicit approval such as "keep going."
+- Before approval, present a summary of the artifact content to the user.
 
-### 게이트 건너뛰기 (화이트리스트)
+### Gate Skipping (Whitelist)
 
-아래 표에 명시된 조건일 때만 게이트를 스킵할 수 있다. 표에 없는 게이트는 어떤 분류·조건에서도 스킵하지 않는다.
+A gate may be skipped only under the conditions specified in the table below. Gates not in the table are not skipped under any classification or condition.
 
-| 게이트 | 스킵 가능 조건 |
+| Gate | Skippable Condition |
 |--------|--------------|
-| GATE-0 | single-feature (multi-feature 감지 안 됨) |
-| GATE-1 | `prepared-requirement` 또는 `change-on-existing-feature` |
-| GATE-2.5 | User Scenarios < 3 AND 신규 사용자 유형 없음 |
-| GATE-2.7 | UOW < 3 예상 AND 신규 컴포넌트 없음 |
-| GATE-4 | 인프라 변경 없음 |
-| GATE-5 | 전체 S 규모 |
+| GATE-0 | single-feature (multi-feature not detected) |
+| GATE-1 | `prepared-requirement` or `change-on-existing-feature` |
+| GATE-2.5 | User Scenarios < 3 AND no new user type |
+| GATE-2.7 | UOW < 3 expected AND no new components |
+| GATE-4 | No infrastructure changes |
+| GATE-5 | All S-sized |
 
-#### 명시적 스킵 불가 게이트
-- **GATE-0** (Roadmap): multi-feature prepared-requirement일 때 필수. 한번 발동되면 사용자 일괄 승인으로도 스킵하지 않는다.
-- **GATE-2** (Requirements): 모든 요청 분류에서 필수. `prepared-requirement`여도 스킵 불가.
-- **GATE-3** (Unit-of-Work): 모든 요청에서 필수.
-- **GATE-3.5** (Technical Design): M/L 규모 UOW가 1개 이상이면 필수. 전체 S 규모일 때만 발동 자체가 안 된다.
+#### Explicitly Non-Skippable Gates
+- **GATE-0** (Roadmap): Required for a multi-feature prepared-requirement. Once triggered, it is not skipped even by a user's batch approval.
+- **GATE-2** (Requirements): Required for all request classifications. Not skippable even for a `prepared-requirement`.
+- **GATE-3** (Unit-of-Work): Required for all requests.
+- **GATE-3.5** (Technical Design): Required if there is 1 or more M/L-sized UOW. It is only left un-triggered when everything is S-sized.
 
-#### 사용자 일괄 승인
-- 사용자가 "skip gate" 또는 "전체 승인"을 명시하면 위 표의 스킵 가능 게이트만 일괄 스킵할 수 있다.
-- GATE-2 / GATE-3 / GATE-3.5는 사용자가 일괄 승인을 명시해도 스킵하지 않는다. 각 게이트에서 산출물 요약을 제시하고 별도 확인을 받는다.
+#### User Batch Approval
+- If the user specifies "skip gate" or "approve all," only the skippable gates in the table above may be batch-skipped.
+- GATE-2 / GATE-3 / GATE-3.5 are not skipped even if the user specifies batch approval. At each of these gates, present the artifact summary and obtain separate confirmation.
 
-## 승인 메시지 표준 포맷
+## Standard Approval Message Format
 
-게이트 도달 시 아래 구조로 메시지를 출력한다.
+Upon reaching a gate, output a message with the structure below.
 
 ```markdown
-## [단계명] 완료
+## [Stage Name] Complete
 
-> **진행 상황**: {Request Anchor 요약} → 현재: {현재 단계} → 다음: {다음 단계}
+> **Progress**: {Request Anchor summary} → Current: {current stage} → Next: {next stage}
 
-### 산출물 요약
-- [핵심 내용 요약 — 사실 중심, 2~5개 항목]
+### Artifact Summary
+- [Core content summary — fact-focused, 2-5 items]
 
-### 리뷰 요청
-> 다음 파일을 검토해 주세요:
-> - `aidlc-docs/features/<feature-slug>/[파일명]`
+### Review Request
+> Please review the following files:
+> - `aidlc-docs/features/<feature-slug>/[filename]`
 
-### 다음 단계
-> A) 수정 요청 — 변경이 필요한 부분을 알려주세요
-> B) 승인 후 계속 — 다음 단계([다음 단계명])로 진행합니다
+### Next Steps
+> A) Request changes — let us know what needs to be changed
+> B) Approve and continue — proceed to the next stage ([next stage name])
 ```
 
-### 포맷 규칙
-- 산출물 요약은 사실 중심으로 짧게 쓴다. 워크플로우 안내 문구를 섞지 않는다.
-- 리뷰 대상 파일 경로를 명시한다.
-- 선택지는 항상 2개(수정 요청 / 승인 후 계속)만 제공한다.
-- 3개 이상의 선택지나 부가 옵션을 임의로 추가하지 않는다.
+### Format Rules
+- Write the artifact summary short and fact-focused. Do not mix in workflow guidance phrasing.
+- State the path of the file to review.
+- Always provide only 2 choices (request changes / approve and continue).
+- Do not arbitrarily add 3 or more choices or extra options.
 
-## 감사 로그 연동
+## Audit Log Integration
 
-게이트 통과 시 `audit.md`에 기록한다. 게이트뿐 아니라 STEP 시작/완료/스킵, 사용자 질문 답변, 상태 변경 시에도 기록한다. 전체 로깅 트리거와 포맷은 `templates/audit.md`를 참조한다.
+Record in `audit.md` when a gate is passed. In addition to gates, also record on STEP start/complete/skip, user question answers, and state changes. Refer to `templates/audit.md` for the full logging triggers and format.
 
 ```markdown
-## [GATE-N] [단계명]
+## [GATE-N] [Stage Name]
 - Timestamp: [ISO 8601]
 - Feature: <feature-slug>
 - Gate: GATE-N
 - Decision: approved / change-requested / skipped
-- User Input: "[사용자 원문 그대로]"
-- Notes: [변경 요청 시 요청 내용 요약]
+- User Input: "[user's verbatim input]"
+- Notes: [summary of the request content when a change is requested]
 ```
 
-### 감사 로그 규칙
-- 사용자 입력은 원문 그대로 기록한다. 요약하거나 의역하지 않는다.
-- 타임스탬프는 ISO 8601 형식을 사용한다.
-- audit.md는 항상 append 한다. 기존 내용을 덮어쓰지 않는다.
+### Audit Log Rules
+- Record user input verbatim. Do not summarize or paraphrase.
+- Use ISO 8601 format for timestamps.
+- Always append to audit.md. Do not overwrite existing content.
 
-## 게이트별 리뷰 항목
+## Per-Gate Review Items
 
 ### GATE-0: Roadmap
-- 피처 분해가 책임 단위로 적절한가 (한 피처에 이질적 도메인이 섞이지 않았는가)
-- 자원 매트릭스의 ⚠ 표시 항목(중복 자원)이 모두 해소 또는 `foundation-*`로 추출되었는가
-- 의존 그래프에 순환 의존이 없는가
-- 분업 권고에 병렬 가능 그룹과 직렬 필수 구간이 구분되어 있는가
-- 각 피처 슬러그가 kebab-case 명명 규칙을 따르는가
-- `aidlc-state.md` Cross-Feature Dependencies 표가 동기화되었는가
+- Is the feature decomposition appropriate as responsibility units (no heterogeneous domains mixed into one feature)?
+- Are all ⚠-marked items (duplicate resources) in the resource matrix resolved or extracted into `foundation-*`?
+- Are there no circular dependencies in the dependency graph?
+- Does the division-of-work recommendation distinguish parallelizable groups from mandatory serial segments?
+- Does each feature slug follow the kebab-case naming convention?
+- Is the `aidlc-state.md` Cross-Feature Dependencies table synchronized?
 
 ### GATE-1: Planning Draft
-- 목표/배경이 원래 요청 의도를 반영하는가
-- 범위/정책 초안 누락 없는가
-- 성공 지표가 측정 가능한가
+- Do the goal/background reflect the original request intent?
+- Is nothing missing from the scope/policy draft?
+- Are the success metrics measurable?
 
 ### GATE-2: Requirements
-- 기능/정책/운영 관점을 모두 포함하는가
-- BLOCK 질문 답변이 완료되었는가
-- Out-of-Scope가 명확한가, 리스크가 식별되었는가
-- Readiness Score 60 미만이면 통과해도 구현 금지 유지
+- Does it include functional/policy/operational perspectives?
+- Are the BLOCK question answers complete?
+- Is the Out-of-Scope clear, and are risks identified?
+- If the Readiness Score is below 60, keep implementation prohibited even if the gate passes
 
 ### GATE-2.5: User Stories
-- 페르소나가 실제 사용자 유형을 반영하는가
-- 유저 스토리가 INVEST 기준 충족하는가
-- Acceptance Criteria가 Gherkin 형식으로 검증 가능한가
-- 페르소나 간 관계/권한 경계가 명확한가
+- Do the personas reflect actual user types?
+- Do the user stories meet the INVEST criteria?
+- Are the Acceptance Criteria verifiable in Gherkin format?
+- Are the relationships/permission boundaries between personas clear?
 
 ### GATE-2.7: Application Design
-- 컴포넌트 식별이 적절하고 책임이 명확한가
-- 서비스 레이어 구분이 합리적인가
-- 의존성에 순환이 없는가
-- Brownfield: 기존 구조와 연결점 명시 여부
+- Is the component identification appropriate and the responsibilities clear?
+- Is the service layer separation reasonable?
+- Are there no cycles in the dependencies?
+- Brownfield: whether connection points to the existing structure are stated
 
 ### GATE-3: Unit of Work
-- 작업 단위 분해가 적절한가
-- 의존성 관계/규모 산정이 합리적인가
-- 수용 기준이 검증 가능한가
-- 모든 UOW 규모 필드(S/M/L)가 채워져야 통과 가능
+- Is the work-unit decomposition appropriate?
+- Are the dependency relationships/size estimates reasonable?
+- Are the acceptance criteria verifiable?
+- All UOW size fields (S/M/L) must be filled in to pass
 
 ### GATE-3.5: Technical Design
-- ADR 결정이 근거 기반인가 (추측 아닌가)
-- API 응답 형태가 명시적이고 완전한가
-- 데이터 모델 변경이 기존 스키마와 호환되는가
-- 모듈 구조가 UOW 분해와 일치하는가
-- 암묵적 설계 결정이 남아 있지 않은가
+- Are the ADR decisions grounded (not guesses)?
+- Is the API response shape explicit and complete?
+- Are data model changes compatible with the existing schema?
+- Does the module structure match the UOW decomposition?
+- Are there no implicit design decisions left?
 
 ### GATE-4: Infrastructure Design
-- 리소스 구성이 요구사항에 부합하는가
-- 보안/네트워크 설정이 적절한가
-- 비용 추정이 합리적인가
-- 마이그레이션 계획과 롤백 전략이 있는가
+- Does the resource configuration meet the requirements?
+- Are the security/network settings appropriate?
+- Is the cost estimate reasonable?
+- Are there a migration plan and a rollback strategy?
 
 ### GATE-5: Build & Test Instructions
-- 빌드 절차가 재현 가능한가
-- UOW별 빌드 순서가 의존성을 반영하는가
-- 테스트 시나리오가 Acceptance Criteria를 커버하는가
-- 에지 케이스/예외 테스트, Quality Gate 기준이 명확한가
-- 모든 게이트 통과 + Readiness Score 80 이상이면 구현 가능 상태
+- Is the build procedure reproducible?
+- Does the per-UOW build order reflect the dependencies?
+- Do the test scenarios cover the Acceptance Criteria?
+- Are the edge-case/exception tests and Quality Gate criteria clear?
+- If all gates pass + Readiness Score is 80 or above, it is in an implementable state

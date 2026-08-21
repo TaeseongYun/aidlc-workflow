@@ -1,129 +1,134 @@
 # Multi-Feature Coordination Guide
 
-큰 prepared 기획서가 **여러 피처**로 자연스럽게 분해될 때, 팀이 분업하면서 발생하는 중복·선행·충돌을 사전에 정리하기 위한 운용 가이드.
+An operations guide for resolving, in advance, the duplication, upstream ordering, and conflicts that arise when a team divides work as a large prepared planning document naturally decomposes into **multiple features**.
 
-단일 피처 작업에는 적용하지 않는다. 단일 피처일 때는 곧바로 `/ctx-aidlc-run`으로 진입한다.
+Not applied to single-feature work. For a single feature, enter `/ctx-aidlc-run` directly.
 
-## 1. 언제 Phase 0가 필요한가
+## 1. When is Phase 0 needed
 
-다음 중 하나에 해당하면 Phase 0(Roadmapping)을 선행한다.
+Do Phase 0 (Roadmapping) first if any of the following applies.
 
-- 기획서가 2개 이상의 피처를 명시적으로 나열한다
-- 기획서가 ≥3개 독립 도메인을 다룬다 (예: 결제 + 알림 + 정산)
-- 같은 컴포넌트/테이블/모듈을 여러 작업이 동시에 건드린다
-- 팀이 분업하기로 합의했고, 누가 무엇을 맡을지 결정해야 한다
+- The planning document explicitly lists 2 or more features
+- The planning document covers ≥3 independent domains (e.g., payment + notification + settlement)
+- Multiple tasks touch the same component/table/module simultaneously
+- The team has agreed to divide the work and needs to decide who handles what
 
-신호가 모호하면 일단 `/ctx-aidlc-roadmap`을 실행하고 STEP R1에서 단일/복수 판정을 받는다.
+If the signal is ambiguous, run `/ctx-aidlc-roadmap` first and get the single/multiple verdict at STEP R1.
 
-## 2. 진입 경로 (양방향)
+## 2. Entry paths (bidirectional)
 
-### 2-1. 직접 호출
-큰 기획서를 받고 곧바로:
+### 2-1. Direct call
+Right after receiving a large planning document:
 
 ```text
 /ctx-aidlc-roadmap
 
-다음 prepared-requirement 기획서로 Phase 0 로드맵을 작성한다.
-- 원본: <기획서 경로 또는 본문>
+Write a Phase 0 roadmap from the following prepared-requirement planning document.
+- Source: <planning document path or body>
 - depth level: standard
 ```
 
-### 2-2. 핸드오프 (감지 후 차단)
-사용자가 멀티피처임을 모르고 `/ctx-aidlc-run`을 먼저 실행한 경우:
+### 2-2. Handoff (blocked after detection)
+When the user runs `/ctx-aidlc-run` first without knowing it is multi-feature:
 
-1. STEP 1-A 1번 라운드 ("Is this a single feature or multiple independent features?")에서 "multiple"로 답변
-2. `_roadmap.md`가 없으면 `ctx-aidlc-run`이 STOP하고 `/ctx-aidlc-roadmap`을 안내
-3. `audit.md`에 `[HANDOFF] ctx-aidlc-run → ctx-aidlc-roadmap` 이벤트 기록
-4. 사용자는 안내된 명령으로 Phase 0 진행
+1. Answer "multiple" in the first round of STEP 1-A ("Is this a single feature or multiple independent features?")
+2. If `_roadmap.md` is missing, `ctx-aidlc-run` STOPs and advises `/ctx-aidlc-roadmap`
+3. Record a `[HANDOFF] ctx-aidlc-run → ctx-aidlc-roadmap` event in `audit.md`
+4. The user proceeds with Phase 0 using the advised command
 
-## 3. Phase 0 산출물 해석
+## 3. Interpreting Phase 0 outputs
 
-`/ctx-aidlc-roadmap` 실행 결과 `aidlc-docs/_roadmap.md`가 생성된다. 핵심 섹션은 다음과 같다.
+Running `/ctx-aidlc-roadmap` generates `aidlc-docs/_roadmap.md`. The key sections are as follows.
 
-| 섹션 | 의미 | 분업 시 활용 |
+| Section | Meaning | Use when dividing work |
 |------|------|-------------|
-| 2. Feature List | 피처 슬러그 + 1줄 책임 | 담당자 배정 단위 |
-| 3. Resource Matrix | 컴포넌트/테이블/API의 피처별 점유 | ⚠ 표시는 충돌 가능성 |
-| 4. Dependency Graph | 피처 간 의존 + Resolution | 직렬/병렬 결정 |
-| 5. Allocation Recommendation | 실행 Phase 그룹화 + 역할 권고 | 누가 언제 시작 |
-| 6. Handoff Plan | 피처별 입력 발췌 + `/ctx-aidlc-run` 호출 안내 | 분담 후 실행 |
+| 2. Feature List | feature slug + one-line responsibility | Unit of assignee allocation |
+| 3. Resource Matrix | per-feature occupancy of components/tables/APIs | ⚠ marks a possible conflict |
+| 4. Dependency Graph | inter-feature dependency + Resolution | Serial/parallel decision |
+| 5. Allocation Recommendation | execution Phase grouping + role recommendation | Who starts when |
+| 6. Handoff Plan | per-feature input excerpt + `/ctx-aidlc-run` call guidance | Execution after division |
 
-`aidlc-state.md`의 다음 영역도 함께 동기화된다.
+The following areas of `aidlc-state.md` are also synced:
 - Roadmap State
-- Feature Index (Roadmap Source 컬럼)
+- Feature Index (Roadmap Source column)
 - Cross-Feature Dependencies
 
-## 4. 분업 패턴
+## 4. Work-split patterns
 
-### 4-1. Foundation-First (권장 기본)
+### 4-1. Foundation-First (recommended default)
 
-공통 도메인 모델·테이블·기반 모듈을 `foundation-*` 피처로 추출하고 **한 명이 먼저** 진행. 나머지 피처는 그 위에서 병렬.
+Extract common domain models·tables·base modules into a `foundation-*` feature and have **one person go first**. The remaining features proceed in parallel on top of it.
 
 ```
-Phase 1 (직렬): foundation-domain-model
-Phase 2 (병렬): feature-a, feature-b, feature-c
-Phase 3 (직렬): feature-d (← feature-b의 산출물 필요)
+Phase 1 (serial): foundation-domain-model
+Phase 2 (parallel): feature-a, feature-b, feature-c
+Phase 3 (serial): feature-d (← needs feature-b's output)
 ```
 
-장점: 머지 충돌 최소화, 일관된 도메인 모델.
-비용: Phase 1 동안 다른 팀원 대기.
+Advantage: minimized merge conflicts, a consistent domain model.
+Cost: other teammates wait during Phase 1.
 
 ### 4-2. Vertical Slice
 
-각 피처를 end-to-end 수직 분할. 공통 기반은 최소화하고 각 피처가 자체 컴포넌트를 갖는다.
+Split each feature end-to-end vertically. Minimize the common base and have each feature own its own components.
 
-장점: 완전 병렬, 빠른 피드백.
-비용: 추후 공통화 작업이 필요할 수 있음.
-조건: 도메인 간 결합이 매우 약할 때만.
+Advantage: fully parallel, fast feedback.
+Cost: later commonization work may be needed.
+Condition: only when coupling between domains is very weak.
 
 ### 4-3. Sequential
 
-의존성이 강해 병렬화가 어려운 경우 직렬 실행. Phase 0의 가치는 "어디까지 직렬해야 하는가"를 명확히 하는 데 있다.
+When dependencies are strong and parallelization is hard, run serially. The value of Phase 0 lies in clarifying "how far it must be serialized."
 
-## 5. 충돌 해결 절차
+## 5. Conflict resolution procedure
 
-### 5-1. 자원 중복 (⚠)
-같은 컴포넌트를 2개 이상 피처가 만들려고 함.
-- **추출**: `foundation-*` 피처 신설, 양쪽이 의존하도록 변경
-- **단일 소유 지정**: 한 피처가 만들고 다른 피처는 read-only 사용
-- **분리 불가** 시: 두 피처를 하나로 병합
+### 5-1. Resource duplication (⚠)
+Two or more features try to build the same component.
+- **Extract**: create a new `foundation-*` feature and change both to depend on it
+- **Single-owner assignment**: one feature builds it and other features use it read-only
+- **When separation is impossible**: merge the two features into one
 
-### 5-2. 정책 충돌
-서로 다른 피처가 같은 정책(예: 환불 규칙)에 다른 가정을 둠.
-- 정책을 `ctx/` 글로벌 룰로 승격해 단일 출처로 만든다
-- 각 피처 STEP 4에서 동일 질문이 반복되지 않도록 함
+### 5-2. Policy conflict
+Different features hold different assumptions about the same policy (e.g., refund rules).
+- Promote the policy to a `ctx/` global rule to make it a single source
+- Ensure the same question is not repeated at each feature's STEP 4
 
-### 5-3. 순환 의존
-피처 A → B → A 형태가 발견되면 GATE-0을 통과시키지 않는다.
-- 피처 분할 변경
-- 의존 방향 역전 (이벤트 기반으로 디커플)
-- 공통 부분 추출
+### 5-3. Cyclic dependency
+If a form feature A → B → A is found, do not pass GATE-0.
+- Change the feature split
+- Reverse the dependency direction (decouple via events)
+- Extract the common part
 
-## 6. 피처별 `/ctx-aidlc-run` 실행
+## 6. Per-feature `/ctx-aidlc-run` execution
 
-GATE-0 승인 후, 각 팀원은 자기 피처에 대해:
+After GATE-0 approval, each teammate, for their own feature:
 
 ```text
 /ctx-aidlc-run
 
-Phase 0 로드맵 기준으로 F-2(<slug>) 작업을 시작한다.
-- 입력: prepared-requirement (원본 §3.2 ~ §3.4)
-- 의존: aidlc-docs/features/foundation-domain-model/requirements.md
-- aidlc-docs/_roadmap.md를 먼저 읽어라.
+Start the F-2(<slug>) task based on the Phase 0 roadmap.
+- Input: prepared-requirement (source §3.2 ~ §3.4)
+- Depends on: aidlc-docs/features/foundation-domain-model/requirements.md
+- Read aidlc-docs/_roadmap.md first.
 ```
 
-`ctx-aidlc-run`은 BOOTSTRAP에서 `_roadmap.md`를 읽고, STEP 1에서 슬러그가 로드맵에 있는지 검증한 뒤, 의존성과 공유 자원을 `status.md`의 "Roadmap Context" 섹션에 인용한다.
+`ctx-aidlc-run` reads `_roadmap.md` in BOOTSTRAP, verifies at STEP 1 that the slug is in the roadmap, and then cites the dependencies and shared resources in the "Roadmap Context" section of `status.md`.
 
-## 7. 자주 묻는 질문
+When parallel-safe features should use isolated branches and directories, run
+`/ctx-worktree` after GATE-0 approval. It reads the allocation phase from
+`_roadmap.md`, shows the proposed paths and branches, and creates them only after
+explicit approval. See [Worktree Mode](worktree-mode.md).
 
-**Q. 단일 피처인데 큰 기획서야. Phase 0을 해야 해?**
-A. 안 해도 된다. STEP R1에서 단일 피처로 판정되면 모든 R-step이 `[-]`로 스킵되고, `/ctx-aidlc-run`을 직접 사용하라는 안내가 나온다.
+## 7. Frequently asked questions
 
-**Q. 로드맵을 만든 뒤 새 피처가 추가되면?**
-A. `/ctx-aidlc-roadmap`을 다시 실행해 `_roadmap.md`와 `aidlc-state.md`를 갱신한 뒤 GATE-0를 다시 받는다. 기존 피처 폴더는 영향받지 않는다.
+**Q. It's a single feature but a large planning document. Do I have to do Phase 0?**
+A. No. If STEP R1 judges it a single feature, all R-steps are skipped as `[-]`, and you get guidance to use `/ctx-aidlc-run` directly.
 
-**Q. 로드맵에 없는 슬러그로 ctx-aidlc-run을 실행하면?**
-A. ctx-aidlc-run이 경고하고 사용자에게 (a) 로드맵 추가 (b) standalone 진행 (c) 중단 중 하나를 묻는다. 답변은 audit.md에 기록된다.
+**Q. What if a new feature is added after making the roadmap?**
+A. Re-run `/ctx-aidlc-roadmap` to update `_roadmap.md` and `aidlc-state.md`, then re-obtain GATE-0. Existing feature folders are unaffected.
 
-**Q. Phase 0 결과를 사람이 직접 수정해도 되나?**
-A. 가능. 단, GATE-0 승인 전이라면 해당 R-step부터 다시 실행하는 것이 안전하다. 승인 후 변경은 audit.md에 변경 사유와 함께 추가 GATE-0 round를 기록한다.
+**Q. What if I run ctx-aidlc-run with a slug not in the roadmap?**
+A. ctx-aidlc-run warns and asks the user to choose one of (a) add to the roadmap (b) proceed standalone (c) abort. The answer is recorded in audit.md.
+
+**Q. May a human edit the Phase 0 result directly?**
+A. Yes. But before GATE-0 approval, it is safer to re-run from the relevant R-step. Changes after approval record an additional GATE-0 round in audit.md along with the reason for the change.

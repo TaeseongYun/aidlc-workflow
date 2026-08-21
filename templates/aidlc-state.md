@@ -1,12 +1,12 @@
 <!-- workflow-step: STEP-1 | gate: none | producer: ctx-aidlc-run, ctx-aidlc-roadmap | updated-by: all steps -->
 # AI-DLC State Tracking
 
-갱신 규칙:
-- **모든 STEP 완료 시** 해당 체크박스를 `[x]`로 갱신한다.
-- **조건부 STEP이 스킵되면** `[-]`로 표기하고 사유를 괄호에 기록한다.
-- **GATE 통과 시** 해당 체크박스를 `[x]`로 갱신한다.
-- Current Stage를 항상 현재 진행 중인 STEP으로 갱신한다.
-- Feature Status를 항상 최신 상태로 갱신한다.
+Update rules:
+- **On completion of every STEP**, update the corresponding checkbox to `[x]`.
+- **When a conditional STEP is skipped**, mark it `[-]` and record the reason in parentheses.
+- **On passing a GATE**, update the corresponding checkbox to `[x]`.
+- Always update Current Stage to the STEP currently in progress.
+- Always keep Feature Status up to date.
 
 ## Project Information
 - Project Type:
@@ -20,7 +20,7 @@
 - Workspace Root:
 
 ## Roadmap State
-- Roadmap Path: `aidlc-docs/_roadmap.md` (없음 / 작성 중 / 승인 완료)
+- Roadmap Path: `aidlc-docs/_roadmap.md` (none / in progress / approved)
 - Multi-Feature Mode: yes / no
 - GATE-0 Decision: pending / approved / not-applicable
 - Last Roadmap Update:
@@ -31,8 +31,8 @@
 |------|--------|----------------|-------|
 |      |        |                |       |
 
-상태 값: active / completed / parked
-Roadmap Source 값: `_roadmap.md` 항목 ID 또는 `standalone` (로드맵 외 단일 피처)
+Status values: active / completed / parked
+Roadmap Source values: `_roadmap.md` item ID or `standalone` (a single feature outside the roadmap)
 
 ## Cross-Feature Dependencies
 
@@ -40,8 +40,8 @@ Roadmap Source 값: `_roadmap.md` 항목 ID 또는 `standalone` (로드맵 외 �
 |----------------|------------|-----------------|------------|
 |                |            |                 |            |
 
-Resolution 값: `foundation-extracted` / `serialized` / `parallel-safe` / `unresolved`
-표가 비어 있으면 "해당 없음"으로 기재한다.
+Resolution values: `foundation-extracted` / `serialized` / `parallel-safe` / `unresolved`
+If the table is empty, write "Not applicable".
 
 ## Current Feature Summary
 - Feature Slug:
@@ -55,10 +55,10 @@ Resolution 값: `foundation-extracted` / `serialized` / `parallel-safe` / `unres
 - Last Updated:
 
 ## Confidence Summary
-- 확실: 0개
-- 추정: 0개
-- AI추천: 0개
-- 미정: 0개
+- Confirmed: 0
+- Estimated: 0
+- AI-recommended: 0
+- Undecided: 0
 
 ## Extension Configuration
 - security-baseline: disabled / enabled
@@ -74,7 +74,7 @@ Resolution 값: `foundation-extracted` / `serialized` / `parallel-safe` / `unres
 - [ ] STEP R6: Roadmap File Output
   - [ ] GATE-0: Roadmap Review
 
-단일 피처일 때는 전체를 `[-]`로 마킹하고 사유에 "single-feature"를 기록한다.
+For a single feature, mark the whole section `[-]` and record "single-feature" as the reason.
 
 ## Current Feature Stage Progress
 - [ ] STEP 1: Project Detection & Classification
@@ -88,22 +88,22 @@ Resolution 값: `foundation-extracted` / `serialized` / `parallel-safe` / `unres
 - [ ] STEP 4: Requirement Gap Extraction
 - [ ] STEP 5: Requirements Writing
   - [ ] GATE-2: Requirements Review
-- [ ] STEP 5.5: User Stories (조건부)
-  - [ ] GATE-2.5: User Stories Review (조건부)
-- [ ] STEP 5.7: Application Design (조건부)
-  - [ ] GATE-2.7: Application Design Review (조건부)
+- [ ] STEP 5.5: User Stories (conditional)
+  - [ ] GATE-2.5: User Stories Review (conditional)
+- [ ] STEP 5.7: Application Design (conditional)
+  - [ ] GATE-2.7: Application Design Review (conditional)
 - [ ] STEP 6: Unit-of-Work Decomposition
   - [ ] GATE-3: Unit-of-Work Review
 - [ ] STEP 6.5: Technical Design (M/L only)
   - [ ] GATE-3.5: Technical Design Review (M/L only)
-- [ ] STEP 6.7: Infrastructure Design (조건부)
-  - [ ] GATE-4: Infrastructure Design Review (조건부)
+- [ ] STEP 6.7: Infrastructure Design (conditional)
+  - [ ] GATE-4: Infrastructure Design Review (conditional)
 - [ ] STEP 7: Readiness Score Calculation
 - [ ] STEP 8: Stop or Proceed Decision
-- [ ] STEP 9: Build & Test Instructions (조건부)
-  - [ ] GATE-5: Build & Test Review (조건부)
+- [ ] STEP 9: Build & Test Instructions (conditional)
+  - [ ] GATE-5: Build & Test Review (conditional)
 
-체크박스 범례:
-- `[x]` 완료
-- `[-]` 스킵 (사유 괄호 표기)
-- `[ ]` 미진행
+Checkbox legend:
+- `[x]` completed
+- `[-]` skipped (reason in parentheses)
+- `[ ]` not started

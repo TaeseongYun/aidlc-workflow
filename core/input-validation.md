@@ -1,98 +1,98 @@
-# Input Validation (입력 문서 검증)
+# Input Validation (input document validation)
 
-## 목표
-- `prepared-requirement` 유형의 입력 문서를 본격 분석 전에 검증한다.
-- 문서의 빈 영역, 모순, 미정의 용어를 사전에 탐지하여 인셉션 품질을 높인다.
+## Goal
+- Validate `prepared-requirement` type input documents before full analysis.
+- Detect empty areas, contradictions, and undefined terms in the document in advance to raise inception quality.
 
-## 배경
+## Background
 
-워크숍 실전에서 다량의 기획 산출물을 검토 없이 한 번에 투입한 결과:
-- AI가 문서 내 모순을 감지하지 못하고 단계별로 다른 답변을 생성
-- 정책 구멍이 인셉션 전체로 전파되어 같은 질문이 반복
-- 인간도 문서를 읽지 않아 산출물 신뢰도 하락
+In hands-on workshops, feeding a large amount of planning artifacts in at once without review resulted in:
+- The AI failing to detect contradictions within the document and generating different answers at each step
+- Policy holes propagating through the entire inception, so the same question repeated
+- Humans also not reading the document, lowering artifact trust
 
-이 스텝은 위 문제를 STEP 2 진입 전에 차단한다.
+This step blocks the above problems before entering STEP 2.
 
-## 실행 조건
-- 요청 분류가 `prepared-requirement`일 때 실행한다.
-- `raw-request`는 STEP 1-A Discovery에서 공백을 메우므로 이 스텝을 건너뛴다.
+## Execution condition
+- Run when the request classification is `prepared-requirement`.
+- `raw-request` fills gaps in STEP 1-A Discovery, so it skips this step.
 
-## 검증 항목
+## Validation items
 
-### 1. 완전성 검사
-입력 문서에서 아래 영역의 존재 여부를 확인한다:
+### 1. Completeness check
+Confirm the presence of the following areas in the input document:
 
-| 영역 | 확인 사항 |
+| Area | What to check |
 |------|----------|
-| 목표/배경 | 서비스 목적, 대상 사용자가 명시되어 있는가 |
-| 기능 목록 | 구현할 기능이 열거되어 있는가 |
-| 정책/규칙 | 비즈니스 정책(결제, 환불, 권한 등)이 정의되어 있는가 |
-| 예외 처리 | 실패/취소/만료 시나리오가 언급되어 있는가 |
-| 외부 연동 | 외부 API/시스템 목록과 제약이 명시되어 있는가 |
-| 데이터 모델 | 주요 엔티티와 관계가 정의되어 있는가 |
+| Goal/background | Is the service purpose and target user specified |
+| Feature list | Are the features to implement enumerated |
+| Policy/rules | Are business policies (payment, refund, authorization, etc.) defined |
+| Exception handling | Are failure/cancellation/expiration scenarios mentioned |
+| External integration | Are the external API/system list and constraints specified |
+| Data model | Are the main entities and relationships defined |
 
-빈 영역 수를 집계한다.
+Count the number of empty areas.
 
-### 2. 모순 탐지
-- 같은 개념에 대해 문서 내에서 상충하는 설명이 있는지 확인한다.
-- 예: A 문서에서 "관리자만 삭제 가능"이라고 하면서 B 문서에서 "사용자가 직접 삭제"라고 기술.
+### 2. Contradiction detection
+- Check whether there are conflicting descriptions of the same concept within the document.
+- Example: document A says "only the admin can delete" while document B states "the user deletes directly".
 
-### 3. 미정의 용어 탐지
-- 문서에서 정의 없이 사용되는 도메인 용어를 식별한다.
-- 같은 개념에 다른 용어가 혼용되는 경우를 탐지한다.
+### 3. Undefined term detection
+- Identify domain terms used without definition in the document.
+- Detect cases where different terms are used interchangeably for the same concept.
 
-### 4. 리스크 태그 확인
-- `> ⚠️ RISK:` 태그가 있으면 수집하여 질문 우선순위(P0) 판정에 전달한다.
-- 외부 연동이 있으나 리스크 태그가 없으면 경고한다.
+### 4. Risk tag check
+- If there is a `> ⚠️ RISK:` tag, collect it and pass it to the question priority (P0) judgment.
+- If there is an external integration but no risk tag, warn.
 
-## 출력
+## Output
 
-검증 결과를 사용자에게 리포트로 제시한다. 별도 파일은 생성하지 않는다.
+Present the validation result to the user as a report. Do not create a separate file.
 
 ```markdown
-## 입력 문서 검증 결과
+## Input document validation result
 
-### 완전성
-- 빈 영역: {N}개
-- 누락 항목: {목록}
+### Completeness
+- Empty areas: {N}
+- Missing items: {list}
 
-### 모순
-- {모순 항목 목록, 없으면 "발견 없음"}
+### Contradictions
+- {list of contradiction items, "none found" if none}
 
-### 미정의 용어
-- {용어 목록, 없으면 "발견 없음"}
+### Undefined terms
+- {list of terms, "none found" if none}
 
-### 리스크 태그
-- {수집된 리스크, 없으면 "없음"}
-- 외부 연동 중 리스크 미태깅: {목록, 없으면 "없음"}
+### Risk tags
+- {collected risks, "none" if none}
+- Untagged risks among external integrations: {list, "none" if none}
 
-### 예상 BLOCK 질문 수: 약 {N}개
+### Estimated number of BLOCK questions: about {N}
 
-### 권장 조치
-- {빈 영역이 3개 이상이면} "문서 보완 후 인셉션 진행을 권장합니다."
-- {모순이 1개 이상이면} "모순 해소 후 진행하지 않으면 단계별 답변 불일치가 발생할 수 있습니다."
-- {빈 영역 2개 이하, 모순 없음이면} "검증 통과. STEP 2로 진행합니다. 단, STEP 4 질문 생성과 GATE-2는 별도로 수행됩니다."
+### Recommended action
+- {if 3 or more empty areas} "We recommend supplementing the document before proceeding with inception."
+- {if 1 or more contradictions} "If you proceed without resolving contradictions, per-step answer inconsistencies may occur."
+- {if 2 or fewer empty areas and no contradictions} "Validation passed. Proceeding to STEP 2. However, STEP 4 question generation and GATE-2 are performed separately."
 ```
 
-## 후속 단계 안내 (필수)
+## Follow-up step guidance (mandatory)
 
-검증 통과/미통과와 무관하게 다음 흐름은 모두 수행된다:
+Regardless of whether validation passes, the following flow is all performed:
 
-- STEP 2 (요청 캡처) → STEP 3 (분석) → STEP 4 (질문 생성) → STEP 5 (요구사항 작성) → GATE-2 (요구사항 리뷰)
+- STEP 2 (request capture) → STEP 3 (analysis) → STEP 4 (question generation) → STEP 5 (requirements authoring) → GATE-2 (requirements review)
 
-규칙:
-- 입력 문서가 충분해 보여도 STEP 4의 질문 생성을 건너뛰지 않는다.
-- STEP 1-C에서 식별한 빈 영역(누락 항목)은 STEP 4에서 BLOCK 질문으로 전환한다.
-- GATE-2는 `prepared-requirement`에서도 스킵하지 않는다. 사용자 승인 없이 STEP 6(UOW)으로 진입하지 않는다.
-- AI는 검증 통과를 곧 "결정 완료"로 해석하지 않는다. 검증은 입력 문서의 형태 점검일 뿐, 정책/설계 결정의 합의가 아니다.
+Rules:
+- Even if the input document looks sufficient, do not skip STEP 4 question generation.
+- Empty areas (missing items) identified in STEP 1-C are converted into BLOCK questions in STEP 4.
+- GATE-2 is not skipped even for `prepared-requirement`. Do not enter STEP 6 (UOW) without user approval.
+- The AI does not interpret passing validation as "decisions complete". Validation is only a shape check of the input document, not agreement on policy/design decisions.
 
-## 사용자 선택지
-검증 결과 제시 후 사용자에게 아래를 선택하게 한다:
-1. **문서 보완 후 재검증** — 사용자가 빈 영역을 보완하고 다시 STEP 1-C를 실행
-2. **현재 상태로 진행** — 빈 영역을 BLOCK 질문으로 전환하여 STEP 2로 진행
-3. **범위 축소 후 진행** — 검증된 영역만으로 범위를 좁혀 진행
+## User choices
+After presenting the validation result, let the user choose from the following:
+1. **Supplement the document and re-validate** — the user supplements the empty areas and runs STEP 1-C again
+2. **Proceed as-is** — convert the empty areas into BLOCK questions and proceed to STEP 2
+3. **Narrow scope and proceed** — narrow the scope to only the validated areas and proceed
 
-## 규칙
-- 이 스텝에서 요구사항을 확정하지 않는다. 검증만 수행한다.
-- 사용자에게 문서 보완을 강제하지 않는다. 선택지를 제시한다.
-- 검증 결과는 `audit.md`에 기록한다.
+## Rules
+- Do not finalize requirements in this step. Only perform validation.
+- Do not force the user to supplement the document. Present choices.
+- Record the validation result in `audit.md`.

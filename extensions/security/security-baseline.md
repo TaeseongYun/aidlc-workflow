@@ -1,154 +1,154 @@
 # Security Baseline
 
-프로덕션 보안 기준 11개 항목의 전체 규칙이다.
-이 파일은 사용자가 opt-in한 경우에만 로드한다.
+The complete set of rules for the 11 production security items.
+This file is loaded only when the user opts in.
 
-## 적용 규칙
+## Application Rules
 
-- opt-in 시 모든 항목은 **blocking constraint**로 취급한다.
-- FAIL 항목은 해당 UOW에서 반드시 해소해야 한다.
-- 산출물은 `aidlc-docs/features/<feature-slug>/extensions/security-baseline.md`에 생성한다.
-
----
-
-## SECURITY-01. 저장 데이터 암호화 (Encryption at Rest)
-
-**평가 기준**:
-- PASS: 민감 데이터가 AES-256 이상으로 암호화 저장. 키 관리 서비스(KMS) 사용.
-- FAIL: 평문 저장, 약한 암호화, 키 하드코딩.
-- N/A: 민감 데이터를 저장하지 않는 기능.
-
-**일반적 조치**: DB 필드 암호화, 파일 스토리지 SSE 활성화, 키 로테이션 정책 수립.
-**Brownfield 고려**: 기존 평문 데이터 마이그레이션 계획, 하위 호환성 확인.
-
-## SECURITY-02. 전송 데이터 암호화 (Encryption in Transit)
-
-**평가 기준**:
-- PASS: 모든 외부/내부 통신이 TLS 1.2 이상. 인증서 유효.
-- FAIL: HTTP 평문 통신 존재, 자체 서명 인증서 프로덕션 사용.
-- N/A: 네트워크 통신이 없는 기능.
-
-**일반적 조치**: HTTPS 강제, 내부 서비스 간 mTLS 검토, 인증서 자동 갱신.
-**Brownfield 고려**: 레거시 HTTP 엔드포인트 마이그레이션, 클라이언트 호환성.
-
-## SECURITY-03. 네트워크 중간자 접근 로깅
-
-**평가 기준**:
-- PASS: 로드밸런서/WAF/프록시 레벨 접근 로그 활성화. 보존 기간 정의.
-- FAIL: 접근 로그 미활성화, 보존 기간 미정의.
-- N/A: 네트워크 중간자가 없는 로컬 전용 기능.
-
-**일반적 조치**: ALB/CloudFront 접근 로그 활성화, S3/CloudWatch 보존 정책.
-**Brownfield 고려**: 기존 로그 파이프라인 연동, 로그 포맷 호환.
-
-## SECURITY-04. 애플리케이션 레벨 로깅
-
-**평가 기준**:
-- PASS: 인증/인가 이벤트, 데이터 변경, 오류를 구조화 로그로 기록. 민감 데이터 마스킹.
-- FAIL: 로깅 부재, 민감 데이터 평문 로깅, 구조화되지 않은 로그.
-- N/A: 사용자 상호작용이 없는 순수 연산 기능.
-
-**일반적 조치**: 구조화 로깅 프레임워크, PII 마스킹 미들웨어, 감사 로그 분리.
-**Brownfield 고려**: 기존 로깅 패턴과 일관성 유지, 로그 레벨 정책.
-
-## SECURITY-05. HTTP 보안 헤더
-
-**평가 기준**:
-- PASS: CSP, X-Frame-Options, X-Content-Type-Options, Strict-Transport-Security, Referrer-Policy 설정.
-- FAIL: 보안 헤더 미설정 또는 permissive 설정.
-- N/A: HTTP 응답을 반환하지 않는 기능 (배치, 이벤트 처리 등).
-
-**일반적 조치**: 미들웨어/프록시 레벨 보안 헤더 설정, CSP 정책 수립.
-**Brownfield 고려**: 기존 프론트엔드와 CSP 호환성, 인라인 스크립트 의존성.
-
-## SECURITY-06. 입력 유효성 검증
-
-**평가 기준**:
-- PASS: 모든 외부 입력에 타입/범위/형식 검증. SQL Injection, XSS, Command Injection 방어.
-- FAIL: 검증 누락, 클라이언트 측만 검증, 블랙리스트 방식만 사용.
-- N/A: 외부 입력을 받지 않는 기능.
-
-**일반적 조치**: 서버 측 화이트리스트 검증, 파라미터 바인딩, 출력 이스케이핑.
-**Brownfield 고려**: 기존 API의 검증 패턴 확인, 하위 호환성 유지하며 강화.
-
-## SECURITY-07. 최소 권한 접근 제어
-
-**평가 기준**:
-- PASS: IAM 역할/정책이 최소 권한 원칙. 서비스 계정 분리. 임시 자격증명 사용.
-- FAIL: 와일드카드 권한, 공유 서비스 계정, 장기 자격증명.
-- N/A: 인프라 접근이 없는 기능.
-
-**일반적 조치**: IAM 정책 세분화, AssumeRole 사용, 정기 권한 감사.
-**Brownfield 고려**: 기존 역할의 과잉 권한 점진적 축소.
-
-## SECURITY-08. 제한적 네트워크 구성
-
-**평가 기준**:
-- PASS: VPC/서브넷 분리, Security Group 최소 오픈, NAT 게이트웨이, 프라이빗 서브넷.
-- FAIL: 퍼블릭 서브넷에 DB 배치, 0.0.0.0/0 인바운드, 불필요한 포트 오픈.
-- N/A: 네트워크 변경이 없는 기능.
-
-**일반적 조치**: 프라이빗 서브넷 사용, Security Group 검토, VPC 엔드포인트.
-**Brownfield 고려**: 기존 네트워크 토폴로지 영향 분석, 점진적 마이그레이션.
-
-## SECURITY-09. 애플리케이션 레벨 접근 제어
-
-**평가 기준**:
-- PASS: RBAC/ABAC 구현, API 엔드포인트별 권한 검증, 수평 권한 상승 방지.
-- FAIL: 접근 제어 누락, URL 기반만 제어, 수평 권한 상승 가능.
-- N/A: 인증/인가가 불필요한 공개 기능.
-
-**일반적 조치**: 미들웨어 수준 권한 검증, 리소스 소유권 확인, 권한 캐싱 전략.
-**Brownfield 고려**: 기존 권한 모델과의 일관성, 마이그레이션 경로.
-
-## SECURITY-10. 보안 하드닝
-
-**평가 기준**:
-- PASS: 디버그 모드 비활성화, 기본 계정/비밀번호 변경, 불필요한 서비스 제거, 에러 메시지에 내부 정보 노출 안 함.
-- FAIL: 디버그 모드 프로덕션 활성화, 기본 자격증명, 스택 트레이스 노출.
-- N/A: 배포 환경이 변경되지 않는 기능.
-
-**일반적 조치**: 환경별 설정 분리, 커스텀 에러 페이지, 불필요 엔드포인트 제거.
-**Brownfield 고려**: 기존 에러 핸들링 패턴 확인, 점진적 하드닝.
-
-## SECURITY-11. 소프트웨어 공급망 보안
-
-**평가 기준**:
-- PASS: 의존성 취약점 스캔 자동화, 라이선스 확인, 잠금 파일 사용, 신뢰된 레지스트리.
-- FAIL: 취약점 스캔 없음, 미확인 의존성, 잠금 파일 미사용.
-- N/A: 새로운 의존성 추가가 없는 기능.
-
-**일반적 조치**: Dependabot/Snyk 설정, 잠금 파일 커밋, 프라이빗 레지스트리 검토.
-**Brownfield 고려**: 기존 취약 의존성 식별, 업그레이드 영향 분석.
+- On opt-in, every item is treated as a **blocking constraint**.
+- FAIL items must be resolved within the corresponding UOW.
+- The artifact is generated at `aidlc-docs/features/<feature-slug>/extensions/security-baseline.md`.
 
 ---
 
-## 산출물 포맷
+## SECURITY-01. Encryption at Rest
+
+**Evaluation criteria**:
+- PASS: Sensitive data is stored encrypted with AES-256 or stronger. A key management service (KMS) is used.
+- FAIL: Stored in plaintext, weak encryption, hardcoded keys.
+- N/A: A feature that does not store sensitive data.
+
+**Typical action**: DB field encryption, enable SSE for file storage, establish a key rotation policy.
+**Brownfield consideration**: Migration plan for existing plaintext data, confirm backward compatibility.
+
+## SECURITY-02. Encryption in Transit
+
+**Evaluation criteria**:
+- PASS: All external/internal communication uses TLS 1.2 or higher. Certificates are valid.
+- FAIL: Plaintext HTTP communication present, self-signed certificates used in production.
+- N/A: A feature with no network communication.
+
+**Typical action**: Enforce HTTPS, review mTLS between internal services, automatic certificate renewal.
+**Brownfield consideration**: Migration of legacy HTTP endpoints, client compatibility.
+
+## SECURITY-03. Network Intermediary Access Logging
+
+**Evaluation criteria**:
+- PASS: Access logging is enabled at the load balancer/WAF/proxy level. A retention period is defined.
+- FAIL: Access logging not enabled, retention period not defined.
+- N/A: A local-only feature with no network intermediary.
+
+**Typical action**: Enable ALB/CloudFront access logs, S3/CloudWatch retention policy.
+**Brownfield consideration**: Integration with the existing log pipeline, log format compatibility.
+
+## SECURITY-04. Application-Level Logging
+
+**Evaluation criteria**:
+- PASS: Authentication/authorization events, data changes, and errors are recorded as structured logs. Sensitive data is masked.
+- FAIL: No logging, sensitive data logged in plaintext, unstructured logs.
+- N/A: A pure computation feature with no user interaction.
+
+**Typical action**: Structured logging framework, PII masking middleware, separate audit logs.
+**Brownfield consideration**: Maintain consistency with existing logging patterns, log level policy.
+
+## SECURITY-05. HTTP Security Headers
+
+**Evaluation criteria**:
+- PASS: CSP, X-Frame-Options, X-Content-Type-Options, Strict-Transport-Security, and Referrer-Policy are set.
+- FAIL: Security headers not set or set permissively.
+- N/A: A feature that does not return HTTP responses (batch, event processing, etc.).
+
+**Typical action**: Set security headers at the middleware/proxy level, establish a CSP policy.
+**Brownfield consideration**: CSP compatibility with the existing frontend, inline script dependencies.
+
+## SECURITY-06. Input Validation
+
+**Evaluation criteria**:
+- PASS: All external inputs are validated for type/range/format. SQL Injection, XSS, and Command Injection are defended against.
+- FAIL: Validation missing, client-side-only validation, blacklist approach only.
+- N/A: A feature that does not accept external input.
+
+**Typical action**: Server-side whitelist validation, parameter binding, output escaping.
+**Brownfield consideration**: Check existing APIs' validation patterns, strengthen while maintaining backward compatibility.
+
+## SECURITY-07. Least-Privilege Access Control
+
+**Evaluation criteria**:
+- PASS: IAM roles/policies follow the principle of least privilege. Service accounts are separated. Temporary credentials are used.
+- FAIL: Wildcard permissions, shared service accounts, long-lived credentials.
+- N/A: A feature with no infrastructure access.
+
+**Typical action**: Fine-grained IAM policies, use AssumeRole, periodic permission audits.
+**Brownfield consideration**: Gradually reduce excessive permissions of existing roles.
+
+## SECURITY-08. Restrictive Network Configuration
+
+**Evaluation criteria**:
+- PASS: VPC/subnet separation, minimal Security Group openings, NAT gateway, private subnets.
+- FAIL: DB placed in a public subnet, 0.0.0.0/0 inbound, unnecessary ports open.
+- N/A: A feature with no network changes.
+
+**Typical action**: Use private subnets, review Security Groups, VPC endpoints.
+**Brownfield consideration**: Analyze impact on the existing network topology, gradual migration.
+
+## SECURITY-09. Application-Level Access Control
+
+**Evaluation criteria**:
+- PASS: RBAC/ABAC implemented, permission checks per API endpoint, horizontal privilege escalation prevented.
+- FAIL: Access control missing, URL-based control only, horizontal privilege escalation possible.
+- N/A: A public feature that does not need authentication/authorization.
+
+**Typical action**: Permission checks at the middleware level, verify resource ownership, permission caching strategy.
+**Brownfield consideration**: Consistency with the existing permission model, migration path.
+
+## SECURITY-10. Security Hardening
+
+**Evaluation criteria**:
+- PASS: Debug mode disabled, default accounts/passwords changed, unnecessary services removed, error messages do not expose internal information.
+- FAIL: Debug mode enabled in production, default credentials, stack traces exposed.
+- N/A: A feature that does not change the deployment environment.
+
+**Typical action**: Separate per-environment configuration, custom error pages, remove unnecessary endpoints.
+**Brownfield consideration**: Check existing error handling patterns, gradual hardening.
+
+## SECURITY-11. Software Supply Chain Security
+
+**Evaluation criteria**:
+- PASS: Dependency vulnerability scanning automated, licenses checked, lock files used, trusted registries.
+- FAIL: No vulnerability scanning, unverified dependencies, lock files not used.
+- N/A: A feature that adds no new dependencies.
+
+**Typical action**: Set up Dependabot/Snyk, commit lock files, review private registries.
+**Brownfield consideration**: Identify existing vulnerable dependencies, analyze upgrade impact.
+
+---
+
+## Artifact Format
 
 ```markdown
 # Security Baseline
 
-> **Request Anchor**: {최초 요청 요약}
+> **Request Anchor**: {summary of the initial request}
 
 ## Security Checklist
 
-| ID | 항목 | 상태 | 비고 |
+| ID | Item | Status | Notes |
 |----|------|------|------|
-| SECURITY-01 | 저장 데이터 암호화 | PASS / FAIL / N/A | |
+| SECURITY-01 | Encryption at rest | PASS / FAIL / N/A | |
 | ... | ... | ... | |
 
 ## Findings
 
-### SECURITY-{NN}. {항목명}
-- 상태: PASS / FAIL / N/A
-- 현재 상태: {현재 적용 현황}
-- 조치 필요: {필요한 조치 또는 "없음"}
-- 관련 UOW: UOW-{N} / 해당 없음
+### SECURITY-{NN}. {item name}
+- Status: PASS / FAIL / N/A
+- Current state: {current application status}
+- Action required: {required action or "none"}
+- Related UOW: UOW-{N} / not applicable
 
 ## Summary
-- 전체 항목: 11
+- Total items: 11
 - PASS: {N}
 - FAIL: {N}
 - N/A: {N}
-- FAIL 항목이 있으면 해당 UOW의 구현에서 반드시 해소해야 한다.
+- If any item is FAIL, it must be resolved during the implementation of the corresponding UOW.
 ```

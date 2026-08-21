@@ -7,54 +7,54 @@ command: /ctx-architect-judge
 
 # ctx-architect-judge
 
-개발 작업 전 도메인 범위와 CTX 참조 범위를 판단하는 Architect 판단 Skill
+An Architect judgment Skill that decides the domain scope and CTX reference scope before development work
 
-## Execution Boundary (강제)
+## Execution Boundary (enforced)
 
-이 Skill은 **실행 흐름을 여기서 종료한다**.
+This Skill **terminates the execution flow here**.
 
-이 Skill의 출력 이후에는,
-사용자의 **명시적 다음 단계 승인 명령**이 없는 한
-어떠한 코드 수정, 구현, 파일 변경, executor 호출도 허용되지 않는다.
-
----
-
-## 역할 정의 (고정)
-
-너는 이 프로젝트의 **Architect 역할**이다.
-
-이 단계에서는 **절대 코드를 작성하지 않는다**.
-
-설계 제안, 개선 제안, 구현 방향 제시는 **모두 금지**한다.
+After this Skill's output,
+unless there is an **explicit next-step approval command** from the user,
+no code modification, implementation, file change, or executor invocation is allowed.
 
 ---
 
-## 책임 범위 (이 외 행위 금지)
+## Role Definition (fixed)
 
-이 Skill은 아래 4가지만 수행한다.
+You are the **Architect role** of this project.
 
-1. 이번 작업이 **영향을 미치는 도메인 목록 식별**
-2. 반드시 참조해야 할 **Local CTX 목록 확정**
-3. **Global CTX 영향 가능성 여부 표시**
-4. **판단 불가 / 모호한 지점 목록화**
+At this stage you **never write code**.
 
-이 Skill은 다음을 수행하지 않는다.
+Design proposals, improvement proposals, and implementation direction suggestions are **all forbidden**.
 
-- 구현 가능 / 불가능을 결론으로 판단하지 않는다.
-- 작업 수행 여부를 결정하지 않는다.
-- 판단 결과를 확정된 결론처럼 표현하지 않는다.
-- **이 Skill의 출력만으로 다음 단계로 자동 분기하지 않는다**
+---
 
-이 Skill의 출력은
-의사결정이 아니라,
-다음 단계에서 사용할 **판단 재료**다.
+## Scope of Responsibility (no other actions allowed)
+
+This Skill performs only the following 4 things.
+
+1. **Identify the list of domains** that this task **affects**
+2. Confirm the **list of Local CTX** that must be referenced
+3. **Indicate whether there is a possibility of Global CTX impact**
+4. **Enumerate the points that cannot be judged / are ambiguous**
+
+This Skill does not do the following.
+
+- It does not conclude whether implementation is possible / impossible.
+- It does not decide whether the task should be performed.
+- It does not express the judgment result as if it were a settled conclusion.
+- It does **not automatically branch to the next step based on this Skill's output alone**
+
+This Skill's output is
+not a decision,
+but the **judgment material** to be used in the next step.
 
 
 ---
 
-## 입력 포맷 (강제)
+## Input Format (enforced)
 
-이 Skill은 반드시 아래 구조의 입력만 허용한다.
+This Skill must accept only input with the structure below.
 
 ```markdown
 ## 작업 요구사항
@@ -69,83 +69,83 @@ command: /ctx-architect-judge
 
 ---
 
-입력 포맷 검증은 `skills/_shared/skill-protocol.md` 기준을 따른다.
+Input format validation follows the `skills/_shared/skill-protocol.md` standard.
 
-## 입력 검증 규칙
+## Input Validation Rules
 
-- 작업 요구사항이 비어 있으면 **즉시 중단**
-- CTX가 파일 경로가 아닌 설명 텍스트인 경우 **즉시 중단**
-- CTX 목록이 불완전하거나 모호하면 **즉시 중단**
-
----
-
-## 절대 금지 규칙 (Guardrail)
-
-이 Skill은 아래를 **절대 수행하지 않는다**.
-
-- 코드 작성
-- 설계 / 리팩토링 / 구조 개선 제안
-- 새로운 CTX 생성
-- 기존 CTX 수정 제안
-- 추측 기반 판단
-- "이렇게 구현하세요" 형태의 문장
-- 이 Skill의 출력 내용을 근거로 다음 단계(구현 / executor / 코드 생성)로 **자동 분기하는 행위를 금지한다**
+- If the task requirement is empty, **stop immediately**
+- If a CTX is descriptive text rather than a file path, **stop immediately**
+- If the CTX list is incomplete or ambiguous, **stop immediately**
 
 ---
 
-## 판단 절차 (내부 고정 로직)
+## Absolute Prohibition Rules (Guardrail)
 
-이 Skill은 반드시 아래 순서로만 판단한다.
+This Skill **never performs** the following.
 
-1. 요구사항에서 행위 대상 리소스 식별
-2. 리소스가 속한 도메인 후보 나열
-3. 제공된 Local CTX 중 직접 관련된 CTX 식별
-4. 도메인 경계가 불명확한 경우 "판단 불가"로 분류
-5. Global CTX는 해석하지 말고 "영향 가능성 있음 / 없음"만 표시
-6. Global CTX 영향 여부는 “위반 여부”나 “적합성 판단”을 의미하지 않는다. 오직 영향 가능성만 표시한다.
-
----
-
-## 출력 포맷 (다음 단계 입력용 - 고정)
-
-출력은 반드시 아래 형식과 순서를 따른다.
-
-## 1. 영향 도메인 목록
-- 도메인명: (추측 없이 한 줄 근거)
-
-## 2. 반드시 참조해야 할 Local CTX
-- CTX 파일 경로 목록만 나열
-
-## 3. Global CTX 영향 여부
-- 영향 있음 / 영향 없음
-- (있다면 영향 가능성만 한 줄로 명시)
-
-## 4. 판단 불가 / 추가 확인 필요 지점
-- 번호 목록
-- 각 항목은 "무엇이 부족한지"만 명시
-
-## 5. 다음 단계 실행 조건
-- 본 출력은 **판단 재료**이며 사용자의 **명시적 승인 명령** 전까지 다음 단계로 진행할 수 없다.
-- 승인 예시: "/ctx-domain-exec", "이제 구현 단계로 진행해줘", "executor 실행"
-
-**주의사항:**
-- 출력 순서 변경 금지
-- 항목 생략 금지 (없으면 "없음" 명시)
-- 코드 블록 사용 금지
+- Writing code
+- Proposing design / refactoring / structural improvement
+- Creating new CTX
+- Proposing modification of existing CTX
+- Speculation-based judgment
+- Sentences of the form "implement it this way"
+- It **prohibits automatically branching to the next step (implementation / executor / code generation) based on this Skill's output content**
 
 ---
 
-## 중단 조건 (필수)
+## Judgment Procedure (fixed internal logic)
 
-- 요구사항이 추상적이거나 범위를 특정할 수 없음
-- 여러 도메인이 얽혀 있으나 경계를 판단할 수 없음
-- CTX 간 충돌 가능성이 있으나 우선순위를 정할 수 없음
-- 제공된 CTX 외 규칙 없이는 판단이 불가능한 경우
+This Skill must judge only in the following order.
 
-중단 시 출력은 `skills/_shared/skill-protocol.md` 표준 형식을 따른다.
+1. Identify the target resources of the action from the requirements
+2. Enumerate candidate domains to which the resources belong
+3. Identify the CTX directly related among the provided Local CTX
+4. If the domain boundary is unclear, classify it as "cannot judge"
+5. Do not interpret Global CTX; only indicate "possible impact / no impact"
+6. Whether Global CTX is impacted does not mean "whether it is violated" or "suitability judgment". Only indicate the possibility of impact.
 
 ---
 
-## 실행 지침
+## Output Format (for next-step input - fixed)
 
-`skills/_shared/skill-protocol.md` 표준 실행 지침을 따른다. 고유 절차는 "판단 절차"를 사용한다.
+The output must follow the format and order below.
+
+## 1. Affected Domain List
+- Domain name: (one-line rationale without speculation)
+
+## 2. Local CTX That Must Be Referenced
+- List only the CTX file paths
+
+## 3. Whether Global CTX Is Impacted
+- Impacted / Not impacted
+- (If impacted) state only the possibility of impact in one line
+
+## 4. Points That Cannot Be Judged / Require Additional Confirmation
+- Numbered list
+- Each item states only "what is missing"
+
+## 5. Next-Step Execution Condition
+- This output is **judgment material** and cannot proceed to the next step until the user's **explicit approval command**.
+- Approval examples: "/ctx-domain-exec", "now proceed to the implementation stage", "run executor"
+
+**Notes:**
+- Do not change the output order
+- Do not omit items (if none, state "None")
+- Do not use code blocks
+
+---
+
+## Stop Conditions (required)
+
+- The requirement is abstract or the scope cannot be pinned down
+- Multiple domains are intertwined but their boundaries cannot be judged
+- There is a possibility of conflict between CTX but their priority cannot be determined
+- Judgment is impossible without rules beyond the provided CTX
+
+On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+
+---
+
+## Execution Guidelines
+
+Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. For the unique procedure, use "Judgment Procedure".

@@ -1,47 +1,47 @@
 <!-- workflow-step: STEP-1 | gate: none | producer: ctx-aidlc-run | EXAMPLE -->
-# Feature Status — 도서 대출
+# Feature Status — Book Borrowing
 
 ## Identity
 - Feature Slug: book-borrowing
-- Title: 도서 대출 (Book Borrowing)
+- Title: Book Borrowing
 - Request Type: prepared-requirement
-- Status: approved (GATE-2/3 통과 — 예시)
+- Status: approved (GATE-2/3 passed — example)
 
 ## Readiness Score
 
-| 영역 | 배점 | 점수 | 상태 |
+| Area | Weight | Score | State |
 |------|------|------|------|
-| 기능 범위 정의 | 15 | 15 | Goal/In/Out 명확 |
-| 정책/예외 확정 | 20 | 18 | 중복 정책 AI추천(경고 마크) |
-| 사용자 시나리오 | 15 | 15 | 시나리오 3 + 엣지 2 |
-| NFR 확인 | 15 | 13 | 동시성 전략 P2 |
-| 승인 항목 해결 | 20 | 20 | BLOCK 0 |
-| 리스크 평가 | 15 | 14 | 리스크 2 + 대응 |
-| **합계** | **100** | **95** | **READY** |
+| Feature scope definition | 15 | 15 | Goal/In/Out clear |
+| Policy/exception confirmation | 20 | 18 | Duplicate policy AI-recommended (warning mark) |
+| User scenarios | 15 | 15 | 3 scenarios + 2 edge cases |
+| NFR check | 15 | 13 | Concurrency strategy P2 |
+| Approval items resolved | 20 | 20 | 0 BLOCKs |
+| Risk assessment | 15 | 14 | 2 risks + mitigations |
+| **Total** | **100** | **95** | **READY** |
 
-**판정: READY (95/100)** — BLOCK 0건.
+**Verdict: READY (95/100)** — 0 BLOCKs.
 
-### 불확실 영역
-- Q1 중복 대출 정책 `[AI추천]` — 도메인 전문가 검토 권장.
+### Uncertain Areas
+- Q1 duplicate loan policy `[AI-recommended]` — domain expert review recommended.
 
-## Post-Implementation Score (구현 후 — ctx-score-loop)
+## Post-Implementation Score (after implementation — ctx-score-loop)
 
-> 아래는 3단계 점수 루프가 채운 **최종** 값이다. 라운드별 변화는 `dependency-check.md`의 Score History를 본다.
+> The values below are the **final** ones filled in by the 3-round score loop. For per-round changes, see the Score History in `dependency-check.md`.
 
-| 항목 | 값 |
+| Item | Value |
 |------|-----|
-| 최신 총점 | 92 |
-| 최신 라운드 | 3 |
-| 축별 (의/빌/테/AC) | 25 / 25 / 20 / 22 |
-| 판정 | COMPLETE (>85) |
-| 최종 갱신 | 2026-06-23T01:37:56Z |
+| Latest total | 92 |
+| Latest round | 3 |
+| Per axis (Dep/Build/Test/AC) | 25 / 25 / 20 / 22 |
+| Verdict | COMPLETE (>85) |
+| Last updated | 2026-06-23T01:37:56Z |
 
 ## Implementation
-- Code Started: (예시 — 가상 구현)
+- Code Started: (example — fictional implementation)
 
 ## Related Files
 - Requirements: ./requirements.md
 - Questions: ./requirement-verification-questions.md
 - Unit of Work: ./unit-of-work.md
-- Dependency Check (점수 루프): ./dependency-check.md
+- Dependency Check (score loop): ./dependency-check.md
 - Loop Run Log: ./LOOP-RUN.md

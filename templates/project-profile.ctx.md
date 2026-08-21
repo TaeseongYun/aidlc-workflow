@@ -1,7 +1,7 @@
 # Project Profile CTX
 
-이 파일은 `ctx/project-profile.ctx.md`에 생성하는 것을 권장한다.
-`ctx/`가 약한 프로젝트에서는 `.aidlc/project-profile.md`로 대체 사용 가능하다.
+It is recommended to create this file at `ctx/project-profile.ctx.md`.
+In projects with a weak `ctx/`, it can be substituted with `.aidlc/project-profile.md`.
 
 ## Project Type
 - Brownfield / Greenfield:

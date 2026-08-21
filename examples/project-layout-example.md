@@ -23,11 +23,11 @@ my-project/
             └── unit-of-work.md
 ```
 
-## 채워진 산출물 예제
-실제 내용이 채워진 예제는 `examples/filled-outputs/`를 참고한다.
+## Filled Output Examples
+For examples with actual content filled in, see `examples/filled-outputs/`.
 
-## 연결 방식
-- `team-ai-workflow/core/*`를 공통 판단 기준으로 사용한다.
-- 프로젝트 로컬 문서는 `AGENTS.md`, `ctx/`를 우선 사용한다.
-- `.aidlc/project-profile.md`는 `ctx/`가 약한 프로젝트에서만 선택적으로 사용한다.
-- 실제 기능별 산출물은 `aidlc-docs/`에 생성한다.
+## How Things Connect
+- Use `team-ai-workflow/core/*` as the shared judgment criteria.
+- Prefer the project-local documents `AGENTS.md` and `ctx/`.
+- Use `.aidlc/project-profile.md` only optionally, for projects where `ctx/` is weak.
+- Generate the actual per-feature outputs in `aidlc-docs/`.

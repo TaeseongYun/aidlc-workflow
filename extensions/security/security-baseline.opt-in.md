@@ -1,12 +1,12 @@
 # Security Baseline Opt-In
 
-프로덕션 보안 기준을 적용하시겠습니까?
+Would you like to apply the production security criteria?
 
-## 설명
-SECURITY-01~11 항목을 기준으로 인증, 인가, 입력 검증, 데이터 보호, 로깅, 의존성 관리 등을 검증합니다.
-활성화하면 GATE-2 이후 보안 기준 평가가 추가됩니다.
+## Description
+Validates authentication, authorization, input validation, data protection, logging, dependency management, and more against items SECURITY-01–11.
+When enabled, a security criteria evaluation is added after GATE-2.
 
-## 질문
-> 이 feature에 Security Baseline을 적용하시겠습니까?
-> A) 적용 — 프로덕션 배포 대상이거나 보안 민감 기능
-> B) 미적용 — 내부 도구, PoC, 보안 비관련 변경
+## Question
+> Would you like to apply the Security Baseline to this feature?
+> A) Apply — production deployment target or security-sensitive feature
+> B) Don't apply — internal tools, PoC, security-unrelated changes

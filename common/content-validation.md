@@ -1,75 +1,75 @@
 # Content Validation
 
-답변과 산출물의 일관성을 검증하는 규칙이다.
+Rules for validating the consistency of answers and artifacts.
 
-## 0. 산출물 생성 전 사전 검증 (Pre-Write Validation)
+## 0. Pre-Write Validation
 
-산출물 파일을 생성하거나 갱신하기 **전에** 아래 체크를 수행한다. 하나라도 실패하면 해당 항목을 수정한 뒤 파일에 기록한다.
+Perform the checks below **before** creating or updating an artifact file. If any check fails, fix the item and then write it to the file.
 
-### 발동 시점
-- 모든 산출물 파일 생성/갱신 직전 (aidlc-docs/ 하위 모든 .md 파일)
+### Trigger Timing
+- Immediately before creating/updating any artifact file (all .md files under aidlc-docs/)
 
-### 체크리스트
+### Checklist
 
-#### 구조 검증
-- [ ] 필수 섹션이 모두 존재하는가 (해당 템플릿의 필수 헤딩 기준)
-- [ ] 빈 섹션이 없는가 (헤딩만 있고 내용이 없는 섹션)
-- [ ] 마크다운 헤딩 레벨이 순차적인가 (## 다음에 #### 없이 ### 건너뜀 등)
+#### Structure Validation
+- [ ] Do all required sections exist (based on the required headings of the relevant template)?
+- [ ] Are there no empty sections (a section with only a heading and no content)?
+- [ ] Are the markdown heading levels sequential (e.g., not jumping from ## to #### by skipping ###)?
 
-#### 참조 무결성
-- [ ] 다른 산출물을 참조하는 링크가 실제 파일과 일치하는가
-- [ ] UOW ID, 질문 번호 등 내부 참조가 실제 존재하는 항목인가
-- [ ] feature-slug가 일관되게 사용되고 있는가
+#### Reference Integrity
+- [ ] Do links that reference other artifacts match the actual files?
+- [ ] Do internal references such as UOW IDs and question numbers point to items that actually exist?
+- [ ] Is the feature-slug used consistently?
 
-#### 다이어그램 검증 (다이어그램 포함 시)
-- [ ] Mermaid: 구문 유효성 확인 (닫히지 않은 괄호, 잘못된 화살표 등)
-- [ ] Mermaid: 텍스트 대안(fallback)이 함께 제공되는가
-- [ ] Mermaid: 노드 ID가 영숫자 + 밑줄만 사용하는가
-- [ ] Mermaid: 라벨 내 특수문자가 이스케이프 되었는가
-- [ ] ASCII: 유니코드 박스 문자를 사용하지 않았는가 (`common/diagram-standards.md` 참조)
-- [ ] ASCII: 박스 내 모든 줄이 동일 폭인가
+#### Diagram Validation (when a diagram is included)
+- [ ] Mermaid: Verify syntax validity (unclosed brackets, invalid arrows, etc.)
+- [ ] Mermaid: Is a text alternative (fallback) provided alongside?
+- [ ] Mermaid: Do node IDs use only alphanumerics + underscores?
+- [ ] Mermaid: Are special characters within labels escaped?
+- [ ] ASCII: Are Unicode box-drawing characters avoided (see `common/diagram-standards.md`)?
+- [ ] ASCII: Is every line within a box the same width?
 
-#### 특수문자 검증
-- [ ] 마크다운 테이블 내 `|` 문자가 이스케이프 되었는가 (내용에 파이프가 포함될 때)
-- [ ] 코드 블록 외부에서 백틱이 올바르게 닫혔는가
-- [ ] YAML frontmatter가 있는 경우 유효한 YAML인가
+#### Special Character Validation
+- [ ] Are `|` characters within markdown tables escaped (when the content contains a pipe)?
+- [ ] Are backticks correctly closed outside of code blocks?
+- [ ] If there is YAML frontmatter, is it valid YAML?
 
-### 검증 실패 시 처리
-1. 실패 항목을 수정한다.
-2. 수정할 수 없는 항목(참조 대상 미존재 등)은 `> ⚠️ TODO: {내용}` 마커를 남긴다.
-3. `audit.md`에 `[PRE-WRITE-VALIDATION] {파일명} — {실패 항목 수}건 수정` 이벤트를 기록한다.
+### Handling Validation Failures
+1. Fix the failed item.
+2. For items that cannot be fixed (e.g., a missing reference target), leave a `> ⚠️ TODO: {content}` marker.
+3. Record a `[PRE-WRITE-VALIDATION] {filename} — {number of items fixed} fixed` event in `audit.md`.
 
 ---
 
-## 1. 모순 감지 (Contradiction Detection)
+## 1. Contradiction Detection
 
-### 발동 시점
-- STEP 5(요구사항 확정) 직전 — 모든 질문 답변 완료 후
-- GATE-2 진입 전 최종 확인
+### Trigger Timing
+- Immediately before STEP 5 (Requirements Finalization) — after all question answers are complete
+- Final check before entering GATE-2
 
-### 감지 대상
-- 답변 간 논리적 모순 (예: Q1에서 "환불 불가"라고 답했는데 Q5에서 "14일 환불 기한" 언급)
-- 범위 모순 (예: "단일 컴포넌트 수정"이라고 했는데 "전체 아키텍처 변경 필요" 언급)
-- 리스크 모순 (예: "낮은 리스크"라고 했는데 "기존 데이터 마이그레이션 필요" 언급)
-- 확신도와 답변 내용의 괴리 (예: `[확신: 확실]`인데 "아마", "~일 수도" 등 불확실한 표현)
+### Detection Targets
+- Logical contradictions between answers (e.g., Q1 answered "no refunds" but Q5 mentions a "14-day refund window")
+- Scope contradictions (e.g., said "single component change" but mentions "full architecture change needed")
+- Risk contradictions (e.g., said "low risk" but mentions "existing data migration needed")
+- Divergence between confidence and answer content (e.g., `[Confidence: Certain]` but uses uncertain phrasing such as "maybe" or "could be")
 
-### 모순 발견 시 처리
-1. 모순 내용을 구체적으로 명시한다: "Q{X}의 답변({내용})과 Q{Y}의 답변({내용})이 모순됩니다."
-2. 해결을 위한 질문을 생성한다 (질문 예산에 포함).
-3. 모순이 해결될 때까지 GATE-2를 진행하지 않는다.
+### Handling Detected Contradictions
+1. State the contradiction concretely: "The answer to Q{X} ({content}) contradicts the answer to Q{Y} ({content})."
+2. Generate a question to resolve it (counted in the question budget).
+3. Do not proceed to GATE-2 until the contradiction is resolved.
 
-## 2. Mermaid 다이어그램 검증
+## 2. Mermaid Diagram Validation
 
-산출물에 Mermaid 다이어그램을 포함할 때 (사전 검증 체크리스트의 다이어그램 항목과 동일):
-- 구문 유효성을 확인한다 (닫히지 않은 괄호, 잘못된 화살표 등).
-- 노드 ID는 영숫자 + 밑줄만 사용한다.
-- 라벨 내 특수문자를 이스케이프한다: `"` -> `\"`, `'` -> `\'`.
-- 텍스트 대안(fallback)을 반드시 함께 제공한다 (`common/diagram-standards.md` 참조).
-- 5개 이상 노드를 포함하면 텍스트 대안은 필수이다.
+When including a Mermaid diagram in an artifact (same as the diagram items in the pre-write checklist):
+- Verify syntax validity (unclosed brackets, invalid arrows, etc.).
+- Node IDs use only alphanumerics + underscores.
+- Escape special characters within labels: `"` -> `\"`, `'` -> `\'`.
+- Always provide a text alternative (fallback) alongside (see `common/diagram-standards.md`).
+- If it contains 5 or more nodes, a text alternative is mandatory.
 
-## 3. ASCII 다이어그램 검증
+## 3. ASCII Diagram Validation
 
-- 유니코드 박스 문자를 사용하지 않는다 (`common/diagram-standards.md` 참조).
-- 허용 문자: `+` `-` `|` `^` `v` `<` `>` 및 영숫자/한글 텍스트, 공백.
-- 박스 내 모든 줄은 동일 폭을 유지한다.
-- 들여쓰기와 정렬이 깨지지 않았는지 확인한다.
+- Do not use Unicode box-drawing characters (see `common/diagram-standards.md`).
+- Allowed characters: `+` `-` `|` `^` `v` `<` `>` and alphanumeric/Korean text, whitespace.
+- Every line within a box maintains the same width.
+- Verify that indentation and alignment are not broken.

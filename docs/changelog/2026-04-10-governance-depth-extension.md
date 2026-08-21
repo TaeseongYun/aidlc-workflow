@@ -1,63 +1,63 @@
 # 2026-04-10: Question Governance, Adaptive Depth, Extension System
 
-## 배경
+## Background
 
-BMAD-METHOD와 aidlc-workflows 프로젝트를 참조하여 team-ai-workflow를 업데이트.
-워크숍 실전 경험에서 발견한 3대 문제(질문 초점 이탈, 결정권자 부재, 지식 부족 답변 누적)를 직접 해결.
+Updated team-ai-workflow by referencing the BMAD-METHOD and aidlc-workflows projects.
+Directly solves the 3 major problems found in hands-on workshop experience (question focus drift, absence of a decision-maker, accumulation of knowledge-deficient answers).
 
-## 철학 변화
+## Philosophy shift
 
 ```
-이전: "AI는 정책을 결정하지 않는다. 모르면 멈추고 질문해."
-이후: "AI는 정책을 결정하지 않지만, 도메인 지식은 적극적으로 제안한다.
-      질문의 깊이와 범위는 작업의 복잡도에 맞추고,
-      모든 질문은 원래 요청과의 관계를 명시한다."
+Before: "AI does not decide policy. If it doesn't know, stop and ask."
+After:  "AI does not decide policy, but it actively proposes domain knowledge.
+         The depth and scope of questions match the complexity of the work,
+         and every question states its relationship to the original request."
 ```
 
-## 변경 사항
+## Changes
 
-### 1. Question Governance (신규)
-- `common/question-governance.md` — 질문 범위 통제, 유형 분류, 확신도 추적, 질문 예산
-- Focus Anchor: 모든 질문 파일에 최초 요청 앵커 고정
-- 질문 유형: policy(사람 필수) / domain(AI 추천 가능) / scope(범위 판단)
-- AI-RECOMMEND: domain 유형 질문에 AI가 근거 기반 추천안 제시
-- Confidence Tagging: 답변에 확신도(확실/추정/AI추천/미정) 표기
-- Question Budget: depth별 라운드당 질문 상한
+### 1. Question Governance (new)
+- `common/question-governance.md` — question scope control, type classification, confidence tracking, question budget
+- Focus Anchor: pin the original-request anchor in every question file
+- Question types: policy (human required) / domain (AI may recommend) / scope (scope judgment)
+- AI-RECOMMEND: for domain-type questions, AI presents a grounded recommendation
+- Confidence Tagging: mark confidence in the answer (certain/estimated/AI-recommended/undecided)
+- Question Budget: per-round question cap by depth
 
-### 2. Adaptive Depth (신규)
-- `common/depth-levels.md` — 3단계 깊이(minimal/standard/comprehensive)
-- STEP 1-B에서 depth 판정, 이후 모든 단계에 적용
-- depth별 질문 예산, 템플릿 상세도, 게이트 메시지 깊이 차별화
+### 2. Adaptive Depth (new)
+- `common/depth-levels.md` — 3 depth levels (minimal/standard/comprehensive)
+- Determine depth at STEP 1-B, then apply it to all subsequent stages
+- Differentiate question budget, template detail, and gate-message depth by depth level
 
-### 3. Extension / Opt-In System (신규)
-- `extensions/` 디렉토리 + `common/extension-rules.md`
-- `*.opt-in.md` 경량 프롬프트 → opt-in 시에만 전체 규칙 로드
-- security-baseline을 첫 번째 extension으로 이관 및 상세화 (SECURITY-01~11 평가 기준)
+### 3. Extension / Opt-In System (new)
+- `extensions/` directory + `common/extension-rules.md`
+- `*.opt-in.md` lightweight prompt → load the full ruleset only on opt-in
+- Migrated and elaborated security-baseline as the first extension (SECURITY-01~11 evaluation criteria)
 
-### 4. Reverse Engineering 강화
-- `core/reverse-engineering.md` — STEP 1.5로 체계적 brownfield 분석
+### 4. Reverse Engineering strengthening
+- `core/reverse-engineering.md` — systematic brownfield analysis as STEP 1.5
 - `templates/reverse-engineering/` — business-overview, architecture-overview, component-inventory
 
-### 5. Skill Validation Framework (신규)
-- `tools/skill-validator.md` — 10개 검증 규칙 (6개 자동 + 4개 추론)
-- `tools/validate-skills.sh` — 자동 검증 스크립트
+### 5. Skill Validation Framework (new)
+- `tools/skill-validator.md` — 10 validation rules (6 automatic + 4 inferential)
+- `tools/validate-skills.sh` — automatic validation script
 
-### 6. Content Validation (신규)
-- `common/content-validation.md` — 답변 간 모순 감지, Mermaid/ASCII 검증
+### 6. Content Validation (new)
+- `common/content-validation.md` — cross-answer contradiction detection, Mermaid/ASCII validation
 
-## 수정된 기존 파일
+## Existing files modified
 
-- `core/core-workflow.md` — STEP 1-B(depth), STEP 1.5(RE), question-governance/content-validation 참조 추가
-- `common/question-rules.md` — AI-RECOMMEND, DEFER-TO-FEATURE, 확신도 필드 추가
-- `common/stage-gate-rules.md` — Progress Line 추가
-- `templates/aidlc-state.md` — Depth Level, Confidence Summary, Extension Configuration, STEP 1-B/1.5 추가
-- `templates/requirement-verification-questions.md` — Request Anchor, Scope Tag, AI 추천, 확신도 포맷
-- `templates/security-baseline.md` — extensions/ 이관 안내로 변경
+- `core/core-workflow.md` — added STEP 1-B (depth), STEP 1.5 (RE), question-governance/content-validation references
+- `common/question-rules.md` — added AI-RECOMMEND, DEFER-TO-FEATURE, confidence field
+- `common/stage-gate-rules.md` — added Progress Line
+- `templates/aidlc-state.md` — added Depth Level, Confidence Summary, Extension Configuration, STEP 1-B/1.5
+- `templates/requirement-verification-questions.md` — Request Anchor, Scope Tag, AI recommendation, confidence format
+- `templates/security-baseline.md` — changed to a migration notice to extensions/
 
-## 참조 출처
+## Reference sources
 
-| 출처 | 가져온 패턴 |
+| Source | Pattern borrowed |
 |------|-----------|
-| BMAD-METHOD | AI 퍼실리테이터 역할, Skill Validation |
+| BMAD-METHOD | AI-facilitator role, Skill Validation |
 | aidlc-workflows | Adaptive Depth, Extension Opt-In, Contradiction Detection |
-| 워크숍 경험 | Question Governance (3개 프로젝트 모두에 없던 신규 패턴) |
+| Workshop experience | Question Governance (a new pattern absent from all 3 projects) |

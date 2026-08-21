@@ -1,54 +1,54 @@
 # Commit Workflow CTX
 
-이 파일은 `ctx/workflow/commit-workflow.ctx.md`에 생성하는 것을 권장한다.
-`init-project.sh` 실행 시 자동 생성된다.
+It is recommended to create this file at `ctx/workflow/commit-workflow.ctx.md`.
+It is generated automatically when `init-project.sh` runs.
 
 ---
 
-## 1. 커밋 분리 기준
+## 1. Commit Separation Criteria
 
-이 규칙이 없으면 AI가 도메인과 응답 변경을 한 커밋에 섞는다.
+Without this rule, the AI mixes domain changes and response changes into a single commit.
 
-- 도메인 계층의 조회 결과 구조 변경과 애플리케이션 계층의 응답 노출 변경을 반드시 서로 다른 커밋으로 분리하라.
-- 동일 목적이라도 변경 위치가 도메인/응답으로 나뉘면 절대 합치지 말라.
-- (TODO: 프로젝트 계층 구조에 맞게 분리 기준을 구체화하라)
+- Always separate changes to the query-result structure in the domain layer from changes to response exposure in the application layer into different commits.
+- Even for the same purpose, never merge changes when the change location splits between domain/response.
+- (TODO: make the separation criteria concrete to match the project's layer structure)
 
-## 2. 커밋 순서 규칙
+## 2. Commit Ordering Rules
 
-이 규칙이 없으면 AI가 의존 순서를 뒤집는다.
+Without this rule, the AI reverses the dependency order.
 
-- 응답 계층 변경이 도메인 조회 결과 변경에 의존하면 도메인 커밋을 반드시 먼저 하라.
-- 문서 정리 커밋은 관련 코드 변경 커밋 이후에 배치하라.
-- (TODO: 프로젝트의 계층 의존 방향에 맞게 순서를 정의하라)
+- When a response-layer change depends on a domain query-result change, always commit the domain change first.
+- Place documentation-cleanup commits after the related code-change commits.
+- (TODO: define the order to match the project's layer dependency direction)
 
-## 3. 파일 포함 범위 규칙
+## 3. File Inclusion Scope Rules
 
-이 규칙이 없으면 AI가 파일을 섞어 커밋 단위 추적이 깨진다.
+Without this rule, the AI mixes files and breaks per-commit tracking.
 
-- 하나의 커밋에는 동일한 책임의 파일만 포함하라.
-- 서로 다른 계층의 파일을 같은 커밋에 넣지 말라.
-- 각 커밋은 파일 단위 `git add`만으로 재현되게 구성하라.
+- Include only files of the same responsibility in a single commit.
+- Do not put files from different layers in the same commit.
+- Compose each commit so it is reproducible with file-level `git add` alone.
 
-## 4. 커밋 메시지 규칙
+## 4. Commit Message Rules
 
-이 규칙이 없으면 AI가 메시지를 누락하거나 섞어 쓴다.
+Without this rule, the AI omits or mixes up messages.
 
-- 제목은 `type: (scope) 한글 요약` 형식을 반드시 지켜라.
-- 본문 구조와 언어 규칙은 `ctx-commit-planner` Skill이 정의한다. 여기서 중복 정의하지 않는다.
+- Always follow the title format `type: (scope) summary`.
+- The body structure and language rules are defined by the `ctx-commit-planner` Skill. Do not redefine them here.
 
-## 허용 scope 목록
+## Allowed scope list
 
-- (TODO: 프로젝트 모듈/도메인에 맞게 정의)
+- (TODO: define to match the project's modules/domains)
 
-## 금지 패턴
+## Forbidden patterns
 
-- WIP 커밋 금지
-- 빈 커밋 메시지 금지
-- 자동 생성 파일만으로 구성된 커밋 금지
+- No WIP commits
+- No empty commit messages
+- No commits composed solely of auto-generated files
 
-## 커밋 전 필수 검증
+## Required pre-commit checks
 
-- (TODO: 프로젝트에 맞게 활성화)
-- [ ] 빌드 통과
-- [ ] 린트 통과
-- [ ] 테스트 통과
+- (TODO: enable to match the project)
+- [ ] Build passes
+- [ ] Lint passes
+- [ ] Tests pass

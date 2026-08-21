@@ -1,27 +1,27 @@
 # Reverse Engineering
 
-Brownfield 프로젝트에서 기존 시스템을 체계적으로 분석하는 워크플로우다.
+This is the workflow for systematically analyzing an existing system in a brownfield project.
 
-## 발동 조건
+## Trigger conditions
 
-- STEP 1에서 `brownfield`로 판별되었고
-- 기존 Reverse Engineering 산출물(`aidlc-docs/reverse-engineering/`)이 없는 경우
-- STEP 1.5로 실행한다.
+- STEP 1 determined it to be `brownfield`, and
+- There are no existing Reverse Engineering artifacts (`aidlc-docs/reverse-engineering/`)
+- Run it as STEP 1.5.
 
-기존 RE 산출물이 있으면 이 단계를 스킵하고 기존 산출물을 참조한다.
+If existing RE artifacts are present, skip this step and reference the existing artifacts.
 
-## 목적
+## Purpose
 
-기존 시스템을 이해하지 않고 설계를 시작하면:
-- 기존 패턴과 충돌하는 구조를 제안하게 된다
-- 이미 존재하는 컴포넌트를 중복 생성하게 된다
-- 데이터 모델 변경의 영향 범위를 놓치게 된다
+Starting design without understanding the existing system means:
+- You end up proposing structures that conflict with existing patterns
+- You end up duplicating components that already exist
+- You miss the impact scope of data model changes
 
-이 단계에서 기존 시스템의 전체 그림을 먼저 파악한다.
+In this step, you first grasp the whole picture of the existing system.
 
-## 산출물
+## Artifacts
 
-산출물은 프로젝트 레벨에 생성한다 (feature 레벨이 아님):
+The artifacts are created at the project level (not the feature level):
 
 ```text
 aidlc-docs/reverse-engineering/
@@ -30,53 +30,53 @@ aidlc-docs/reverse-engineering/
 └── component-inventory.md
 ```
 
-템플릿: `templates/reverse-engineering/`
+Templates: `templates/reverse-engineering/`
 
-## 수행 순서
+## Order of execution
 
 ### 1. Business Overview
 
-프로젝트의 비즈니스 맥락을 파악한다.
+Grasp the business context of the project.
 
-- **비즈니스 도메인**: 프로젝트가 다루는 핵심 도메인 (예: 이커머스, 핀테크, SaaS)
-- **핵심 트랜잭션**: 시스템이 처리하는 주요 비즈니스 트랜잭션 (예: 주문 → 결제 → 배송)
-- **이해관계자**: 시스템을 사용하거나 영향을 받는 사용자 유형
-- **용어사전**: 프로젝트에서 사용하는 핵심 비즈니스 용어와 정의
+- **Business domain**: the core domain the project deals with (e.g. e-commerce, fintech, SaaS)
+- **Core transactions**: the main business transactions the system handles (e.g. order → payment → shipping)
+- **Stakeholders**: the user types that use or are affected by the system
+- **Glossary**: the core business terms and definitions used in the project
 
-소스: `README.md`, `AGENTS.md`, `ctx/`, 코드 주석, 도메인 패키지 구조
+Sources: `README.md`, `AGENTS.md`, `ctx/`, code comments, domain package structure
 
 ### 2. Architecture Overview
 
-기존 시스템의 기술 아키텍처를 파악한다.
+Grasp the technical architecture of the existing system.
 
-- **아키텍처 패턴**: 모놀리스 / 모듈러 모놀리스 / MSA / 서버리스 등
-- **주요 컴포넌트**: 시스템을 구성하는 핵심 컴포넌트와 역할
-- **데이터 플로우**: 주요 데이터가 시스템을 통과하는 경로
-- **외부 연동**: 사용 중인 외부 서비스, API, 메시지 큐 등
-- **기술 스택**: 언어, 프레임워크, DB, 인프라
+- **Architecture pattern**: monolith / modular monolith / MSA / serverless, etc.
+- **Main components**: the core components that make up the system and their roles
+- **Data flow**: the paths that main data takes through the system
+- **External integrations**: external services, APIs, message queues, etc. in use
+- **Tech stack**: language, framework, DB, infrastructure
 
-소스: 코드 구조, 설정 파일, 패키지 의존성, `ctx/project-profile.ctx.md`
+Sources: code structure, configuration files, package dependencies, `ctx/project-profile.ctx.md`
 
 ### 3. Component Inventory
 
-기존 컴포넌트를 유형별로 분류한다.
+Classify existing components by type.
 
-- **도메인 컴포넌트**: 비즈니스 로직을 담은 모듈/패키지
-- **인프라 컴포넌트**: DB, 캐시, 큐, 스토리지 등
-- **공통 컴포넌트**: 인증, 로깅, 에러 처리, 유틸리티 등
-- **핵심 의존성**: 컴포넌트 간 의존 관계 (순환 여부 포함)
-- **재사용 후보**: 새 feature에서 재사용할 수 있는 기존 컴포넌트
+- **Domain components**: modules/packages containing business logic
+- **Infrastructure components**: DB, cache, queue, storage, etc.
+- **Common components**: authentication, logging, error handling, utilities, etc.
+- **Core dependencies**: dependency relationships between components (including whether cyclic)
+- **Reuse candidates**: existing components that can be reused in new features
 
-소스: 패키지 구조, import 관계, 설정 파일
+Sources: package structure, import relationships, configuration files
 
-## 상세 탐색은 docs/brownfield-guide.md 참조
+## For detailed exploration, see docs/brownfield-guide.md
 
-Reverse Engineering 완료 후 실제 feature 분석 시:
-- 영향 도메인 식별, 기존 패턴 확인, 충돌 지점 선별 등의 상세 가이드는 `docs/brownfield-guide.md`를 따른다.
-- RE 산출물은 이후 모든 feature 분석에서 참조 기반으로 사용한다.
+When actually analyzing a feature after Reverse Engineering completes:
+- For a detailed guide on identifying impacted domains, checking existing patterns, selecting conflict points, etc., follow `docs/brownfield-guide.md`.
+- The RE artifacts are used as a reference base in all subsequent feature analysis.
 
-## 주의사항
+## Cautions
 
-- 기존 구조를 이해하지 않고 새 구조를 강요하지 않는다.
-- "더 나은 방법"을 제안하기 전에 기존 패턴을 먼저 따른다.
-- 기존 코드와 다른 패턴을 도입해야 할 때는 ADR로 근거를 남긴다.
+- Do not force a new structure without understanding the existing structure.
+- Before proposing a "better way", first follow the existing patterns.
+- When you must introduce a pattern that differs from the existing code, leave the rationale as an ADR.

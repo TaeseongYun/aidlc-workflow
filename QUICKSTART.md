@@ -1,49 +1,49 @@
 # Quick Start
 
-AI 요구사항 분석/설계/검증 워크플로우를 프로젝트에 적용하기 위한 가이드이다.
-앱/백엔드/프론트 구분 없이 모든 프로젝트에서 공용으로 사용 가능하다.
+A guide for applying the AI requirements analysis/design/verification workflow to a project.
+It can be used commonly across all projects, regardless of whether they are apps, backends, or frontends.
 
-> **TL;DR** — `/team-ai-workflow-start`만 외우면 된다. 어디서 시작할지 모를 때 부르면
-> 진단 후 적절한 후속 명령을 알려준다.
+> **TL;DR** — you only need to memorize `/team-ai-workflow-start`. When you don't know where to
+> begin, call it and it will diagnose and tell you the appropriate next command.
 
-## 1. repo 클론 (최초 1회)
+## 1. Clone the repo (once)
 
 ```bash
 git clone https://github.com/TaeseongYun/aidlc-workflow.git ~/workspace/aidlc-workflow
 
-# 다른 위치에 클론했다면 환경변수로 알려줘야 한다.
+# If you cloned it elsewhere, you must tell it via an environment variable.
 echo 'export TEAM_AI_WORKFLOW_DIR="$HOME/workspace/aidlc-workflow"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-## 2. 스킬 설치 (최초 1회, 계정마다)
+## 2. Install the skills (once, per account)
 
 ```bash
 bash ~/workspace/aidlc-workflow/scripts/install-skills.sh
 ```
 
-`/team-ai-workflow-start`, `/ctx-aidlc-run`, `/ctx-run` 등 스킬이 글로벌로 설치된다.
+Skills such as `/team-ai-workflow-start`, `/ctx-aidlc-run`, and `/ctx-run` are installed globally.
 
-**multi-account 환경** (예: Claude Code 부계정 `~/.claude-personal/`)에서는
-환경변수로 대상 홈을 바꿔 한 번 더 실행한다.
+In a **multi-account** environment (e.g., a Claude Code secondary account at `~/.claude-personal/`),
+run it once more with the target home changed via environment variables.
 
 ```bash
 CLAUDE_HOME="$HOME/.claude-personal" CODEX_HOME="$HOME/.codex-personal" \
   bash ~/workspace/aidlc-workflow/scripts/install-skills.sh
 ```
 
-스크립트는 멱등하므로 본체를 업데이트한 후에도 안전하게 재실행 가능하다.
+The script is idempotent, so it is safe to re-run after updating the main body.
 
-## 3. 프로젝트 초기화 (프로젝트마다 1회)
+## 3. Initialize the project (once per project)
 
 ```bash
 cd my-project
 bash ~/workspace/aidlc-workflow/scripts/init-project.sh
 ```
 
-`ctx/`, `aidlc-docs/`, `CLAUDE.md`가 자동 생성된다.
+`ctx/`, `aidlc-docs/`, and `CLAUDE.md` are created automatically.
 
-생성되는 구조:
+The generated structure:
 
 ```text
 <project-root>/
@@ -57,104 +57,109 @@ bash ~/workspace/aidlc-workflow/scripts/init-project.sh
     └── features/
 ```
 
-## 4. 프로젝트 정보 채우기
+## 4. Fill in the project information
 
-프로젝트에서 Claude Code를 열고 아래 명령어를 입력한다.
+Open Claude Code in the project and enter the command below.
 
 ```text
-ctx/INDEX.md, ctx/project-profile.ctx.md 프로젝트 분석해서 채워줘
+Analyze the project and fill in ctx/INDEX.md, ctx/project-profile.ctx.md
 ```
 
-Claude가 프로젝트 구조, 스택, 모듈 등을 자동으로 파악해서 채워준다.
+Claude automatically figures out the project structure, stack, modules, and so on, and fills them in.
 
-## 5. 사용법
+## 5. Usage
 
-### 어디서 시작할지 모를 때
+### When you don't know where to start
 
 ```text
 /team-ai-workflow-start
 ```
 
-현재 환경(본체 위치, 스킬 설치, 프로젝트 초기화, 진행 중 feature, OMC/Ouroboros 감지)을
-진단하고 다음에 해야 할 명령을 알려준다.
+It diagnoses the current environment (location of the main body, skill installation, project
+initialization, in-progress features, OMC/Ouroboros detection) and tells you the next command to run.
 
-### 메인 스킬 3종
+### The 4 main skills
 
 ```text
-/ctx-aidlc-roadmap → (멀티피처일 때) 큰 prepared 기획서를 피처로 분해 + GATE-0
-/ctx-aidlc-run     → 요구사항 분석 + 질문 추출 (피처 단위)
-/ctx-run           → 승인된 요구사항 기준 구현
+/ctx-aidlc-roadmap → (when multi-feature) decompose a large prepared plan into features + GATE-0
+/ctx-worktree      → optionally create isolated worktrees for parallel-safe features
+/ctx-aidlc-run     → requirements analysis + question extraction (per feature)
+/ctx-run           → implementation based on approved requirements
 ```
 
-### OMC / Ouroboros 연동
+### OMC / Ouroboros Integration
 
-requirements가 승인(GATE-2/3 통과)되면 구현을 OMC autopilot/ralph나 Ouroboros evolve에
-넘길 수 있다. 상세 패턴: [docs/omc-ouroboros-integration.md](docs/omc-ouroboros-integration.md)
+Once requirements are approved (GATE-2/3 passed), you can hand implementation off to OMC autopilot/ralph
+or Ouroboros evolve. Detailed patterns: [docs/omc-ouroboros-integration.md](docs/omc-ouroboros-integration.md)
 
-### 코드 절제 (ponytail)
+### Code Restraint (ponytail)
 
-구현 단계에서 코드량을 줄이고 싶으면 [ponytail](https://github.com/DietrichGebert/ponytail)의
-7단계 절제 사다리를 함께 쓴다. `/ctx-run`이 [core/lazy-implementation.md](core/lazy-implementation.md)를
-근거로 ROLE 1/3에서 자동 적용하므로 플러그인 설치 없이도 동작한다. 상세: [docs/ponytail-integration.md](docs/ponytail-integration.md)
+If you want to reduce the amount of code during the implementation stage, use [ponytail](https://github.com/DietrichGebert/ponytail)'s
+7-step restraint ladder alongside. `/ctx-run` applies it automatically in ROLE 1/3 based on [core/lazy-implementation.md](core/lazy-implementation.md),
+so it works without installing the plugin. Details: [docs/ponytail-integration.md](docs/ponytail-integration.md)
 
-### 요구사항 분석
+### Requirements Analysis
 
 ```text
 /ctx-aidlc-run
 
-이번 요구사항을 team-ai-workflow 기준으로 분석해라.
+Analyze this requirement against the team-ai-workflow standard.
 
 Feature:
-- (여기에 요구사항 입력)
+- (enter the requirement here)
 ```
 
-### 멀티피처 (큰 prepared 기획서)
+### Multi-Feature (a large prepared plan)
 
-기획서가 여러 피처로 분해되어 팀 분업이 필요하면 `/ctx-aidlc-run` 대신 먼저 로드맵을 만든다.
+If a plan is decomposed into multiple features and needs to be divided among the team, create a roadmap first instead of `/ctx-aidlc-run`.
 
 ```text
 /ctx-aidlc-roadmap
 
-다음 prepared-requirement 기획서로 Phase 0 로드맵을 작성한다.
-- 원본: <기획서 경로 또는 본문>
+Create a Phase 0 roadmap from the following prepared-requirement plan.
+- Source: <plan path or body>
 ```
 
-GATE-0 승인 후 `aidlc-docs/_roadmap.md`가 생성되고, 각 팀원이 자기 피처에 대해 `/ctx-aidlc-run`을 실행한다. 단일 피처라면 STEP R1에서 자동 스킵된다.
+After GATE-0 approval, `aidlc-docs/_roadmap.md` is generated. Run `/ctx-worktree`
+when parallel-safe features need isolated branches and directories; it shows the
+allocation plan and waits for approval before creating anything. Each team member
+then runs `/ctx-aidlc-run` for their own feature. For a single feature, Phase 0 is
+skipped automatically at STEP R1.
 
-상세 운용: [docs/multi-feature-coordination.md](docs/multi-feature-coordination.md)
+Detailed operation: [docs/multi-feature-coordination.md](docs/multi-feature-coordination.md)
 
-실행 후 `aidlc-docs/features/<feature-slug>/` 아래에 산출물이 생성된다:
-- `status.md` — 현재 상태
-- `requirements.md` — 요구사항 정리
-- `requirement-verification-questions.md` — 미결 질문 목록
-- `unit-of-work.md` — 작업 단위 분해
+After running, artifacts are generated under `aidlc-docs/features/<feature-slug>/`:
+- `status.md` — current status
+- `requirements.md` — organized requirements
+- `requirement-verification-questions.md` — list of open questions
+- `unit-of-work.md` — work unit decomposition
 
-### 질문 답변 후 구현
+### Implementation after answering questions
 
-`requirement-verification-questions.md`에서 BLOCK 상태인 질문에 답변한 뒤:
+After answering the questions marked BLOCK in `requirement-verification-questions.md`:
 
 ```text
 /ctx-run
 
-aidlc-docs와 ctx에 승인된 내용 기준으로 구현해라.
+Implement based on the content approved in aidlc-docs and ctx.
 
 Feature:
-- (구현할 feature 입력)
+- (enter the feature to implement)
 ```
 
-## 세션 분리
+## Session Separation
 
-대규모 기능은 Phase 단위로 세션을 나눠야 품질이 유지된다.
-- **Phase A** (Discovery): STEP 1~3 → GATE-1 통과 후 세션 종료
-- **Phase B** (Definition): STEP 4~6 → GATE-3 통과 후 세션 종료  
-- **Phase C** (Design): STEP 6.5~9 → GATE-5 통과 후 세션 종료
+Large features must be split into sessions by Phase to maintain quality.
+- **Phase A** (Discovery): STEP 1–3 → end the session after passing GATE-1
+- **Phase B** (Definition): STEP 4–6 → end the session after passing GATE-3
+- **Phase C** (Design): STEP 6.5–9 → end the session after passing GATE-5
 
-적용 기준: minimal=선택, standard=권장, comprehensive=**필수**
+Application criteria: minimal=optional, standard=recommended, comprehensive=**required**
 
-상세: [docs/workflow-guide.md](docs/workflow-guide.md#세션-분리-기본-실행-모델)
+Details: [docs/workflow-guide.md](docs/workflow-guide.md#세션-분리-기본-실행-모델)
 
-## 다음 단계
+## Next Steps
 
-- 상세 워크플로우: [docs/workflow-guide.md](docs/workflow-guide.md)
-- 핵심 개념: [docs/concepts.md](docs/concepts.md)
-- FAQ / 체크리스트: [docs/faq.md](docs/faq.md)
+- Detailed workflow: [docs/workflow-guide.md](docs/workflow-guide.md)
+- Core concepts: [docs/concepts.md](docs/concepts.md)
+- FAQ / checklist: [docs/faq.md](docs/faq.md)

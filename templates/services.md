@@ -1,52 +1,52 @@
 <!-- workflow-step: STEP-5.7 | gate: GATE-2.7 | producer: ctx-aidlc-run | condition: UOW >= 3 or new component creation -->
 # Services
 
-이 파일은 `aidlc-docs/features/<feature-slug>/application-design/services.md`에 생성하는 것을 권장한다.
+It is recommended to create this file at `aidlc-docs/features/<feature-slug>/application-design/services.md`.
 
-선행 산출물:
+Prerequisite artifacts:
 - `aidlc-docs/features/<feature-slug>/requirements.md`
 - `aidlc-docs/features/<feature-slug>/application-design/components.md`
 
-관련 상태 파일:
+Related state file:
 - `aidlc-docs/features/<feature-slug>/status.md`
 
-## 작성 조건
+## Authoring Conditions
 
-- components.md가 작성된 경우 함께 작성한다.
-- 서비스 레이어 구분이 필요 없는 단순 구조이면 생략할 수 있다.
+- Write this together when components.md has been written.
+- It may be omitted for a simple structure that needs no service-layer distinction.
 
 ---
 
 ## Service Layer Overview
 
-| ID | 서비스명 | 책임 | 소속 컴포넌트 | 외부 노출 여부 |
+| ID | Service Name | Responsibility | Owning Component | External Exposure |
 |----|---------|------|------------|-------------|
-| S-1 | | | C-{N} | 내부 / 외부 API |
+| S-1 | | | C-{N} | internal / external API |
 | S-2 | | | C-{N} | |
 
-## S-1. {서비스명}
+## S-1. {service name}
 
-- 책임: {이 서비스가 담당하는 비즈니스 로직}
-- 소속 컴포넌트: C-{N}
-- 외부 노출: 내부 전용 / REST API / gRPC / 이벤트
-- 주요 오퍼레이션:
-  - {오퍼레이션 1}: {입력} -> {출력}
-  - {오퍼레이션 2}: {입력} -> {출력}
-- 의존하는 서비스: S-{N} / 외부 시스템명 / 없음
-- 트랜잭션 경계: {단일 트랜잭션 / 분산 / 이벤트 기반}
+- Responsibility: {the business logic this service handles}
+- Owning component: C-{N}
+- External exposure: internal-only / REST API / gRPC / event
+- Key operations:
+  - {operation 1}: {input} -> {output}
+  - {operation 2}: {input} -> {output}
+- Depends on services: S-{N} / external system name / none
+- Transaction boundary: {single transaction / distributed / event-based}
 
-## S-2. {서비스명}
+## S-2. {service name}
 
-- 책임:
-- 소속 컴포넌트:
-- 외부 노출:
-- 주요 오퍼레이션:
+- Responsibility:
+- Owning component:
+- External exposure:
+- Key operations:
   -
-- 의존하는 서비스:
-- 트랜잭션 경계:
+- Depends on services:
+- Transaction boundary:
 
-## 서비스 간 통신 방식
+## Inter-Service Communication
 
-- 동기 호출: {서비스 간 직접 호출 관계}
-- 비동기 이벤트: {이벤트 기반 통신 관계}
-- 외부 연동: {외부 시스템과의 연결 방식}
+- Synchronous calls: {direct call relationships between services}
+- Asynchronous events: {event-based communication relationships}
+- External integration: {connection method with external systems}

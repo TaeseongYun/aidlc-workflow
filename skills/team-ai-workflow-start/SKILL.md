@@ -1,5 +1,5 @@
 ---
-description: Entry point for team-ai-workflow on any account/repo. Detects state, sets up if needed, and routes to ctx-aidlc-roadmap / ctx-aidlc-run / ctx-run. Also bridges to oh-my-claudecode and Ouroboros workflows.
+description: Entry point for team-ai-workflow on any account/repo. Detects state, sets up if needed, and routes to ctx-aidlc-roadmap / ctx-worktree / ctx-aidlc-run / ctx-run. Also bridges to oh-my-claudecode and Ouroboros workflows.
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Skill, AskUserQuestion
 ---
@@ -12,63 +12,64 @@ EXECUTION_MODEL: SEQUENTIAL
 PURPOSE
 ────────────────────────────────────
 
-team-ai-workflow의 단일 진입점이다. 어떤 계정·어떤 레포지토리에서든
-같은 명령(`/team-ai-workflow-start`)으로 시작할 수 있게 한다.
+This is the single entry point for team-ai-workflow. It lets you start with the
+same command (`/team-ai-workflow-start`) on any account and any repository.
 
-이 스킬은 직접 작업을 수행하지 않는다. 다음 3가지만 한다:
-1. 현재 환경 상태를 진단한다 (스킬 설치 여부, 프로젝트 초기화 여부).
-2. 필요하면 셋업을 안내한다 (또는 사용자 승인 시 자동 실행).
-3. 사용자의 의도를 듣고 적절한 후속 스킬로 라우팅한다.
+This skill does not perform work directly. It only does the following 3 things:
+1. Diagnoses the current environment state (whether skills are installed, whether the project is initialized).
+2. Guides setup if needed (or runs it automatically upon user approval).
+3. Listens to the user's intent and routes to the appropriate follow-up skill.
 
-대상 후속 스킬:
-- team-ai-workflow 본체: `/ctx-aidlc-roadmap`, `/ctx-aidlc-run`, `/ctx-run`
-- 보조 스킬: `/ctx-architect-judge`, `/ctx-domain-exec`, `/ctx-reviewer`,
+Target follow-up skills:
+- team-ai-workflow core: `/ctx-aidlc-roadmap`, `/ctx-worktree`, `/ctx-aidlc-run`, `/ctx-run`
+- Auxiliary skills: `/ctx-architect-judge`, `/ctx-domain-exec`, `/ctx-reviewer`,
   `/ctx-updater`, `/ctx-refiner`, `/ctx-commit-planner`
-- 구현 후 자동 채점 루프: `/ctx-score-loop` (GATE-3 통과 피처에 한해
-  의존성·4축 검증을 85점 초과까지 자율 반복)
-- 외부 오케스트레이션 (선택): oh-my-claudecode(OMC), Ouroboros
+- Post-implementation automatic scoring loop: `/ctx-score-loop` (only for features
+  that pass GATE-3; autonomously iterates dependency/4-axis verification until the
+  score exceeds 85)
+- External orchestration (optional): oh-my-claudecode(OMC), Ouroboros
 
 ────────────────────────────────────
 CORE RULES
 ────────────────────────────────────
 
-- 진단 결과 없이 임의로 파일을 만들지 않는다.
-- 자동 실행은 사용자가 명시적으로 동의했을 때만 수행한다.
-- 본 스킬은 요구사항을 직접 분석하지 않는다. 분석은 항상 `/ctx-aidlc-run`이 한다.
-- 본 스킬은 코드를 작성하지 않는다. 구현은 항상 `/ctx-run`이 한다.
-- 한국어로 응답한다. 코드/명령은 영문 유지.
+- Do not create files arbitrarily without diagnosis results.
+- Automatic execution is performed only when the user explicitly consents.
+- This skill does not analyze requirements directly. Analysis is always done by `/ctx-aidlc-run`.
+- This skill does not write code. Implementation is always done by `/ctx-run`.
+- Respond to the user in Korean. Keep code/commands in English.
 
 ────────────────────────────────────
 DIAGNOSIS CHECKLIST
 ────────────────────────────────────
 
-시작 시 다음을 순서대로 확인하고, 모든 결과를 한 번에 보고한다.
+At startup, check the following in order and report all results at once.
 
-A. team-ai-workflow 본체 위치 추정
-   - 우선순위:
-     1. 환경 변수 `TEAM_AI_WORKFLOW_DIR`
+A. Estimate the team-ai-workflow core location
+   - Priority:
+     1. Environment variable `TEAM_AI_WORKFLOW_DIR`
      2. `~/workspace/team-ai-workflow`
      3. `~/work/team-ai-workflow`
      4. `~/.team-ai-workflow`
-   - 위 중 하나에 `scripts/install-skills.sh`가 존재하면 그 경로를 채택.
-   - 모두 없으면 "본체 미설치" 상태.
+   - If `scripts/install-skills.sh` exists in one of the above, adopt that path.
+   - If none exist, the state is "core not installed".
 
-B. 스킬 글로벌 설치 여부
-   - `~/.claude/commands/ctx-aidlc-run.md` 존재 여부 확인.
-   - `~/.codex/skills/ctx-aidlc-run/SKILL.md` 존재 여부 확인 (선택).
+B. Whether skills are installed globally
+   - Check whether `~/.claude/commands/ctx-aidlc-run.md` exists.
+   - Check whether `~/.codex/skills/ctx-aidlc-run/SKILL.md` exists (optional).
 
-C. 현재 프로젝트 초기화 여부 (현재 작업 디렉토리 기준)
-   - `ctx/INDEX.md`, `ctx/project-profile.ctx.md` 존재 여부.
-   - `aidlc-docs/aidlc-state.md` 존재 여부.
-   - `CLAUDE.md` 또는 `AGENTS.md` 존재 여부.
+C. Whether the current project is initialized (based on the current working directory)
+   - Whether `ctx/INDEX.md`, `ctx/project-profile.ctx.md` exist.
+   - Whether `aidlc-docs/aidlc-state.md` exists.
+   - Whether `CLAUDE.md` or `AGENTS.md` exists.
 
-D. 기존 작업 진행 상태
-   - `aidlc-docs/_roadmap.md` 존재 → multi-feature 모드
-   - `aidlc-docs/features/*/status.md` 존재 → 진행 중 feature 목록 추출
+D. Existing work progress state
+   - `aidlc-docs/_roadmap.md` exists → multi-feature mode
+   - `aidlc-docs/features/*/status.md` exists → extract the list of in-progress features
 
-E. 외부 오케스트레이션 감지 (선택)
-   - `.omc/` 디렉토리 존재 → OMC 사용 가능성
-   - `.ouroboros/` 또는 ouroboros 관련 파일 존재 → Ouroboros 사용 가능성
+E. External orchestration detection (optional)
+   - `.omc/` directory exists → OMC may be in use
+   - `.ouroboros/` or Ouroboros-related files exist → Ouroboros may be in use
 
 F. 코드 그래프 전제조건 (Hallucination Guard — 필수)
    - `bash <본체경로>/scripts/check-codegraph.sh .` 를 실행하고 종료코드를 읽는다.
@@ -79,7 +80,7 @@ F. 코드 그래프 전제조건 (Hallucination Guard — 필수)
 REPORT FORMAT
 ────────────────────────────────────
 
-진단 결과는 다음 포맷으로 출력한다.
+Output the diagnosis results in the following format.
 
 ```markdown
 ## team-ai-workflow 진단
@@ -105,73 +106,84 @@ REPORT FORMAT
 ROUTING DECISION TREE
 ────────────────────────────────────
 
-진단 결과에 따라 사용자에게 다음 중 하나를 추천한다.
+Based on the diagnosis results, recommend one of the following to the user.
 
-CASE 0: 코드 그래프 전제조건 미충족 (다른 모든 CASE보다 먼저 평가 — HARD GATE)
-- 조건: 진단 F에서 `check-codegraph.sh`가 codegraph 또는 graphify 중 **하나라도 누락**(종료코드 2)이면
-  적용한다. (인덱스만 없으면(코드 3) 도구는 있으므로 `codegraph init`로 생성하고 통과시킨다.)
-- **금지**: 이 상태에서 초기 세팅/요구사항/구현 등 어떤 후속 CASE로도 라우팅하지 않는다.
-  "그냥 진행"·"무시하고 계속" 같은 자유 텍스트 프롬프트를 받지 않는다.
-- 응답: 먼저 "초기 세팅 불가 — codegraph/graphify 전제조건 미충족"을 명확히 알린다.
-  이어서 **자유 텍스트가 아니라 AskUserQuestion 대화 상자**로 다음을 묻는다:
-    (1) 누락 도구 설치 실행  (2) 수동 설치 안내만  (3) 취소
-  - `check-codegraph.sh` 출력의 `MISSING:` 줄에서 각 도구의 install 명령을 그대로 읽어 제시한다
-    (codegraph: `npm i -g @colbymchenry/codegraph`; graphify: 레지스트리에 지정된 명령).
-  - 사용자가 (1)을 **명시적으로 승인**하면 Bash로 install 명령 + `codegraph init` 을 실행한다.
-    승인 없이는 자동 실행 금지 (skill-protocol Execution Boundary).
-  - 설치 후 `check-codegraph.sh`를 재실행해 통과(코드 0)를 확인한 뒤에야 다음 CASE로 진행한다.
-- 근거: 가드의 VERIFY는 코드 그래프를 1차 소스로 쓴다. 그래프 없이는 전제가 성립하지 않으므로
-  세팅을 진행하는 것이 불가능하다(가능한 척하지 않는다).
+CASE 0: Code graph prerequisites not satisfied (evaluate before every other case — HARD GATE)
+- Condition: apply when diagnosis F reports that **either** codegraph or graphify
+  is missing (exit code 2). If only the index is missing (code 3), the tools are
+  available; create it with `codegraph init` and make the check pass.
+- **Prohibited**: do not route to any subsequent case, including initial setup,
+  requirements, or implementation. Do not accept a free-text prompt such as
+  "just continue" or "ignore it and proceed."
+- Response: first state clearly that initial setup cannot proceed because the
+  codegraph/graphify prerequisites are not satisfied. Then use an
+  **AskUserQuestion dialog, not free text**, to ask whether to:
+    (1) install the missing tools, (2) show manual installation instructions, or (3) cancel.
+  - Read and present each installation command exactly from the `MISSING:` lines
+    emitted by `check-codegraph.sh` (codegraph:
+    `npm i -g @colbymchenry/codegraph`; graphify: the command specified by the registry).
+  - If the user **explicitly approves** option (1), run the install command and
+    `codegraph init` with Bash. Never execute automatically without approval
+    (skill-protocol Execution Boundary).
+  - After installation, rerun `check-codegraph.sh` and proceed to the next case
+    only after it passes (code 0).
+- Rationale: the guard's VERIFY step uses the code graph as its primary source.
+  Without the graph, the prerequisite is not met, so setup cannot proceed.
 
-CASE 1: 본체 미설치
-- 안내: "team-ai-workflow 본체를 먼저 클론해야 합니다."
-- 권장 명령:
+CASE 1: Core not installed
+- Guidance: "You must clone the team-ai-workflow core first."
+- Recommended command:
   ```bash
   git clone https://github.com/TaeseongYun/aidlc-workflow.git ~/workspace/aidlc-workflow
   bash ~/workspace/aidlc-workflow/scripts/install-skills.sh
   ```
-- 자동 실행 금지. 사용자 승인 시에만 Bash 도구로 실행.
+- No automatic execution. Run with the Bash tool only upon user approval.
 
-CASE 2: 본체는 있으나 글로벌 스킬 미설치
-- 권장 명령:
+CASE 2: Core exists but global skills are not installed
+- Recommended command:
   ```bash
   bash <본체경로>/scripts/install-skills.sh
   ```
-- 사용자 승인 시 자동 실행 가능.
+- Automatic execution allowed upon user approval.
 
-CASE 3: 글로벌 스킬은 있으나 현재 프로젝트 미초기화
-- 권장 명령:
+CASE 3: Global skills exist but the current project is not initialized
+- Recommended command:
   ```bash
   bash <본체경로>/scripts/init-project.sh
   ```
-- 자동 실행 후 사용자에게 `ctx/INDEX.md` 자동 채움을 제안한다.
+- After automatic execution, propose auto-filling `ctx/INDEX.md` to the user.
 
-CASE 4: 초기화 완료, multi-feature 기획서 있음
-- 추천: `/ctx-aidlc-roadmap`
+CASE 4: Initialization complete, multi-feature planning document present
+- Recommendation: `/ctx-aidlc-roadmap`
 
-CASE 5: 초기화 완료, 단일 feature 요구사항 있음
-- 추천: `/ctx-aidlc-run`
+CASE 5: Approved multi-feature roadmap has a parallel execution phase
+- Recommendation: `/ctx-worktree`
+- The skill must show the allocation plan and wait for approval before creation.
 
-CASE 6: requirements.md 승인 완료, 구현 단계
-- 추천: `/ctx-run`
+CASE 6: Initialization complete, single-feature requirements present
+- Recommendation: `/ctx-aidlc-run`
 
-CASE 7: 진행 중 feature가 여러 개
-- 사용자에게 어느 feature로 이어갈지 묻고, 해당 status.md를 먼저 읽도록 안내한다.
+CASE 7: requirements.md approval complete, implementation stage
+- Recommendation: `/ctx-run`
 
-CASE 8: 구현 완료, 품질 자동 반복 채점이 필요
-- 추천: `/ctx-score-loop <feature-slug>`
-- 조건: 해당 feature가 GATE-3(구현 승인)를 통과했어야 한다.
-  의존성·4축 검증을 85점 초과까지 자율 반복하며, GATE를 자동 통과시키지 않는다.
+CASE 8: Multiple in-progress features
+- Ask the user which feature to continue with, and guide them to read that status.md first.
+
+CASE 9: Implementation complete, automatic iterative quality scoring needed
+- Recommendation: `/ctx-score-loop <feature-slug>`
+- Condition: that feature must have passed GATE-3 (implementation approval).
+  It autonomously iterates dependency/4-axis verification until the score exceeds 85,
+  and does not auto-pass GATEs.
 
 ────────────────────────────────────
 EXTERNAL ORCHESTRATION (OMC / Ouroboros)
 ────────────────────────────────────
 
-team-ai-workflow는 요구사항 분석/설계의 "What"을 담당한다.
-실행 자동화/반복 루프의 "How"는 OMC나 Ouroboros가 담당한다.
-둘은 충돌하지 않는다. 다음 패턴으로 연계한다.
+team-ai-workflow handles the "What" of requirements analysis/design.
+The "How" of execution automation/iteration loops is handled by OMC or Ouroboros.
+The two do not conflict. Connect them with the following patterns.
 
-### 패턴 1 — OMC autopilot으로 끝까지 자동화
+### Pattern 1 — Full automation to the end with OMC autopilot
 
 ```text
 사용자 요청
@@ -183,10 +195,10 @@ team-ai-workflow는 요구사항 분석/설계의 "What"을 담당한다.
 /oh-my-claudecode:autopilot ← 구현/테스트/검증 자동 반복
 ```
 
-OMC autopilot은 `aidlc-docs/features/<slug>/requirements.md`와
-`unit-of-work.md`를 입력으로 받아 구현을 수행한다.
+OMC autopilot takes `aidlc-docs/features/<slug>/requirements.md` and
+`unit-of-work.md` as input and performs the implementation.
 
-### 패턴 2 — Ouroboros evolve로 진화적 구현
+### Pattern 2 — Evolutionary implementation with Ouroboros evolve
 
 ```text
 /ctx-aidlc-run            ← Seed가 될 requirements 생성
@@ -196,11 +208,11 @@ OMC autopilot은 `aidlc-docs/features/<slug>/requirements.md`와
 /ouroboros:evolve          ← 진화 루프
 ```
 
-Ouroboros는 측정 가능한 목표가 있는 경우(테스트 통과율, 성능 지표 등)
-에 가장 효과적이다. `unit-of-work.md`의 Acceptance Criteria를
-Seed의 verification으로 사용한다.
+Ouroboros is most effective when there is a measurable goal (test pass rate,
+performance metrics, etc.). It uses the Acceptance Criteria of `unit-of-work.md`
+as the Seed's verification.
 
-### 패턴 3 — ralph 루프로 단일 feature 완성
+### Pattern 3 — Complete a single feature with the ralph loop
 
 ```text
 /ctx-aidlc-run            ← requirements + UOW 확정
@@ -208,106 +220,110 @@ Seed의 verification으로 사용한다.
 /oh-my-claudecode:ralph   ← 검증 통과까지 반복 실행
 ```
 
-작은 단위(S 사이즈) feature에 적합. UOW의 verification method를 ralph의
-종료 조건으로 사용.
+Suitable for small (S size) features. Use the UOW's verification method as ralph's
+termination condition.
 
-### 연계 시 주의사항
+### Precautions when connecting
 
-- GATE 승인은 항상 사람이 한다. OMC/Ouroboros가 GATE를 자동 통과시키지 않는다.
-- `audit.md`는 두 시스템 모두 append-only로 존중한다. 충돌 시
-  team-ai-workflow의 audit 룰이 우선.
-- OMC의 `.omc/state/`, Ouroboros의 세션 상태는 `aidlc-docs/`와
-  별개 공간에 둔다. 서로 덮어쓰지 않는다.
+- GATE approval is always done by a human. OMC/Ouroboros does not auto-pass GATEs.
+- `audit.md` is respected as append-only by both systems. In case of conflict,
+  team-ai-workflow's audit rule takes precedence.
+- OMC's `.omc/state/` and Ouroboros's session state are kept in a space separate
+  from `aidlc-docs/`. They do not overwrite each other.
 
 ────────────────────────────────────
 CROSS-ACCOUNT / CROSS-REPO PORTABILITY
 ────────────────────────────────────
 
-다른 계정·다른 레포지토리에서도 동일하게 동작시키기 위한 체크리스트.
+Checklist for operating identically across different accounts and different repositories.
 
-1. **본체 클론 위치를 통일**한다. 권장: `~/workspace/team-ai-workflow`.
-   다른 위치 사용 시 `TEAM_AI_WORKFLOW_DIR` 환경변수로 명시한다.
+1. **Unify the core clone location.** Recommended: `~/workspace/team-ai-workflow`.
+   If using a different location, specify it with the `TEAM_AI_WORKFLOW_DIR` environment variable.
 
    ```bash
    echo 'export TEAM_AI_WORKFLOW_DIR="$HOME/work/team-ai-workflow"' >> ~/.zshrc
    ```
 
-2. **스킬은 글로벌로 설치**되어 있어야 한다.
+2. **Skills must be installed globally.**
 
    ```bash
    bash "$TEAM_AI_WORKFLOW_DIR/scripts/install-skills.sh"
    ```
 
-   설치 후 `~/.claude/commands/`에 `ctx-*.md` 파일이 생성된다.
+   After installation, `ctx-*.md` files are created in `~/.claude/commands/`.
 
-3. **계정 전환 시** 글로벌 스킬은 사용자 홈 디렉토리 기준이므로 그대로 유지된다.
-   단, Claude Code multi-account를 사용하는 경우 `~/.claude-personal/` 또는
-   별도 홈 경로에 동일하게 설치해야 한다.
+3. **When switching accounts**, global skills are based on the user's home directory, so they are retained as-is.
+   However, if using Claude Code multi-account, you must install identically under `~/.claude-personal/` or
+   a separate home path.
 
-4. **레포지토리 전환 시** 각 레포에서 한 번씩 `init-project.sh`를 실행한다.
+4. **When switching repositories**, run `init-project.sh` once in each repo.
 
    ```bash
    cd /path/to/new-repo
    bash "$TEAM_AI_WORKFLOW_DIR/scripts/init-project.sh"
    ```
 
-5. **본체 업데이트**는 `git pull` 후 재설치한다.
+5. **To update the core**, reinstall after `git pull`.
 
    ```bash
    cd "$TEAM_AI_WORKFLOW_DIR" && git pull
    bash scripts/install-skills.sh
    ```
 
-   `install-skills.sh`는 멱등하므로 여러 번 돌려도 안전하다.
+   `install-skills.sh` is idempotent, so it is safe to run multiple times.
 
 ────────────────────────────────────
 EXECUTION FLOW
 ────────────────────────────────────
 
-STEP 1. 진단 수행
-- Bash로 위 DIAGNOSIS CHECKLIST를 한 번에 실행한다 (진단 F의 `check-codegraph.sh` 포함).
-- 결과를 REPORT FORMAT으로 출력한다.
+STEP 1. Perform diagnosis
+- Run the DIAGNOSIS CHECKLIST above all at once with Bash, including the
+  `check-codegraph.sh` command in diagnosis F.
+- Output the results in the REPORT FORMAT.
 
-STEP 1.5. 코드 그래프 HARD GATE (CASE 0)
-- 진단 F가 도구 누락(종료코드 2)이면 **여기서 멈춘다**. STEP 2/3의 의도 확인·라우팅으로
-  넘어가지 않는다. CASE 0 절차대로 AskUserQuestion 대화 상자로 설치를 처리하고,
-  통과(종료코드 0)를 확인한 뒤에만 STEP 2로 진행한다.
-- 인덱스만 없으면(코드 3) `codegraph init` 실행 후 진행한다.
+STEP 1.5. Code graph HARD GATE (CASE 0)
+- If diagnosis F reports a missing tool (exit code 2), **stop here**. Do not
+  proceed to intent confirmation or routing in STEP 2/3. Handle installation
+  through an AskUserQuestion dialog as defined by CASE 0, and continue to STEP 2
+  only after the check passes (exit code 0).
+- If only the index is missing (code 3), run `codegraph init` and continue.
 
-STEP 2. 의도 확인
-- 사용자가 명시적으로 무엇을 하려는지 한 줄로 묻는다. 예:
-  - "이번에 하고 싶은 작업은 (a) 새 기능 요구사항 분석 (b) 큰 기획서 분해
-    (c) 승인된 요구사항 구현 (d) 환경 셋업 중 무엇인가요?"
-- 사용자 답변에 따라 ROUTING DECISION TREE의 케이스로 분기한다.
+STEP 2. Confirm intent
+- Ask the user in one line what they explicitly want to do. Example:
+  - "Is the task you want to do this time (a) new feature requirements analysis
+    (b) decomposing a large planning document (c) allocating approved roadmap
+    features to worktrees (d) implementing approved requirements (e) environment setup?"
+- Branch to the appropriate case in the ROUTING DECISION TREE based on the user's answer.
 
-STEP 3. 라우팅
-- 권장 명령을 코드 블록으로 출력하고, 사용자가 그 명령을 입력하면
-  해당 스킬이 자동 실행된다고 안내한다.
-- 환경 셋업이 필요하면 셋업 명령을 먼저 제안한다. 사용자 승인 시 Bash로 실행.
+STEP 3. Routing
+- Output the recommended command as a code block, and inform the user that when they enter that command
+  the corresponding skill runs automatically.
+- If environment setup is needed, propose the setup command first. Run with Bash upon user approval.
 
-STEP 4. 외부 오케스트레이션 안내 (선택)
-- 진단에서 OMC/Ouroboros가 감지되었거나 사용자가 묻는 경우,
-  EXTERNAL ORCHESTRATION 섹션의 패턴 1~3 중 적합한 것을 추천한다.
-- 추천 시 항상 "GATE 승인은 사람이 한다"는 점을 명시한다.
+STEP 4. External orchestration guidance (optional)
+- If OMC/Ouroboros was detected in the diagnosis or the user asks,
+  recommend the appropriate one among Patterns 1–3 in the EXTERNAL ORCHESTRATION section.
+- When recommending, always state that "GATE approval is done by a human".
 
 ────────────────────────────────────
 WHEN TO STOP
 ────────────────────────────────────
 
-다음 상황에서는 진행하지 말고 사용자 입력을 기다린다.
-- 코드 그래프 전제조건 미충족(codegraph/graphify 누락): 후속 라우팅 금지. CASE 0의
-  AskUserQuestion 대화 상자로만 처리하고, 자유 텍스트 "계속" 프롬프트는 받지 않는다.
-- 본체 클론, 글로벌 설치, 프로젝트 초기화는 사용자 명시 승인 전 자동 실행 금지.
-- 진행 중 feature가 2개 이상인데 사용자가 어느 것을 이어갈지 명시하지 않음.
-- 외부 오케스트레이션 자동 실행 요청. 본 스킬은 라우팅만 하고, 실제 호출은
-  사용자가 명시적으로 한다.
+In the following situations, do not proceed and wait for user input.
+- Code graph prerequisites are not satisfied (codegraph/graphify missing): do
+  not perform subsequent routing. Handle this only through the AskUserQuestion
+  dialog in CASE 0; do not accept a free-text "continue" prompt.
+- Do not auto-execute core cloning, global installation, or project initialization before explicit user approval.
+- There are 2 or more in-progress features but the user has not specified which one to continue with.
+- Request for automatic execution of external orchestration. This skill only routes; the actual invocation
+  is done explicitly by the user.
 
 ────────────────────────────────────
 NON-GOALS
 ────────────────────────────────────
 
-- 요구사항 분석/질문 추출 (→ `/ctx-aidlc-run`)
-- 멀티피처 로드맵 작성 (→ `/ctx-aidlc-roadmap`)
-- 구현/테스트/리뷰 (→ `/ctx-run` 및 그 하위 스킬)
-- 코드 자동 수정 (→ `/ctx-updater`)
-- 외부 시스템 직접 호출 (사용자가 별도 스킬로 호출)
+- Requirements analysis/question extraction (→ `/ctx-aidlc-run`)
+- Multi-feature roadmap authoring (→ `/ctx-aidlc-roadmap`)
+- Implementation/test/review (→ `/ctx-run` and its sub-skills)
+- Automatic code modification (→ `/ctx-updater`)
+- Direct invocation of external systems (the user invokes them with a separate skill)

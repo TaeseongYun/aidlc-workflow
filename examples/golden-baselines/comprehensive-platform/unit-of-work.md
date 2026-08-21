@@ -1,84 +1,84 @@
 <!-- workflow-step: STEP-6 | gate: GATE-3 | producer: ctx-aidlc-run -->
 # Unit of Work
 
-분해 기준: `core/units-generation.md`
+Decomposition criteria: `core/units-generation.md`
 
 ## Summary
 
-| ID | 책임 | 규모 | 의존성 | 상태 |
+| ID | Responsibility | Size | Dependencies | Status |
 |----|------|------|--------|------|
-| UOW-1 | 정산 도메인 모델 및 저장소 | M | 없음 | TODO |
-| UOW-2 | 벤더 수수료 정책 관리 | S | UOW-1 | TODO |
-| UOW-3 | 매출 집계 및 정산 산출 배치 | L | UOW-1, UOW-2 | TODO |
-| UOW-4 | PG사 대사 연동 | M | UOW-1 | TODO |
-| UOW-5 | 정산 승인 워크플로우 API | M | UOW-1, UOW-3 | TODO |
-| UOW-6 | 벤더 정산 조회 API | S | UOW-1 | TODO |
-| UOW-7 | 정산 감사 로그 | S | UOW-1, UOW-5 | TODO |
+| UOW-1 | Settlement domain model and repository | M | None | TODO |
+| UOW-2 | Vendor fee policy management | S | UOW-1 | TODO |
+| UOW-3 | Sales aggregation and settlement calculation batch | L | UOW-1, UOW-2 | TODO |
+| UOW-4 | PG-provider reconciliation integration | M | UOW-1 | TODO |
+| UOW-5 | Settlement approval workflow API | M | UOW-1, UOW-3 | TODO |
+| UOW-6 | Vendor settlement query API | S | UOW-1 | TODO |
+| UOW-7 | Settlement audit log | S | UOW-1, UOW-5 | TODO |
 
-## UOW-1. 정산 도메인 모델 및 저장소
-- 책임: settlement, settlement_detail, vendor_fee_policy, reconciliation 테이블 및 Entity/Repository
-- 예상 위치: domains/domain-rds/src/.../settlement/
-- 의존성: 없음
-- 규모: M
-- 수용 기준: 4개 테이블 DDL, Entity, Repository 생성. 기본 CRUD 테스트 통과.
-- 검증 방법: 단위 테스트
+## UOW-1. Settlement domain model and repository
+- Responsibility: settlement, settlement_detail, vendor_fee_policy, reconciliation tables and Entity/Repository
+- Expected location: domains/domain-rds/src/.../settlement/
+- Dependencies: None
+- Size: M
+- Acceptance criteria: DDL for the 4 tables, Entity, and Repository created. Basic CRUD tests pass.
+- Verification method: unit tests
 
-## UOW-2. 벤더 수수료 정책 관리
-- 책임: 벤더별 수수료 정책 CRUD API, effective_from 기반 적용 로직
-- 예상 위치: center/back-end/src/.../settlement/service/FeePolicy*
-- 의존성: UOW-1
-- 규모: S
-- 수용 기준: 정률/정액/혼합 정책 설정 가능, effective_from 이후 적용 확인
-- 검증 방법: 단위 테스트
+## UOW-2. Vendor fee policy management
+- Responsibility: per-vendor fee policy CRUD API, effective_from-based application logic
+- Expected location: center/back-end/src/.../settlement/service/FeePolicy*
+- Dependencies: UOW-1
+- Size: S
+- Acceptance criteria: percentage/fixed-amount/mixed policies can be configured, application after effective_from confirmed
+- Verification method: unit tests
 
-## UOW-3. 매출 집계 및 정산 산출 배치
-- 책임: 주문 완료 건 벤더별 집계 → 수수료 적용 → 정산 금액 산출 → settlement 생성
-- 예상 위치: center/back-end/src/.../settlement/batch/
-- 의존성: UOW-1, UOW-2
-- 규모: L
-- 수용 기준: 200 벤더 × 10만 건 기준 30분 이내, 정산 금액 = 매출 - 수수료, 원 단위 절사
-- 검증 방법: 통합 테스트 + 성능 테스트
+## UOW-3. Sales aggregation and settlement calculation batch
+- Responsibility: aggregate completed orders per vendor → apply fees → calculate settlement amount → create settlement
+- Expected location: center/back-end/src/.../settlement/batch/
+- Dependencies: UOW-1, UOW-2
+- Size: L
+- Acceptance criteria: within 30 minutes for 200 vendors × 100,000 records, settlement amount = sales − fees, truncated to the won unit
+- Verification method: integration tests + performance tests
 
-## UOW-4. PG사 대사 연동
-- 책임: PG사 API 호출 → 거래 내역 다운로드 → 주문 건 매칭 → 불일치 목록 생성
-- 예상 위치: center/back-end/src/.../settlement/reconciliation/
-- 의존성: UOW-1
-- 규모: M
-- 수용 기준: 매칭 성공/실패/불일치 분류, rate limit 준수, webhook + 배치 혼합
-- 검증 방법: 통합 테스트 (PG API mock)
+## UOW-4. PG-provider reconciliation integration
+- Responsibility: PG-provider API call → download transaction records → match order transactions → generate mismatch list
+- Expected location: center/back-end/src/.../settlement/reconciliation/
+- Dependencies: UOW-1
+- Size: M
+- Acceptance criteria: match success/failure/mismatch classification, rate-limit compliance, webhook + batch hybrid
+- Verification method: integration tests (PG API mock)
 
-## UOW-5. 정산 승인 워크플로우 API
-- 책임: 정산 상태 관리 (생성 → 검토 → 승인 → 지급), 관리자 API, 지급 재시도
-- 예상 위치: center/back-end/src/.../settlement/controller/, service/
-- 의존성: UOW-1, UOW-3
-- 규모: M
-- 수용 기준: 상태 전이가 규칙대로 동작, 권한 검증(ROLE_SETTLEMENT_ADMIN), 재시도 3회
-- 검증 방법: 통합 테스트
+## UOW-5. Settlement approval workflow API
+- Responsibility: settlement status management (create → review → approve → pay), administrator API, payout retry
+- Expected location: center/back-end/src/.../settlement/controller/, service/
+- Dependencies: UOW-1, UOW-3
+- Size: M
+- Acceptance criteria: state transitions work per the rules, permission check (ROLE_SETTLEMENT_ADMIN), 3 retries
+- Verification method: integration tests
 
-## UOW-6. 벤더 정산 조회 API
-- 책임: 벤더 포탈용 정산 내역 조회 API (본인 정산만 접근)
-- 예상 위치: center/back-end/src/.../settlement/controller/VendorSettlement*
-- 의존성: UOW-1
-- 규모: S
-- 수용 기준: 벤더별 정산 목록/상세 조회, 타 벤더 데이터 접근 차단
-- 검증 방법: 통합 테스트 (권한 테스트 포함)
+## UOW-6. Vendor settlement query API
+- Responsibility: settlement-history query API for the vendor portal (access to own settlements only)
+- Expected location: center/back-end/src/.../settlement/controller/VendorSettlement*
+- Dependencies: UOW-1
+- Size: S
+- Acceptance criteria: per-vendor settlement list/detail query, access to other vendors' data blocked
+- Verification method: integration tests (including permission tests)
 
-## UOW-7. 정산 감사 로그
-- 책임: 정산 상태 변경 이벤트 기록, 조회 API
-- 예상 위치: center/back-end/src/.../settlement/audit/
-- 의존성: UOW-1, UOW-5
-- 규모: S
-- 수용 기준: 모든 상태 변경이 감사 로그에 기록, 5년 보관 정책 적용
-- 검증 방법: 통합 테스트
+## UOW-7. Settlement audit log
+- Responsibility: record settlement status change events, query API
+- Expected location: center/back-end/src/.../settlement/audit/
+- Dependencies: UOW-1, UOW-5
+- Size: S
+- Acceptance criteria: all status changes recorded in the audit log, 5-year retention policy applied
+- Verification method: integration tests
 
 ## Recommended Delivery Order
-1. UOW-1 — 전체 기반
-2. UOW-2 — 정산 산출의 선행 조건
-3. UOW-4 — 대사 연동 (독립 작업 가능)
-4. UOW-3 — 핵심 배치 (UOW-1, UOW-2 필요)
-5. UOW-5 — 승인 워크플로우 (UOW-3 이후)
-6. UOW-7 — 감사 로그 (UOW-5 이벤트 필요)
-7. UOW-6 — 벤더 조회 (데이터 축적 후 의미)
+1. UOW-1 — the overall foundation
+2. UOW-2 — a precondition for settlement calculation
+3. UOW-4 — reconciliation integration (can be done independently)
+4. UOW-3 — the core batch (requires UOW-1, UOW-2)
+5. UOW-5 — the approval workflow (after UOW-3)
+6. UOW-7 — the audit log (requires UOW-5 events)
+7. UOW-6 — vendor query (meaningful after data has accumulated)
 
-## 규모 기준
+## Sizing Criteria
 `core/unit-sizing.md`

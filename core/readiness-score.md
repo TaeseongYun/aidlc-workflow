@@ -1,76 +1,76 @@
 # Readiness Score
 
-requirements.md가 구현 가능한 수준인지 정량 평가하는 기준이다.
+This is the standard for quantitatively evaluating whether requirements.md is at an implementable level.
 
-## 채점 영역
+## Scoring areas
 
-### 1. 기능 범위 정의 (15점)
-- Goal이 명확하다 (5)
-- In-Scope / Out-of-Scope가 구분되어 있다 (5)
-- 범위에 대한 BLOCK 질문이 없다 (5)
+### 1. Feature scope definition (15 points)
+- The Goal is clear (5)
+- In-Scope / Out-of-Scope are distinguished (5)
+- There are no BLOCK questions about scope (5)
 
-### 2. 정책/예외 확정 (20점)
-- 핵심 비즈니스 정책이 명시되어 있다 (10)
-- 예외/에러/취소 처리 방침이 있다 (5)
-- 정책 관련 BLOCK 질문이 없다 (5)
+### 2. Policy/exception finalization (20 points)
+- Core business policies are specified (10)
+- There is a policy for handling exceptions/errors/cancellations (5)
+- There are no policy-related BLOCK questions (5)
 
-### 3. 사용자 시나리오 (15점)
-- 주요 사용자 유형이 식별되어 있다 (5)
-- 핵심 시나리오가 기술되어 있다 (5)
-- 엣지 케이스가 식별되어 있다 (5)
+### 3. User scenarios (15 points)
+- The main user types are identified (5)
+- The core scenarios are described (5)
+- Edge cases are identified (5)
 
-### 4. NFR 확인 (15점)
-- 성능 요구사항이 확인되었거나 해당 없음이 명시되어 있다 (5)
-- 보안/권한 요구사항이 확인되었다 (5)
-- 운영 요구사항(알림, 모니터링, 배치)이 확인되었다 (5)
+### 4. NFR confirmation (15 points)
+- Performance requirements are confirmed or "not applicable" is specified (5)
+- Security/authorization requirements are confirmed (5)
+- Operational requirements (notifications, monitoring, batch) are confirmed (5)
 
-### 5. 승인 항목 해결 (20점)
-- Approval Preconditions에 나열된 항목이 모두 해결되었다 (10)
-- BLOCK 질문이 0건이다 (10)
-- 1건이라도 BLOCK이 남아 있으면 이 영역은 최대 5점
+### 5. Resolution of approval items (20 points)
+- All items listed in Approval Preconditions are resolved (10)
+- There are 0 BLOCK questions (10)
+- If even one BLOCK remains, this area is capped at 5 points
 
-### 6. 리스크 평가 (15점)
-- 리스크가 식별되어 있다 (5)
-- 각 리스크에 대응 방안 또는 수용 판단이 있다 (5)
-- 기존 시스템 영향(brownfield)이 파악되어 있다 (5)
+### 6. Risk assessment (15 points)
+- Risks are identified (5)
+- Each risk has a mitigation plan or an acceptance judgment (5)
+- The impact on the existing system (brownfield) is understood (5)
 
-### 7. 사용자 스토리 품질 (조건부 가점, 최대 10점)
-- 이 영역은 GATE-2.5가 발동된 경우에만 채점한다.
-- GATE-2.5가 발동되지 않으면 이 영역은 건너뛰고 합계에 포함하지 않는다.
-- 페르소나가 실제 사용자 유형을 반영한다 (3)
-- 유저 스토리가 INVEST 기준을 충족한다 (4)
-- Acceptance Criteria가 Gherkin 형식으로 검증 가능하다 (3)
+### 7. User story quality (conditional bonus, max 10 points)
+- This area is scored only when GATE-2.5 is triggered.
+- If GATE-2.5 is not triggered, skip this area and do not include it in the total.
+- The personas reflect actual user types (3)
+- The user stories satisfy the INVEST criteria (4)
+- The Acceptance Criteria are verifiable in Gherkin format (3)
 
-### 8. 시스템 구조 설계 (조건부 가점, 최대 10점)
-- 이 영역은 GATE-2.7이 발동된 경우에만 채점한다.
-- GATE-2.7이 발동되지 않으면 이 영역은 건너뛰고 합계에 포함하지 않는다.
-- 컴포넌트 식별과 책임 분리가 적절하다 (4)
-- 서비스 레이어와 API 경계가 명확하다 (3)
-- 의존성 매트릭스에 순환이 없다 (3)
+### 8. System structure design (conditional bonus, max 10 points)
+- This area is scored only when GATE-2.7 is triggered.
+- If GATE-2.7 is not triggered, skip this area and do not include it in the total.
+- Component identification and separation of responsibilities are appropriate (4)
+- The service layer and API boundaries are clear (3)
+- The dependency matrix has no cycles (3)
 
-## 판정 기준
+## Verdict criteria
 
-| 점수 | 판정 | 의미 |
+| Score | Verdict | Meaning |
 |------|------|------|
-| 80~100 | READY | 구현 가능. BLOCK 질문 0건. |
-| 60~79 | CONDITIONAL | 조건부 진행. ASSUME 가정을 status.md에 명시해야 함. |
-| 0~59 | NOT_READY | 구현 금지. BLOCK 질문 해결 필요. |
+| 80~100 | READY | Implementable. 0 BLOCK questions. |
+| 60~79 | CONDITIONAL | Conditional proceed. ASSUME assumptions must be specified in status.md. |
+| 0~59 | NOT_READY | Implementation prohibited. BLOCK questions need resolution. |
 
-판정 기준은 기본 100점 만점에 대해 적용한다.
-조건부 가점 영역(7, 8)이 활성화되면 만점이 늘어나지만, 판정 임계값(80/60)은 기본 100점 기준 비율로 환산한다.
-- 예: 기본 100점 + 가점 20점 = 만점 120점일 때, READY 기준은 96점(120 × 80%)이다.
+The verdict criteria are applied against a base of 100 points.
+When conditional bonus areas (7, 8) are activated the maximum increases, but the verdict thresholds (80/60) are converted using the ratio based on the base 100 points.
+- Example: when base 100 points + 20 bonus points = 120 points maximum, the READY threshold is 96 points (120 × 80%).
 
-## 산출 시점
-- STEP 5(requirements 작성) 완료 후, STEP 7(stop 판단) 전에 산출한다.
-- `status.md`의 Readiness Score 테이블에 기록한다.
-- score가 60 미만이면 status를 `questions-open`으로 유지한다.
+## Timing of computation
+- Compute it after STEP 5 (requirements authoring) completes and before STEP 7 (stop judgment).
+- Record it in the Readiness Score table of `status.md`.
+- If the score is below 60, keep the status as `questions-open`.
 
-## 구조화된 스키마
-자동 채점 및 프로그래매틱 참조용 스키마: `core/readiness-score.schema.yaml`
+## Structured schema
+Schema for automated scoring and programmatic reference: `core/readiness-score.schema.yaml`
 
-## 규칙
-- BLOCK 질문이 1건이라도 있으면 "승인 항목 해결" 영역은 최대 5점이다.
-- score를 올리기 위해 BLOCK을 ASSUME으로 임의 변경하지 않는다.
-- 점수는 근거와 함께 기록한다. 숫자만 쓰지 않는다.
-- 조건부 가점 영역은 해당 GATE가 발동된 경우에만 채점한다. 발동되지 않은 영역은 만점 계산에서 제외한다.
-- 조건부 가점 영역을 채점할 때, 해당 산출물이 생략된 경우에는 0점이 아니라 "해당 없음"으로 표기한다.
+## Rules
+- If there is even one BLOCK question, the "Resolution of approval items" area is capped at 5 points.
+- Do not arbitrarily change a BLOCK to ASSUME in order to raise the score.
+- Record the score together with rationale. Do not write the number alone.
+- Score conditional bonus areas only when the corresponding GATE is triggered. Areas that are not triggered are excluded from the maximum calculation.
+- When scoring a conditional bonus area, if the corresponding artifact was omitted, mark it as "not applicable" rather than 0 points.

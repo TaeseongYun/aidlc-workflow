@@ -1,97 +1,97 @@
 # API Contract
 
-API 계약 5개 항목의 전체 규칙이다.
-이 파일은 사용자가 opt-in한 경우에만 로드한다.
+The complete set of rules for the 5 API contract items.
+This file is loaded only when the user opts in.
 
-## 적용 규칙
+## Application Rules
 
-- opt-in 시 모든 항목은 **blocking constraint**로 취급한다.
-- FAIL 항목은 해당 UOW에서 반드시 해소해야 한다.
-- 산출물은 `aidlc-docs/features/<feature-slug>/extensions/api-contract.md`에 생성한다.
-
----
-
-## API-01. API 버전 관리 전략
-
-**평가 기준**:
-- PASS: 버전 관리 전략이 명시되어 있다 (URL path, header, query param 중 택일). 신규/변경 API의 버전이 정의되어 있다.
-- FAIL: 버전 관리 전략 미정의, 기존 API와 버전 충돌 가능성 있음.
-- N/A: 내부 전용 API로 버전 관리 불필요.
-
-**일반적 조치**: URL path 버전(`/v1/`, `/v2/`) 권장, 버전 업 기준 정의 (breaking change 시).
-**Brownfield 고려**: 기존 버전 체계와 일관성, 클라이언트 마이그레이션 계획.
-
-## API-02. 요청/응답 스키마 정의
-
-**평가 기준**:
-- PASS: 모든 API의 요청/응답 스키마가 명시적으로 정의되어 있다. 필수/선택 필드, 데이터 타입, 제약 조건이 포함되어 있다.
-- FAIL: 스키마 미정의, 필드 타입 불명확, 제약 조건 누락.
-- N/A: 스키마 없는 이벤트 기반 통신.
-
-**일반적 조치**: OpenAPI/Swagger 명세 작성, DTO 클래스 기반 자동 문서 생성, JSON Schema 검증.
-**Brownfield 고려**: 기존 API 스키마와의 일관성, 필드 네이밍 컨벤션 준수.
-
-## API-03. 에러 응답 표준
-
-**평가 기준**:
-- PASS: 에러 응답 형식이 일관된다 (error code, message, detail). HTTP 상태 코드가 의미에 맞게 사용된다. 비즈니스 에러 코드가 정의되어 있다.
-- FAIL: 에러 형식 불일치, 상태 코드 오용 (모든 에러에 500), 에러 코드 미정의.
-- N/A: 에러 발생이 없는 조회 전용 API.
-
-**일반적 조치**: 표준 에러 응답 포맷 정의, 비즈니스 에러 코드 테이블, 내부 정보 노출 방지.
-**Brownfield 고려**: 기존 에러 포맷과 일관성, 클라이언트 에러 핸들링 영향.
-
-## API-04. 하위 호환성
-
-**평가 기준**:
-- PASS: 기존 API 변경 시 하위 호환성이 검토되었다. Breaking change가 있으면 마이그레이션 계획이 수립되어 있다. Deprecation 정책이 명시되어 있다.
-- FAIL: 하위 호환성 미검토, breaking change 무계획 적용, 기존 클라이언트 영향 미분석.
-- N/A: 신규 API만 추가 (기존 변경 없음).
-
-**일반적 조치**: 필드 추가는 허용, 필드 삭제/변경은 버전 업, deprecation 기간(최소 2주) 공지.
-**Brownfield 고려**: 기존 클라이언트 목록 파악, 영향 범위 분석, 점진적 마이그레이션.
-
-## API-05. API 문서화
-
-**평가 기준**:
-- PASS: OpenAPI/Swagger 또는 동등한 문서가 작성되어 있다. 예제 요청/응답이 포함되어 있다. 인증/인가 요구사항이 명시되어 있다.
-- FAIL: 문서 미작성, 예제 미포함, 인증 요구사항 누락.
-- N/A: 내부 이벤트 기반 통신으로 API 문서 불필요.
-
-**일반적 조치**: 코드 기반 OpenAPI 자동 생성, Swagger UI 제공, API 변경 시 문서 동기화 검증.
-**Brownfield 고려**: 기존 문서 도구와 통합, 미문서화 API 식별.
+- On opt-in, every item is treated as a **blocking constraint**.
+- FAIL items must be resolved within the corresponding UOW.
+- The artifact is generated at `aidlc-docs/features/<feature-slug>/extensions/api-contract.md`.
 
 ---
 
-## 산출물 포맷
+## API-01. API Versioning Strategy
+
+**Evaluation criteria**:
+- PASS: A versioning strategy is specified (one of URL path, header, or query param). Versions for new/changed APIs are defined.
+- FAIL: No versioning strategy defined; possibility of version conflict with existing APIs.
+- N/A: Internal-only API with no need for versioning.
+
+**Typical action**: URL path versioning (`/v1/`, `/v2/`) recommended; define the criteria for bumping versions (on breaking changes).
+**Brownfield consideration**: Consistency with the existing versioning scheme, client migration plan.
+
+## API-02. Request/Response Schema Definition
+
+**Evaluation criteria**:
+- PASS: The request/response schema for every API is explicitly defined. Required/optional fields, data types, and constraints are included.
+- FAIL: Schema not defined, unclear field types, missing constraints.
+- N/A: Event-based communication with no schema.
+
+**Typical action**: Write an OpenAPI/Swagger spec, auto-generate docs from DTO classes, validate with JSON Schema.
+**Brownfield consideration**: Consistency with existing API schemas, adherence to field naming conventions.
+
+## API-03. Error Response Standard
+
+**Evaluation criteria**:
+- PASS: The error response format is consistent (error code, message, detail). HTTP status codes are used according to their meaning. Business error codes are defined.
+- FAIL: Inconsistent error format, misused status codes (500 for all errors), error codes not defined.
+- N/A: Read-only API with no errors.
+
+**Typical action**: Define a standard error response format, a business error code table, prevent exposure of internal information.
+**Brownfield consideration**: Consistency with the existing error format, impact on client error handling.
+
+## API-04. Backward Compatibility
+
+**Evaluation criteria**:
+- PASS: Backward compatibility is reviewed when changing existing APIs. If there is a breaking change, a migration plan is established. A deprecation policy is specified.
+- FAIL: Backward compatibility not reviewed, breaking changes applied without a plan, impact on existing clients not analyzed.
+- N/A: Only new APIs added (no changes to existing ones).
+
+**Typical action**: Allow field additions; bump the version for field removals/changes; announce a deprecation period (at least 2 weeks).
+**Brownfield consideration**: Identify the list of existing clients, analyze the scope of impact, gradual migration.
+
+## API-05. API Documentation
+
+**Evaluation criteria**:
+- PASS: OpenAPI/Swagger or equivalent documentation is written. Example requests/responses are included. Authentication/authorization requirements are specified.
+- FAIL: Documentation not written, examples not included, authentication requirements missing.
+- N/A: Internal event-based communication with no need for API documentation.
+
+**Typical action**: Auto-generate OpenAPI from code, provide Swagger UI, verify doc synchronization when the API changes.
+**Brownfield consideration**: Integration with existing documentation tools, identifying undocumented APIs.
+
+---
+
+## Artifact Format
 
 ```markdown
 # API Contract
 
-> **Request Anchor**: {최초 요청 요약}
+> **Request Anchor**: {summary of the initial request}
 
 ## API Contract Checklist
 
-| ID | 항목 | 상태 | 비고 |
+| ID | Item | Status | Notes |
 |----|------|------|------|
-| API-01 | 버전 관리 전략 | PASS / FAIL / N/A | |
-| API-02 | 요청/응답 스키마 | PASS / FAIL / N/A | |
-| API-03 | 에러 응답 표준 | PASS / FAIL / N/A | |
-| API-04 | 하위 호환성 | PASS / FAIL / N/A | |
-| API-05 | API 문서화 | PASS / FAIL / N/A | |
+| API-01 | Versioning strategy | PASS / FAIL / N/A | |
+| API-02 | Request/response schema | PASS / FAIL / N/A | |
+| API-03 | Error response standard | PASS / FAIL / N/A | |
+| API-04 | Backward compatibility | PASS / FAIL / N/A | |
+| API-05 | API documentation | PASS / FAIL / N/A | |
 
 ## Findings
 
-### API-{NN}. {항목명}
-- 상태: PASS / FAIL / N/A
-- 현재 상태: {현재 적용 현황}
-- 조치 필요: {필요한 조치 또는 "없음"}
-- 관련 UOW: UOW-{N} / 해당 없음
+### API-{NN}. {item name}
+- Status: PASS / FAIL / N/A
+- Current state: {current application status}
+- Action required: {required action or "none"}
+- Related UOW: UOW-{N} / not applicable
 
 ## Summary
-- 전체 항목: 5
+- Total items: 5
 - PASS: {N}
 - FAIL: {N}
 - N/A: {N}
-- FAIL 항목이 있으면 해당 UOW의 구현에서 반드시 해소해야 한다.
+- If any item is FAIL, it must be resolved during the implementation of the corresponding UOW.
 ```

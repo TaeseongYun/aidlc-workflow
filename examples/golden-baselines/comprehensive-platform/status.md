@@ -3,46 +3,46 @@
 
 ## Identity
 - Feature Slug: comprehensive-platform
-- Title: 멀티 벤더 정산 시스템
+- Title: Multi-Vendor Settlement System
 
 ## Readiness Score
 
-| 영역 | 배점 | 점수 | 상태 |
+| Area | Points | Score | Status |
 |------|------|------|------|
-| 기능 범위 정의 | 15 | 15 | OK |
-| 정책/예외 확정 | 20 | 18 | OK |
-| 사용자 시나리오 | 15 | 15 | OK |
-| NFR 확인 | 15 | 13 | OK |
-| 승인 항목 해결 | 20 | 20 | OK |
-| 리스크 평가 | 15 | 13 | OK |
-| 사용자 스토리 품질 | 10 | 9 | OK |
-| 시스템 구조 설계 | 10 | 8 | OK |
-| **합계** | **120** | **111** | **READY** |
+| Functional scope definition | 15 | 15 | OK |
+| Policy/exception finalization | 20 | 18 | OK |
+| User scenarios | 15 | 15 | OK |
+| NFR confirmation | 15 | 13 | OK |
+| Approval item resolution | 20 | 20 | OK |
+| Risk assessment | 15 | 13 | OK |
+| User story quality | 10 | 9 | OK |
+| System structure design | 10 | 8 | OK |
+| **Total** | **120** | **111** | **READY** |
 
-## 불확실 영역
-- NFR: 정산 배치 동시 실행 시 데드락 가능성 — `⚠️ UNCERTAIN` 마커 1건
-- 리스크: PG사 API 응답 시간 변동 — `[확신: 추정]` 1건
+## Uncertain Areas
+- NFR: possible deadlock when settlement batches run concurrently — 1 `⚠️ UNCERTAIN` marker
+- Risk: PG-provider API response time variability — 1 `[Confidence: estimated]`
 
 ## Scope
-- 벤더별 매출 집계 및 정산 금액 산출
-- 정산 주기 관리 (일/주/월)
-- 수수료 정책 적용 (정률/정액/혼합)
-- PG사 연동 정산 대사
-- 관리자 정산 승인 워크플로우
-- 벤더 포탈 정산 내역 조회
+- Per-vendor sales aggregation and settlement amount calculation
+- Settlement cycle management (daily/weekly/monthly)
+- Fee policy application (percentage/fixed-amount/mixed)
+- PG-provider-integrated settlement reconciliation
+- Administrator settlement approval workflow
+- Vendor portal settlement-history query
 
 ## Gate Approval History
 
-| 게이트 | 결정 | 일시 | 비고 |
+| Gate | Decision | Timestamp | Notes |
 |--------|------|------|------|
-| GATE-1 | approved | 2026-04-15T09:00:00Z | planning-draft 승인 |
-| GATE-2 | approved | 2026-04-15T11:00:00Z | BLOCK 0건 |
-| GATE-2.5 | approved | 2026-04-15T13:00:00Z | 페르소나 3개, 스토리 8개 |
-| GATE-2.7 | approved | 2026-04-15T15:00:00Z | 컴포넌트 6개, 서비스 4개 |
-| GATE-3 | approved | 2026-04-15T16:00:00Z | UOW 7개 확인 |
-| GATE-3.5 | approved | 2026-04-16T10:00:00Z | technical-design 승인 |
-| GATE-4 | approved | 2026-04-16T14:00:00Z | infra 승인 |
-| GATE-5 | approved | 2026-04-16T16:00:00Z | build/test 승인 |
+| GATE-1 | approved | 2026-04-15T09:00:00Z | planning-draft approved |
+| GATE-2 | approved | 2026-04-15T11:00:00Z | 0 BLOCK items |
+| GATE-2.5 | approved | 2026-04-15T13:00:00Z | 3 personas, 8 stories |
+| GATE-2.7 | approved | 2026-04-15T15:00:00Z | 6 components, 4 services |
+| GATE-3 | approved | 2026-04-15T16:00:00Z | 7 UOWs confirmed |
+| GATE-3.5 | approved | 2026-04-16T10:00:00Z | technical-design approved |
+| GATE-4 | approved | 2026-04-16T14:00:00Z | infra approved |
+| GATE-5 | approved | 2026-04-16T16:00:00Z | build/test approved |
 
 ## Approval
 - Status: ready
@@ -67,5 +67,5 @@
 - `test-instructions.md`
 
 ## Notes
-- comprehensive depth: 세션 분리 필수 (Phase A/B/C)
-- Extension: security-baseline 활성화
+- comprehensive depth: session separation required (Phase A/B/C)
+- Extension: security-baseline enabled

@@ -1,166 +1,166 @@
 # Error Recovery
 
-워크플로우 실행 중 오류나 중단이 발생했을 때의 복구 절차를 정의한다.
+Defines the recovery procedures for when an error or interruption occurs during workflow execution.
 
-## 1. 오류 심각도 분류
+## 1. Error Severity Classification
 
-| 심각도 | 설명 | 워크플로우 영향 |
+| Severity | Description | Workflow Impact |
 |--------|------|----------------|
-| **CRITICAL** | 워크플로우 진행 불가 | 필수 산출물 누락, aidlc-state.md 손상, 필수 입력 처리 불가 |
-| **HIGH** | 현재 STEP 완료 불가 | BLOCK 질문 미답변, 이전 STEP 산출물 불완전, 모순 미해결 |
-| **MEDIUM** | 우회하여 진행 가능 | 조건부 산출물 누락, 비핵심 검증 실패 |
-| **LOW** | 진행에 영향 없음 | 포맷 불일치, 선택 정보 누락 |
+| **CRITICAL** | Workflow cannot proceed | Missing required artifact, corrupted aidlc-state.md, required input cannot be processed |
+| **HIGH** | Current STEP cannot be completed | BLOCK question unanswered, previous STEP artifact incomplete, contradiction unresolved |
+| **MEDIUM** | Can proceed via a workaround | Conditional artifact missing, non-core validation failure |
+| **LOW** | No impact on progress | Format inconsistency, optional information missing |
 
-## 2. 세션 재개 절차
+## 2. Session Resumption Procedure
 
-세션 분리(`docs/workflow-guide.md` 참조) 후 새 세션에서 재개할 때의 절차이다.
+The procedure for resuming in a new session after session separation (see `docs/workflow-guide.md`).
 
-### 2.1 상태 확인 (필수)
+### 2.1 State Check (Required)
 
-1. `aidlc-docs/aidlc-state.md`를 읽는다.
-2. 아래 항목을 확인한다:
-   - Current Stage: 현재 어디까지 진행했는가
-   - Current Phase: A / B / C 중 어느 단계인가
-   - Stage Progress 체크박스: 완료/스킵/미진행 상태
-   - Confidence Summary: 불확실 답변 현황
+1. Read `aidlc-docs/aidlc-state.md`.
+2. Check the following items:
+   - Current Stage: How far has progress gotten?
+   - Current Phase: Which stage among A / B / C?
+   - Stage Progress checkboxes: Completed/skipped/not-started status
+   - Confidence Summary: Status of uncertain answers
 
-3. 사용자에게 현재 상태를 요약하여 제시한다:
+3. Present a summary of the current state to the user:
 ```markdown
-## 세션 재개
+## Session Resumption
 
 - Feature: {feature-slug}
-- 마지막 완료: {마지막 [x] STEP}
-- 다음 단계: {다음 미진행 STEP}
-- 미해결 항목: {BLOCK 질문 수, UNCERTAIN 마커 수}
+- Last completed: {last [x] STEP}
+- Next step: {next not-started STEP}
+- Unresolved items: {number of BLOCK questions, number of UNCERTAIN markers}
 
-> A) 이어서 진행 — {다음 단계 설명}
-> B) 이전 단계 리뷰 — 수정이 필요한 부분 확인
+> A) Continue — {description of next step}
+> B) Review previous step — check parts that need fixing
 ```
 
-### 2.2 산출물 무결성 검증
+### 2.2 Artifact Integrity Verification
 
-다음 STEP으로 진행하기 전에, 해당 STEP에 필요한 이전 산출물이 존재하고 유효한지 확인한다.
+Before proceeding to the next STEP, verify that the previous artifacts required for that STEP exist and are valid.
 
-| 진행할 STEP | 필요한 산출물 |
+| STEP to proceed | Required artifacts |
 |-------------|-------------|
-| STEP 4-5 | requirements.md 또는 planning-draft.md |
+| STEP 4-5 | requirements.md or planning-draft.md |
 | STEP 5.5 | requirements.md, requirement-verification-questions.md |
-| STEP 5.7 | requirements.md, (있다면) stories.md |
+| STEP 5.7 | requirements.md, (if present) stories.md |
 | STEP 6 | requirements.md |
 | STEP 6.5 | unit-of-work.md |
-| STEP 6.7 | unit-of-work.md, (있다면) technical-design.md |
+| STEP 6.7 | unit-of-work.md, (if present) technical-design.md |
 | STEP 7-8 | unit-of-work.md, requirements.md |
 | STEP 9 | unit-of-work.md, requirements.md, Readiness Score >= 80 |
 
-### 2.3 불일치 발견 시
+### 2.3 When an Inconsistency Is Found
 
-**aidlc-state.md에 완료로 표시되었으나 산출물이 없는 경우**:
-1. aidlc-state.md의 해당 STEP을 `[ ]`로 되돌린다.
-2. 해당 STEP부터 재실행한다.
-3. `audit.md`에 `[RECOVERY] STEP {N} — 산출물 누락으로 재실행` 이벤트를 기록한다.
+**When marked as complete in aidlc-state.md but the artifact does not exist**:
+1. Revert the corresponding STEP in aidlc-state.md to `[ ]`.
+2. Re-run from that STEP.
+3. Record a `[RECOVERY] STEP {N} — re-run due to missing artifact` event in `audit.md`.
 
-**산출물은 존재하나 aidlc-state.md에 미완료로 표시된 경우**:
-1. 산출물 내용이 완전한지 확인한다 (필수 섹션, 빈 섹션 여부).
-2. 완전하면 aidlc-state.md를 `[x]`로 갱신한다.
-3. 불완전하면 해당 STEP부터 재실행한다.
+**When the artifact exists but is marked as incomplete in aidlc-state.md**:
+1. Verify that the artifact content is complete (required sections, whether any section is empty).
+2. If complete, update aidlc-state.md to `[x]`.
+3. If incomplete, re-run from that STEP.
 
-## 3. STEP별 오류 처리
+## 3. Per-STEP Error Handling
 
-### STEP 1 (Project Detection) 오류
+### STEP 1 (Project Detection) Errors
 
-**프로젝트 루트를 식별할 수 없음**:
-- 사용자에게 프로젝트 경로와 구조를 확인 요청한다.
-- 최소 정보(언어, 프레임워크)로 진행 가능하면 사용자 제공 정보로 대체한다.
+**Cannot identify the project root**:
+- Request that the user confirm the project path and structure.
+- If progress is possible with minimal information (language, framework), substitute with the user-provided information.
 
-**greenfield/brownfield 판단이 불확실**:
-- 기존 코드, DB, 운영 시스템이 **하나라도** 있으면 brownfield로 판단한다.
-- 판단 근거를 `audit.md`에 기록한다.
+**greenfield/brownfield judgment is uncertain**:
+- If **even one** of existing code, DB, or operating system is present, judge it as brownfield.
+- Record the basis for the judgment in `audit.md`.
 
-### STEP 3-5 (분석/질문/요구사항) 오류
+### STEP 3-5 (Analysis/Questions/Requirements) Errors
 
-**사용자가 모순된 답변을 제공**:
-- `content-validation.md`의 모순 감지 규칙에 따라 처리한다.
-- 모순이 해결될 때까지 GATE-2를 진행하지 않는다.
+**User provides contradictory answers**:
+- Handle according to the contradiction detection rules in `content-validation.md`.
+- Do not proceed to GATE-2 until the contradiction is resolved.
 
-**질문 답변이 불완전 (일부만 응답)**:
-1. 미응답 질문 목록을 명시한다.
-2. BLOCK 질문이 미응답이면 해당 질문을 다시 제시한다.
-3. ASSUME/AI-RECOMMEND 질문이 미응답이면 `question-governance.md`의 미응답 대응 규칙을 적용한다.
+**Question answers are incomplete (only partially responded)**:
+1. State the list of unanswered questions.
+2. If a BLOCK question is unanswered, re-present that question.
+3. If an ASSUME/AI-RECOMMEND question is unanswered, apply the no-response handling rules in `question-governance.md`.
 
-### STEP 6 (Unit Decomposition) 오류
+### STEP 6 (Unit Decomposition) Errors
 
-**순환 의존성 발견**:
-1. 순환 관계를 명시한다: "UOW-A → UOW-B → UOW-A".
-2. 분해 기준(`core/units-generation.md`)에 따라 경계를 재조정한다.
-3. 재조정 후 GATE-3에서 사용자 확인을 받는다.
+**Circular dependency found**:
+1. State the cyclic relationship: "UOW-A → UOW-B → UOW-A".
+2. Readjust the boundaries according to the decomposition criteria (`core/units-generation.md`).
+3. After readjustment, obtain user confirmation at GATE-3.
 
-### STEP 7 (Readiness Score) 오류
+### STEP 7 (Readiness Score) Errors
 
-**점수 산출 기준 데이터 부족**:
-- 누락된 도메인은 0점으로 산출한다 (가점 없음).
-- `status.md`에 "미평가 도메인" 섹션으로 명시한다.
-- 미평가 도메인이 2개 이상이면 자동으로 NOT_READY 판정한다.
+**Insufficient data for score calculation**:
+- Score the missing domain as 0 (no bonus points).
+- State it as a "Not Evaluated Domains" section in `status.md`.
+- If 2 or more domains are not evaluated, automatically render a NOT_READY verdict.
 
-## 4. 산출물 복구 절차
+## 4. Artifact Recovery Procedure
 
-### 산출물 재생성이 필요한 경우
+### When Artifact Regeneration Is Needed
 
-1. 기존 산출물을 백업한다: `{파일명}` → `{파일명}.backup.md`
-2. `audit.md`에 `[RECOVERY] {파일명} — 재생성 시작. 사유: {사유}` 이벤트를 기록한다.
-3. 해당 STEP을 처음부터 재실행한다.
-4. 재생성 완료 후 백업 파일은 사용자가 삭제를 승인할 때까지 보존한다.
+1. Back up the existing artifact: `{filename}` → `{filename}.backup.md`
+2. Record a `[RECOVERY] {filename} — regeneration started. Reason: {reason}` event in `audit.md`.
+3. Re-run the corresponding STEP from the beginning.
+4. After regeneration completes, preserve the backup file until the user approves its deletion.
 
-### aidlc-state.md 손상 시
+### When aidlc-state.md Is Corrupted
 
-1. 백업을 생성한다: `aidlc-state.md.backup`
-2. 사용자에게 현재 진행 상황을 확인한다.
-3. `aidlc-docs/features/<feature-slug>/` 내 존재하는 산출물 목록을 기반으로 상태를 재구성한다.
-4. 재구성 결과를 사용자에게 제시하고 승인을 받은 후 적용한다.
-5. `audit.md`에 `[RECOVERY] aidlc-state.md — 손상으로 재구성` 이벤트를 기록한다.
+1. Create a backup: `aidlc-state.md.backup`
+2. Confirm the current progress with the user.
+3. Reconstruct the state based on the list of artifacts present under `aidlc-docs/features/<feature-slug>/`.
+4. Present the reconstruction result to the user and apply it after obtaining approval.
+5. Record a `[RECOVERY] aidlc-state.md — reconstructed due to corruption` event in `audit.md`.
 
-## 5. 사용자 요청에 의한 되돌리기
+## 5. Rollback by User Request
 
-### STEP 재실행 요청
+### STEP Re-run Request
 
-사용자가 특정 STEP의 결과에 불만족하여 재실행을 요청한 경우:
+When the user is dissatisfied with the result of a specific STEP and requests a re-run:
 
-1. 해당 STEP의 산출물을 백업한다.
-2. **해당 STEP 이후에 의존하는 STEP이 이미 완료되었는지** 확인한다.
-3. 의존 STEP이 있으면 사용자에게 경고한다:
+1. Back up the artifact of that STEP.
+2. Check **whether STEPs that depend on this STEP have already been completed**.
+3. If there are dependent STEPs, warn the user:
    ```
-   STEP {N} 재실행 시 STEP {M}, {L}의 산출물도 영향을 받습니다.
-   해당 산출물도 함께 재생성하시겠습니까?
+   Re-running STEP {N} will also affect the artifacts of STEP {M}, {L}.
+   Do you want to regenerate those artifacts as well?
    ```
-4. 사용자 승인 후 재실행한다.
-5. `audit.md`에 `[REDO] STEP {N} — 사용자 요청으로 재실행` 이벤트를 기록한다.
+4. Re-run after user approval.
+5. Record a `[REDO] STEP {N} — re-run by user request` event in `audit.md`.
 
-### GATE에서 변경 요청
+### Change Request at a GATE
 
-사용자가 GATE에서 "수정 요청"을 선택한 경우:
+When the user selects "request change" at a GATE:
 
-1. 수정 요청 내용을 `audit.md`에 원문 그대로 기록한다.
-2. 수정 범위를 판단한다:
-   - **부분 수정**: 해당 산출물만 수정하고 다시 GATE를 제시한다.
-   - **전면 재작업**: 해당 STEP을 처음부터 재실행한다.
-3. 수정이 이전 STEP의 산출물에도 영향을 미치면 사용자에게 알린다.
+1. Record the change request content verbatim in `audit.md`.
+2. Judge the scope of the change:
+   - **Partial change**: Modify only the relevant artifact and present the GATE again.
+   - **Full rework**: Re-run the corresponding STEP from the beginning.
+3. If the change also affects a previous STEP's artifact, notify the user.
 
-## 6. audit.md 로깅 포맷
+## 6. audit.md Logging Format
 
-복구/오류 이벤트는 아래 포맷으로 기록한다.
+Record recovery/error events in the format below.
 
 ```markdown
-## [RECOVERY] {대상}
+## [RECOVERY] {target}
 - Timestamp: {ISO 8601}
 - Feature: {feature-slug}
 - Error Type: CRITICAL / HIGH / MEDIUM / LOW
-- Description: {발생한 문제}
-- Resolution: {수행한 조치}
-- Artifacts Affected: {영향받은 파일 목록}
+- Description: {the problem that occurred}
+- Resolution: {the action taken}
+- Artifacts Affected: {list of affected files}
 ```
 
-## 7. 금지 사항
+## 7. Prohibitions
 
-- 산출물 손상/누락을 무시하고 다음 STEP으로 진행하지 않는다.
-- 백업 없이 산출물을 재생성하지 않는다.
-- 사용자 확인 없이 aidlc-state.md를 재구성하지 않는다.
-- 복구 이벤트를 audit.md에 기록하지 않고 넘어가지 않는다.
+- Do not ignore artifact corruption/absence and proceed to the next STEP.
+- Do not regenerate an artifact without a backup.
+- Do not reconstruct aidlc-state.md without user confirmation.
+- Do not move on without recording the recovery event in audit.md.

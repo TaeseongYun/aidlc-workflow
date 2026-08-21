@@ -1,12 +1,12 @@
 <!-- workflow-step: STEP-5 | gate: GATE-2 | producer: ctx-aidlc-run -->
 # Feature Requirements
 
-이 파일은 `aidlc-docs/features/<feature-slug>/requirements.md`에 생성하는 것을 권장한다.
+It is recommended to create this file at `aidlc-docs/features/<feature-slug>/requirements.md`.
 
-관련 상태 파일:
+Related state file:
 - `aidlc-docs/features/<feature-slug>/status.md`
 
-선행 초안 문서:
+Prerequisite draft documents:
 - `aidlc-docs/features/<feature-slug>/request-intake.md`
 - `aidlc-docs/features/<feature-slug>/planning-draft.md`
 

@@ -1,64 +1,70 @@
 # Skills
 
-이 디렉터리는 팀 공통 Codex 스킬 원본 저장소다.
+This directory is the source repository for the team's shared Codex skills.
 
-## 원칙
-- 여기 있는 파일이 팀 공통 스킬의 원본이다.
-- 글로벌 실행 경로는 `~/.codex/skills/`이다.
-- Claude 글로벌 경로는 `~/.claude/commands/`이다.
-- 직접 글로벌 스킬/명령을 수정하지 말고, 여기서 수정한 뒤 설치 스크립트로 배포한다.
-- 모든 스킬은 `_shared/skill-protocol.md`의 공통 실행 프로토콜을 따른다.
+## Principles
+- The files here are the source of the team's shared skills.
+- The global execution path is `~/.codex/skills/`.
+- The Claude global path is `~/.claude/commands/`.
+- Do not edit the global skills/commands directly; edit them here and then deploy with the install script.
+- All skills follow the common execution protocol in `_shared/skill-protocol.md`.
 
-## 포함 스킬
+## Included Skills
 - `ctx-aidlc-roadmap`
-  - Phase 0 멀티피처 로드맵 작성용 (큰 prepared 기획서를 피처별로 분해)
-  - 산출물: `aidlc-docs/_roadmap.md`. GATE-0 통과 후 피처별 `ctx-aidlc-run` 진입.
+  - For Phase 0 multi-feature roadmapping (decompose a large prepared planning document by feature)
+  - Output: `aidlc-docs/_roadmap.md`. After passing GATE-0, enter `ctx-aidlc-run` per feature.
+- `ctx-worktree`
+  - Plans and creates one isolated git worktree per parallel-safe roadmap feature
+  - Always shows the target paths and waits for approval before creation
 - `ctx-aidlc-run`
-  - 요구사항/설계 분석용
-  - `team-ai-workflow + ctx + aidlc-docs` 흐름 사용
+  - For requirements/design analysis
+  - Uses the `team-ai-workflow + ctx + aidlc-docs` flow
 - `ctx-run`
-  - 구현 실행용
+  - For implementation execution
 - `ctx-architect-judge`
-  - 요구사항/영향 범위 판단
+  - Requirement/impact scope judgment
 - `ctx-domain-exec`
-  - 도메인 구현 실행
+  - Domain implementation execution
 - `ctx-reviewer`
-  - CTX 기준 리뷰
+  - CTX-based review
 - `ctx-updater`
-  - CTX 갱신
+  - CTX update
 - `ctx-refiner`
-  - CTX 정제
+  - CTX refinement
 - `ctx-commit-planner`
-  - 커밋 분리 계획
+  - Commit separation planning
 - `ctx-hallucination-audit`
-  - Hallucination Guard(바이브 블로커) 감사 루프. dev fact를 codegraph로 검증하고
-    refuted 항목을 ledger에 격리, Hallucination-Free Score ≥ 87까지 반복, 교훈을 Linear로 푸시.
-  - 규칙 원문: `extensions/hallucination-guard/hallucination-guard.md`. 전제조건: codegraph + graphify.
+  - Hallucination Guard audit loop. Verifies dev facts with codegraph, isolates
+    refuted items in the ledger, repeats until the Hallucination-Free Score is
+    at least 87, and pushes lessons learned to Linear.
+  - Rule source: `extensions/hallucination-guard/hallucination-guard.md`.
+    Prerequisites: codegraph + graphify.
 
-## 설치
+## Installation
 
 ```bash
 bash scripts/install-skills.sh
 ```
 
-## 업데이트 절차
-1. `skills/` 아래 원본 수정
-2. 필요하면 `README.md` 또는 사용 예시 갱신
-3. `bash scripts/install-skills.sh` 실행
-4. 글로벌 `~/.codex/skills/`에서 동작 확인
-5. 글로벌 `~/.claude/commands/`에서 동작 확인
+## Update Procedure
+1. Edit the source under `skills/`
+2. If needed, update `README.md` or the usage examples
+3. Run `bash scripts/install-skills.sh`
+4. Verify operation in the global `~/.codex/skills/`
+5. Verify operation in the global `~/.claude/commands/`
 
-## 사용 권장 흐름
+## Recommended Usage Flow
 
-### 단일 피처
-1. 요구사항 분석: `/ctx-aidlc-run`
-2. 사람 승인/답변 반영
-3. 구현 실행: `/ctx-run`
+### Single Feature
+1. Requirements analysis: `/ctx-aidlc-run`
+2. Reflect human approval/answers
+3. Implementation execution: `/ctx-run`
 
-### 멀티피처 (큰 prepared 기획서)
-1. 로드맵: `/ctx-aidlc-roadmap` → `aidlc-docs/_roadmap.md` 생성, GATE-0 승인
-2. 각 팀원이 자기 피처에 대해 `/ctx-aidlc-run` 실행 (입력: 원본의 해당 섹션 발췌)
-3. 사람 승인/답변 반영
-4. 구현 실행: `/ctx-run` (피처별)
+### Multi-feature (large prepared planning document)
+1. Roadmap: `/ctx-aidlc-roadmap` → generate `aidlc-docs/_roadmap.md`, approve GATE-0
+2. Optional isolated allocation: `/ctx-worktree` → approve the detected worktree plan
+3. Each team member runs `/ctx-aidlc-run` for their own feature (input: the excerpt of the relevant section from the source)
+4. Reflect human approval/answers
+5. Implementation execution: `/ctx-run` (per feature)
 
-자세한 운용 절차: `docs/multi-feature-coordination.md`
+Detailed operating procedure: `docs/multi-feature-coordination.md`

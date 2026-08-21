@@ -1,65 +1,65 @@
 # Question Rules
 
-## 원칙
-- 질문은 "AI가 모르는 것"이 아니라 "프로젝트가 아직 결정하지 않은 것"을 대상으로 만든다.
-- 질문은 구현/운영/정산에 영향을 주는 항목만 올린다.
-- 질문은 답하기 쉽게 선택지 형태를 우선 제공한다.
-- 각 질문에는 답변하지 않았을 때의 결과(구현 차단 또는 가정 적용)를 명시한다.
+## Principles
+- Questions target "what the project has not yet decided," not "what the AI does not know."
+- Only raise items that affect implementation/operation/settlement.
+- Prefer providing questions in a choice format so they are easy to answer.
+- Each question states the consequence of not answering it (implementation blocked or assumption applied).
 
-## 좋은 질문
-- 선택지가 분명하다
-- 각 선택지의 구현 영향이 다르다
-- 답이 설계 결정을 고정한다
-- 영향 수준(high/medium/low)이 명확하다
+## Good Questions
+- The choices are clear
+- Each choice has a different implementation impact
+- The answer locks in a design decision
+- The impact level (high/medium/low) is clear
 
-## 나쁜 질문
-- 너무 포괄적이다
-- 프로젝트와 무관하다
-- 문장만 바꿔도 같은 질문이다
-- 구현 영향 없이 "알면 좋은" 수준이다
+## Bad Questions
+- Too broad
+- Unrelated to the project
+- The same question just reworded
+- "Nice to know" level with no implementation impact
 
-## 질문 카테고리
-- `policy` — 비즈니스 정책 결정 (환불, 할인, 권한 등)
-- `scope` — 기능 범위, 포함/제외 기준
-- `flow` — 사용자/운영자 흐름, 상태 전이
-- `integration` — 외부 시스템 연동 방식
-- `ops` — 운영, 알림, 모니터링, 배치
+## Question Categories
+- `policy` — Business policy decisions (refunds, discounts, permissions, etc.)
+- `scope` — Feature scope, inclusion/exclusion criteria
+- `flow` — User/operator flow, state transitions
+- `integration` — External system integration methods
+- `ops` — Operations, notifications, monitoring, batch
 
-## 영향 수준
-- `high` — 답 없으면 구현 불가. 아키텍처/데이터 모델에 영향.
-- `medium` — 답 없으면 가정으로 진행 가능하나 재작업 위험.
-- `low` — 답 없어도 기본값으로 진행 가능. 나중에 변경 용이.
+## Impact Levels
+- `high` — Without an answer, implementation is impossible. Affects architecture/data model.
+- `medium` — Can proceed with an assumption without an answer, but there is rework risk.
+- `low` — Can proceed with a default even without an answer. Easy to change later.
 
-## 추천 포맷
+## Recommended Format
 
 ```markdown
-### Q{N}. {질문 제목}
-- 범위: [원래 요청] {관련 부분 설명}
-- 유형: policy / domain / scope
-- 분류: policy / scope / flow / integration / ops
-- 영향도: high / medium / low
-- 이유: {이 질문이 필요한 이유}
-- 선택지:
-  - A) {선택지} → {구현 영향}
-  - B) {선택지} → {구현 영향}
-  - C) 기타 (직접 입력)
-- AI 추천: {선택지}) {추천 내용} — 근거: {판단 근거}
-- 미응답 시: BLOCK / ASSUME-{선택지} ({가정 근거}) / AI-RECOMMEND-{선택지} / DEFER-TO-FEATURE
-- [답변]:
-- [확신]: 확실 / 추정 / AI추천 / 미정
+### Q{N}. {question title}
+- Scope: [Original Request] {description of the relevant part}
+- Type: policy / domain / scope
+- Category: policy / scope / flow / integration / ops
+- Impact: high / medium / low
+- Reason: {why this question is needed}
+- Choices:
+  - A) {choice} → {implementation impact}
+  - B) {choice} → {implementation impact}
+  - C) Other (enter directly)
+- AI Recommendation: {choice}) {recommended content} — Rationale: {basis for the judgment}
+- If unanswered: BLOCK / ASSUME-{choice} ({basis for the assumption}) / AI-RECOMMEND-{choice} / DEFER-TO-FEATURE
+- [Answer]:
+- [Confidence]: Certain / Estimated / AI-Recommended / Undecided
 ```
 
-> **참고**: `AI 추천` 필드와 `AI-RECOMMEND` 미응답 대응은 `유형: domain` 질문에만 사용한다.
-> `유형: policy` 질문에는 AI 추천을 제시하지 않는다. 상세 규칙은 `common/question-governance.md` 참조.
+> **Note**: The `AI Recommendation` field and the `AI-RECOMMEND` no-response handling are used only for `Type: domain` questions.
+> For `Type: policy` questions, do not present an AI recommendation. See `common/question-governance.md` for detailed rules.
 
-## 포맷 규칙
-- `미응답 시: BLOCK` — high impact 질문의 기본값. 답 없으면 구현 진행 금지.
-- `미응답 시: ASSUME-A` — medium/low impact 질문에서 가정 진행이 가능할 때. 가정 근거를 반드시 명시.
-- `미응답 시: AI-RECOMMEND-A` — domain 유형 질문에서 AI가 근거 기반 추천안을 제시할 때. `common/question-governance.md` 참조.
-- `미응답 시: DEFER-TO-FEATURE` — scope 유형 질문에서 현재 범위 밖으로 판단될 때. 별도 feature로 분리.
-- 선택지의 구현 영향은 "테이블 1개 추가", "API 응답 구조 변경", "배치 스케줄러 필요" 등 구체적으로 쓴다.
-- 선택지가 2개 미만이면 질문이 아니라 확인 요청이다. 질문 목록에 넣지 않는다.
-- 라벨은 반드시 한글을 사용한다 (범위, 유형, 분류, 영향도, 이유, 선택지, AI 추천, 미응답 시, [답변], [확신]).
+## Format Rules
+- `If unanswered: BLOCK` — the default for high-impact questions. Without an answer, implementation must not proceed.
+- `If unanswered: ASSUME-A` — when proceeding with an assumption is possible for medium/low-impact questions. Always state the basis for the assumption.
+- `If unanswered: AI-RECOMMEND-A` — when the AI presents a grounded recommendation for a domain-type question. See `common/question-governance.md`.
+- `If unanswered: DEFER-TO-FEATURE` — when a scope-type question is judged to be out of the current scope. Split it into a separate feature.
+- Write the implementation impact of each choice concretely, e.g., "add 1 table," "change API response structure," "batch scheduler needed."
+- If there are fewer than 2 choices, it is a confirmation request, not a question. Do not put it in the question list.
+- Labels must always use English (Scope, Type, Category, Impact, Reason, Choices, AI Recommendation, If unanswered, [Answer], [Confidence]).
 
-## 질문 거버넌스
-질문의 범위 통제, 유형 분류, 확신도 추적, 질문 예산은 `common/question-governance.md`를 따른다.
+## Question Governance
+Scope control, type classification, confidence tracking, and question budget for questions follow `common/question-governance.md`.

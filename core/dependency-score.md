@@ -1,81 +1,81 @@
 # Dependency Score
 
-구현 **이후** 코드가 의존성과 다축 검증 기준을 충족하는지 정량 평가하는 기준이다.
+This is the standard for quantitatively evaluating whether the code, **after** implementation, satisfies the dependency and multi-axis verification criteria.
 
-> `core/readiness-score.md`(구현 **전** 요구사항 준비도)의 형제 문서다. 시점·용도가 다르다.
-> - readiness-score: 구현 진입 전, 요구사항이 구현 가능한지 (사람 GATE 직전 1회)
-> - dependency-score: 구현 후, 산출물이 완성되었는지 (루프가 반복 산출)
+> This is the sibling document to `core/readiness-score.md` (pre-**implementation** requirements readiness). The timing and purpose differ.
+> - readiness-score: before entering implementation, whether the requirements are implementable (once, right before the human GATE)
+> - dependency-score: after implementation, whether the artifact is complete (the loop produces it repeatedly)
 
-## 채점 영역 (4축 · 각 25점 · 총 100점)
+## Scoring areas (4 axes · 25 points each · 100 points total)
 
-### 1. 의존성 해결 (25점)
-대상 피처/모듈의 의존성 검증 md(`templates/dependency-check.md` 구조)에 나열된 항목의 해결 여부.
+### 1. Dependency resolution (25 points)
+Whether the items listed in the target feature/module's dependency verification md (`templates/dependency-check.md` structure) are resolved.
 
-- 기능 간 선후관계 의존성이 모두 충족되었다 (8)
-- 빌드/라이브러리 의존성이 모두 설정·해결되었다 (8)
-- 모듈 간 의존성(API 호출/구현)이 모두 충족되었다 (9)
+- All ordering dependencies between features are satisfied (8)
+- All build/library dependencies are set up and resolved (8)
+- All inter-module dependencies (API call/implementation) are satisfied (9)
 
-규칙:
-- 미해결 항목 비율만큼 비례 차감한다.
-- BLOCK으로 표시된 미해결 의존성이 1건이라도 있으면 이 영역은 **최대 12점**으로 제한한다 (GR-2).
+Rules:
+- Deduct proportionally to the ratio of unresolved items.
+- If there is even one unresolved dependency marked as BLOCK, this area is capped at **12 points at most** (GR-2).
 
-### 2. 빌드/컴파일 통과 (25점)
-코드가 실제로 빌드되고 컴파일 에러가 없는가.
+### 2. Build/compile pass (25 points)
+Whether the code actually builds with no compile errors.
 
-- 빌드 명령이 성공적으로 완료된다 (15)
-- 경고(warning)가 기준 이하다 (5)
-- 린트/정적 분석이 통과한다 (5)
+- The build command completes successfully (15)
+- Warnings are below the threshold (5)
+- Lint/static analysis passes (5)
 
-규칙:
-- **빌드 명령을 실제로 실행한 결과(종료 코드/로그)만 근거로 인정한다.** 명령을 실행하지 않았으면 이 영역은 **0점**이다 (FR-4).
-- 빌드 명령 출처: `build-instructions.md` 또는 UOW Verification 섹션.
+Rules:
+- **Only the result of actually running the build command (exit code/log) is accepted as evidence.** If the command was not run, this area is **0 points** (FR-4).
+- Build command source: `build-instructions.md` or the UOW Verification section.
 
-### 3. 테스트 통과 / 커버리지 (25점)
-관련 테스트가 통과하고 커버리지가 기준 이상인가.
+### 3. Test pass / coverage (25 points)
+Whether the relevant tests pass and coverage is at or above the threshold.
 
-- 관련 테스트가 모두 통과한다 (15)
-- 커버리지가 목표 기준 이상이다 (5)
-- 예외/엣지 케이스 테스트가 존재한다 (5)
+- All relevant tests pass (15)
+- Coverage is at or above the target threshold (5)
+- Exception/edge-case tests exist (5)
 
-규칙:
-- **테스트 명령을 실제로 실행한 결과(리포트)만 근거로 인정한다.** 명령을 실행하지 않았으면 이 영역은 **0점**이다 (FR-4).
-- 커버리지 목표가 정의되지 않은 경우 해당 5점은 "해당 없음"으로 표기하고 만점에서 제외한다.
+Rules:
+- **Only the result of actually running the test command (report) is accepted as evidence.** If the command was not run, this area is **0 points** (FR-4).
+- If the coverage target is not defined, mark that 5 points as "not applicable" and exclude it from the maximum.
 
-### 4. 요구사항 / AC 충족도 (25점)
-원래 의도한 Acceptance Criteria가 충족되는가.
+### 4. Requirements / AC fulfillment (25 points)
+Whether the originally intended Acceptance Criteria are met.
 
-- `unit-of-work.md`의 각 UOW 수용 기준이 충족된다 (15)
-- `requirements.md`의 Functional Requirements가 반영되었다 (10)
+- Each UOW's acceptance criteria in `unit-of-work.md` are met (15)
+- The Functional Requirements in `requirements.md` are reflected (10)
 
-규칙:
-- 채점 기준 소스는 **UOW 수용 기준 + requirements Functional Requirements**다 (FR-5). 다른 임의 기준을 만들지 않는다.
+Rules:
+- The scoring criteria source is **UOW acceptance criteria + requirements Functional Requirements** (FR-5). Do not create other arbitrary criteria.
 
-## 판정 기준
+## Verdict criteria
 
-| 점수 | 판정 | 의미 |
+| Score | Verdict | Meaning |
 |------|------|------|
-| 86~100 | COMPLETE | 온전히 종료(완료). 단 게이팅 규칙 통과 시에만. |
-| 0~85 | INCOMPLETE | 미완료. 부족 축을 보완하고 재채점한다. |
+| 86~100 | COMPLETE | Fully closed (complete). But only when the gating rules pass. |
+| 0~85 | INCOMPLETE | Not complete. Supplement the lacking axes and re-score. |
 
-- 완료 임계는 **85점 초과(`score > 85`)** 다. 정확히 85점은 미완료다.
+- The completion threshold is **greater than 85 (`score > 85`)**. Exactly 85 is incomplete.
 
-## 게이팅 규칙 (필수)
+## Gating rules (mandatory)
 
-- **GR-1**: 총점이 85를 초과하더라도 **빌드 축이 0점이면 COMPLETE로 판정하지 않는다.** 빌드 실패 코드를 "완료"로 부르지 않는다 (프로젝트 룰 "빌드 깨진 채 커밋 금지"와 일치).
-- **GR-2**: BLOCK으로 분류된 미해결 의존성이 1건이라도 있으면 의존성 축(영역 1)은 최대 12점으로 제한한다.
+- **GR-1**: Even if the total exceeds 85, **do not judge COMPLETE if the build axis is 0 points.** Do not call code that fails to build "complete" (consistent with the project rule "no committing with a broken build").
+- **GR-2**: If there is even one unresolved dependency classified as BLOCK, the dependency axis (area 1) is capped at 12 points.
 
-## 점수 산출과 반복 (루프)
+## Score computation and iteration (loop)
 
-- 점수는 매 라운드 산출하고, 직전 라운드와 비교한다.
-- 점수 이력은 의존성 검증 md의 **Score History** 테이블에 append한다 (`templates/dependency-check.md`).
-- 종료/중단 판정은 `core/dependency-score-eval.md`의 루프 규칙을 따른다.
+- Compute the score every round and compare it with the previous round.
+- Append the score history to the **Score History** table in the dependency verification md (`templates/dependency-check.md`).
+- The termination/halt judgment follows the loop rules in `core/dependency-score-eval.md`.
 
-## 규칙
+## Rules
 
-- BLOCK 의존성을 점수를 올리기 위해 임의로 해제하지 않는다.
-- 점수는 **근거와 함께** 기록한다. 숫자만 쓰지 않는다 (readiness-score 규칙 계승).
-- 빌드·테스트 축은 추정으로 채점하지 않는다. 실행 증빙이 없으면 0점이다.
-- 커버리지 목표 등 정의되지 않은 세부 항목은 0점이 아니라 "해당 없음"으로 표기하고 만점 계산에서 제외한다.
+- Do not arbitrarily release a BLOCK dependency in order to raise the score.
+- Record the score **together with rationale**. Do not write the number alone (inheriting the readiness-score rule).
+- Do not score the build/test axes by estimation. Without execution evidence, it is 0 points.
+- Mark undefined detail items such as the coverage target as "not applicable" rather than 0 points, and exclude them from the maximum calculation.
 
-## 구조화된 스키마
-자동 채점 및 프로그래매틱 참조용: `core/dependency-score.schema.yaml`
+## Structured schema
+For automated scoring and programmatic reference: `core/dependency-score.schema.yaml`

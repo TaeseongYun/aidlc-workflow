@@ -1,8 +1,8 @@
-# ctx-updater 사용 예시
+# ctx-updater Usage Examples
 
-## 정상 호출 예시
+## Normal Invocation Example
 
-### 입력
+### Input
 
 ```markdown
 ## CTX 반영 제안 목록
@@ -14,7 +14,7 @@
 - 이 규칙이 없으면 발생하는 오작동: AI가 연관관계 매핑 시 JoinColumn을 생략하여 예측 불가능한 컬럼명이 생성된다.
 ```
 
-### 출력
+### Output
 
 ```markdown
 ## CTX 반영 결과
@@ -35,9 +35,9 @@
 
 ---
 
-## 잘못된 호출 예시 (중단됨)
+## Incorrect Invocation Example (stopped)
 
-### 입력
+### Input
 
 ```markdown
 ## CTX 반영 제안
@@ -48,7 +48,7 @@
 - 문장: JoinColumn 관련 규칙 추가
 ```
 
-### 출력
+### Output
 
 ```markdown
 ## CTX 반영 중단

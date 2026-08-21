@@ -1,36 +1,36 @@
 <!-- workflow-step: STEP-1.5 | gate: none | producer: ctx-aidlc-run | condition: brownfield only -->
 # Component Inventory
 
-이 파일은 `aidlc-docs/reverse-engineering/component-inventory.md`에 생성한다.
+Create this file at `aidlc-docs/reverse-engineering/component-inventory.md`.
 
-## 도메인 컴포넌트
+## Domain Components
 
-| 컴포넌트 | 패키지/모듈 경로 | 역할 | 핵심 엔티티 |
+| Component | Package/Module Path | Role | Core Entities |
 |---------|---------------|------|-----------|
 | | | | |
 
-## 인프라 컴포넌트
+## Infrastructure Components
 
-| 컴포넌트 | 유형 | 용도 | 설정 위치 |
+| Component | Type | Purpose | Config Location |
 |---------|------|------|---------|
-| | DB / 캐시 / 큐 / 스토리지 | | |
+| | DB / cache / queue / storage | | |
 
-## 공통 컴포넌트
+## Common Components
 
-| 컴포넌트 | 패키지/모듈 경로 | 역할 |
+| Component | Package/Module Path | Role |
 |---------|---------------|------|
-| | | 인증 / 로깅 / 에러 처리 / 유틸리티 |
+| | | auth / logging / error handling / utilities |
 
-## 핵심 의존성
+## Key Dependencies
 
-| 소스 → 타겟 | 의존 유형 | 비고 |
+| Source → Target | Dependency Type | Notes |
 |-----------|---------|------|
-| | 호출 / 데이터 참조 / 이벤트 | |
+| | call / data reference / event | |
 
-순환 의존성 여부:
+Circular dependency present:
 
-## 재사용 후보
+## Reuse Candidates
 
-| 컴포넌트 | 재사용 가능 범위 | 조건/제약 |
+| Component | Reusable Scope | Conditions/Constraints |
 |---------|--------------|---------|
 | | | |

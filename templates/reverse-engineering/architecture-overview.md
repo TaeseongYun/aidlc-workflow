@@ -1,36 +1,36 @@
 <!-- workflow-step: STEP-1.5 | gate: none | producer: ctx-aidlc-run | condition: brownfield only -->
 # Architecture Overview
 
-이 파일은 `aidlc-docs/reverse-engineering/architecture-overview.md`에 생성한다.
+Create this file at `aidlc-docs/reverse-engineering/architecture-overview.md`.
 
-## 아키텍처 패턴
-- 유형: 모놀리스 / 모듈러 모놀리스 / MSA / 서버리스
-- 특징:
+## Architecture Pattern
+- Type: monolith / modular monolith / MSA / serverless
+- Characteristics:
 
-## 주요 컴포넌트
+## Key Components
 
-| 컴포넌트 | 역할 | 기술 스택 |
+| Component | Role | Tech Stack |
 |---------|------|----------|
 | | | |
 
-## 데이터 플로우
+## Data Flow
 
 ```
-(주요 데이터 흐름을 ASCII 또는 Mermaid로 표현)
+(express the main data flow in ASCII or Mermaid)
 ```
 
-## 외부 연동
+## External Integrations
 
-| 외부 서비스 | 연동 방식 | 용도 |
+| External Service | Integration Method | Purpose |
 |-----------|---------|------|
-| | REST / gRPC / 웹훅 / 메시지 큐 | |
+| | REST / gRPC / webhook / message queue | |
 
-## 기술 스택
+## Tech Stack
 
-| 영역 | 기술 | 버전 |
+| Area | Technology | Version |
 |------|------|------|
-| 언어 | | |
-| 프레임워크 | | |
+| Language | | |
+| Framework | | |
 | DB | | |
-| 인프라 | | |
+| Infrastructure | | |
 | CI/CD | | |

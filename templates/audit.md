@@ -1,81 +1,81 @@
 <!-- workflow-step: all steps & gates | producer: ctx-aidlc-run, ctx-aidlc-roadmap | append-only -->
 # Audit Log
 
-감사 로그 작성 규칙:
-- 타임스탬프는 ISO 8601 형식 (YYYY-MM-DDTHH:MM:SSZ)
-- 사용자 입력은 원문 그대로 기록 (요약/의역 금지)
-- 항상 기존 내용 뒤에 append (덮어쓰기 금지)
-- **모든 STEP 시작/완료, 모든 GATE 통과, 사용자 입력(질문 답변 포함)마다 기록**
-- **Phase 0 (Roadmapping) 이벤트, GATE-0, 핸드오프**도 동일 규칙으로 기록한다.
+Audit log writing rules:
+- Timestamps use ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)
+- Record user input verbatim (no summarizing/paraphrasing)
+- Always append after existing content (no overwriting)
+- **Record on every STEP start/completion, every GATE pass, and every user input (including question answers)**
+- **Phase 0 (Roadmapping) events, GATE-0, and handoffs** are recorded under the same rules.
 
-## 로깅 트리거 (필수)
+## Logging Triggers (mandatory)
 
-아래 이벤트가 발생하면 반드시 audit.md에 append 한다.
+When the events below occur, they must be appended to audit.md.
 
-### 1. STEP 시작/완료
-매 STEP 진입 시와 완료 시 기록한다. 조건부 STEP이 스킵되는 경우에도 스킵 사유를 기록한다.
-Phase 0 STEP은 ID를 `STEP-R1` ~ `STEP-R6`로 표기하고, Feature 필드는 `roadmap`(피처가 결정되기 전 단계)으로 기록한다.
+### 1. STEP start/completion
+Record on entering and completing each STEP. Also record the skip reason when a conditional STEP is skipped.
+For Phase 0 STEPs, write the ID as `STEP-R1` ~ `STEP-R6`, and record the Feature field as `roadmap` (the stage before a feature is determined).
 
 ```markdown
-## [STEP-N] [단계명] — [started / completed / skipped]
+## [STEP-N] [step name] — [started / completed / skipped]
 - Timestamp: [ISO 8601]
-- Feature: <feature-slug>  # Phase 0 단계는 "roadmap"
+- Feature: <feature-slug>  # "roadmap" for Phase 0 stages
 - Step: STEP-N
 - Action: started / completed / skipped
-- Reason: [스킵 시 사유. 예: "전체 S 규모", "기존 사용자 유형만 해당", "single-feature"]
-- Outputs: [생성/갱신된 파일 목록]
+- Reason: [reason when skipped. e.g. "entire scope is S", "applies to existing user types only", "single-feature"]
+- Outputs: [list of files created/updated]
 ```
 
-### 2. GATE 통과
-매 GATE에서 사용자 승인/변경 요청/스킵 시 기록한다.
-GATE-0 (Roadmap Review)도 동일 포맷을 사용하며 Feature 필드는 `roadmap`으로 기록한다.
+### 2. GATE pass
+Record at each GATE on user approval / change request / skip.
+GATE-0 (Roadmap Review) uses the same format, and the Feature field is recorded as `roadmap`.
 
 ```markdown
-## [GATE-N] [단계명]
+## [GATE-N] [step name]
 - Timestamp: [ISO 8601]
-- Feature: <feature-slug>  # GATE-0은 "roadmap"
+- Feature: <feature-slug>  # "roadmap" for GATE-0
 - Gate: GATE-N
 - Decision: approved / change-requested / skipped
-- User Input: "[사용자 원문 그대로]"
-- Notes: [변경 요청 시 요청 내용 요약]
+- User Input: "[user's verbatim text]"
+- Notes: [summary of the requested changes when a change is requested]
 ```
 
-### 3. 사용자 입력 (질문 답변)
-사용자가 BLOCK/ASSUME 질문에 답변하거나 Discovery 라운드에서 응답할 때 기록한다.
+### 3. User input (question answers)
+Record when the user answers a BLOCK/ASSUME question or responds in a Discovery round.
 
 ```markdown
-## [ANSWER] 질문 답변
+## [ANSWER] question answer
 - Timestamp: [ISO 8601]
 - Feature: <feature-slug>
-- Question: [질문 ID 또는 요약]
-- User Input: "[사용자 원문 그대로]"
-- Impact: [BLOCK 해제 / ASSUME 확정 / Discovery 정보 수집]
+- Question: [question ID or summary]
+- User Input: "[user's verbatim text]"
+- Impact: [BLOCK released / ASSUME confirmed / Discovery info gathered]
 ```
 
-### 4. 상태 변경
-feature status가 변경될 때 기록한다 (예: questions-open → approved).
+### 4. Status change
+Record when a feature status changes (e.g. questions-open → approved).
 
 ```markdown
-## [STATUS] 상태 변경
+## [STATUS] status change
 - Timestamp: [ISO 8601]
 - Feature: <feature-slug>
-- Previous: [이전 상태]
-- Current: [현재 상태]
-- Trigger: [변경을 유발한 이벤트]
+- Previous: [previous status]
+- Current: [current status]
+- Trigger: [event that caused the change]
 ```
 
-### 5. 핸드오프 (스킬 간 전환)
-한 스킬이 다른 스킬에게 작업을 넘기며 차단할 때 기록한다.
-대표 사례: `ctx-aidlc-run` STEP 1-A에서 multi-feature 감지 → `ctx-aidlc-roadmap` 실행 안내.
+### 5. Handoff (switching between skills)
+Record when one skill hands work over to another skill and blocks.
+Representative case: `ctx-aidlc-run` STEP 1-A detects multi-feature → guides running `ctx-aidlc-roadmap`.
 
 ```markdown
 ## [HANDOFF] [from-skill] → [to-skill]
 - Timestamp: [ISO 8601]
-- Feature: <feature-slug 또는 roadmap>
+- Feature: <feature-slug or roadmap>
 - From: ctx-aidlc-run
 - To: ctx-aidlc-roadmap
-- Reason: [예: "multi-feature detected, _roadmap.md absent"]
-- Resume Hint: [후속 명령어 또는 다음 단계 안내]
+- Reason: [e.g. "multi-feature detected, _roadmap.md absent"]
+- Resume Hint: [follow-up command or next-step guidance]
 ```
 
 ---

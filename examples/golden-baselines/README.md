@@ -1,26 +1,26 @@
 # Golden Baselines
 
-워크플로우 변경 시 품질 회귀를 감지하기 위한 참조 출력 세트이다.
+A reference output set for detecting quality regressions when the workflow changes.
 
-## 사용법
+## Usage
 
 ```bash
-# 특정 baseline으로 검증 도구 실행
+# Run the validation tool against a specific baseline
 bash tools/evaluator/validate-all.sh examples/golden-baselines/standard-feature
 ```
 
-워크플로우 규칙을 수정한 후 3개 baseline 모두 통과하는지 확인한다.
+After modifying workflow rules, confirm that all 3 baselines pass.
 
-## Baseline 목록
+## Baseline List
 
-| Baseline | Depth | 시나리오 | 특징 |
+| Baseline | Depth | Scenario | Characteristics |
 |----------|-------|---------|------|
-| `minimal-bugfix/` | minimal | 기존 패턴 재사용 버그 수정 | 질문 3개 이하, 조건부 STEP 대부분 스킵, UOW 1개 |
-| `standard-feature/` | standard | 중간 규모 신규 기능 | 질문 7개 이하, GATE-3까지 진행, UOW 3~5개 |
-| `comprehensive-platform/` | comprehensive | 대규모 플랫폼 기능 | 질문 12개, 전체 GATE 활성, UOW 5개+, 기술 설계 포함 |
+| `minimal-bugfix/` | minimal | Bug fix reusing an existing pattern | 3 or fewer questions, most conditional STEPs skipped, 1 UOW |
+| `standard-feature/` | standard | Mid-sized new feature | 7 or fewer questions, proceeds through GATE-3, 3–5 UOWs |
+| `comprehensive-platform/` | comprehensive | Large-scale platform feature | 12 questions, all GATEs active, 5+ UOWs, technical design included |
 
-## Baseline 갱신 원칙
+## Baseline Update Principles
 
-- 워크플로우 규칙 변경 시 baseline도 함께 갱신한다.
-- 갱신 전 기존 baseline을 백업한다.
-- 갱신 사유를 changelog에 기록한다.
+- When workflow rules change, update the baselines together.
+- Back up the existing baselines before updating.
+- Record the reason for the update in the changelog.

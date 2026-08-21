@@ -1,41 +1,41 @@
 # MoSCoW Prioritization
 
-요구사항을 4단계로 분류하여 범위를 정리하는 프레임워크.
+A framework that organizes scope by classifying requirements into 4 levels.
 
-## 분류
+## Classification
 
 ### Must Have
-- 이것 없이는 출시할 수 없다.
-- 법적 요구, 핵심 비즈니스 로직, 데이터 정합성.
+- Cannot release without this.
+- Legal requirements, core business logic, data integrity.
 
 ### Should Have
-- 중요하지만 없어도 출시는 가능하다.
-- 우회 방법이 있거나 수동 처리로 대체 가능.
+- Important, but release is still possible without it.
+- A workaround exists or it can be replaced by manual handling.
 
 ### Could Have
-- 있으면 좋지만 일정 압박 시 제외 가능.
-- UX 개선, 편의 기능, 추가 알림.
+- Nice to have, but can be excluded under schedule pressure.
+- UX improvements, convenience features, additional notifications.
 
 ### Won't Have (this time)
-- 이번 범위에서 명시적으로 제외.
-- 향후 검토 대상으로 기록.
+- Explicitly excluded from this scope.
+- Recorded as a candidate for future review.
 
-## 사용 예시
+## Usage Example
 
-| 요구사항 | 분류 | 근거 |
+| Requirement | Classification | Rationale |
 |----------|------|------|
-| 재구매 할인 적용 | Must | 핵심 비즈니스 목표 |
-| 할인 이력 대시보드 | Should | 수동 조회로 대체 가능 |
-| 할인 추천 알고리즘 | Could | MVP 이후 검토 |
-| 타사 포인트 연동 | Won't | 이번 범위 아님 |
+| Apply repurchase discount | Must | Core business goal |
+| Discount history dashboard | Should | Can be replaced by manual lookup |
+| Discount recommendation algorithm | Could | Review after MVP |
+| Third-party point integration | Won't | Not in this scope |
 
-## requirements.md 연결
+## requirements.md Connection
 - Must → In-Scope (Functional Requirements)
-- Should → In-Scope (낮은 우선순위로 명시)
-- Could → Out-of-Scope (향후 검토로 기록)
-- Won't → Out-of-Scope (명시적 제외)
+- Should → In-Scope (marked as lower priority)
+- Could → Out-of-Scope (recorded as future review)
+- Won't → Out-of-Scope (explicit exclusion)
 
-## 주의
-- 분류는 사람이 결정한다. AI가 Must/Should를 임의로 판단하지 않는다.
-- 분류 기준이 불명확하면 질문으로 올린다.
-- Won't는 "안 한다"가 아니라 "이번에는 안 한다"이다. 삭제하지 않고 기록한다.
+## Notes
+- Classification is decided by a human. The AI does not judge Must/Should arbitrarily.
+- If the classification criteria are unclear, raise it as a question.
+- Won't means "not doing it this time," not "not doing it." Record it rather than delete it.

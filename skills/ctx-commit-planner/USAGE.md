@@ -1,8 +1,8 @@
-# ctx-commit-planner 사용 예시
+# ctx-commit-planner Usage Examples
 
-## 정상 호출 예시 (단일 커밋)
+## Normal Invocation Example (single commit)
 
-### 입력
+### Input
 
 ```markdown
 ## 변경 사항 설명
@@ -16,7 +16,7 @@
 - center/back-end/src/main/java/com/nhnad/ohdasiyoung/admin/grade/dto/GradeResponse.java
 ```
 
-### 출력
+### Output
 
 ```markdown
 ## 커밋 설계 결과
@@ -41,9 +41,9 @@
 
 ---
 
-## 정상 호출 예시 (다중 커밋)
+## Normal Invocation Example (multiple commits)
 
-### 입력
+### Input
 
 ```markdown
 ## 변경 사항 설명
@@ -60,7 +60,7 @@
 - center/back-end/src/test/java/com/nhnad/ohdasiyoung/cscenter/InquiryServiceTest.java (신규)
 ```
 
-### 출력
+### Output
 
 ```markdown
 ## 커밋 설계 결과
@@ -121,9 +121,9 @@
 
 ---
 
-## 잘못된 호출 예시 (중단됨)
+## Incorrect Invocation Example (halted)
 
-### 입력
+### Input
 
 ```markdown
 ## 변경 사항 설명
@@ -133,7 +133,7 @@
 - 여러 파일
 ```
 
-### 출력
+### Output
 
 ```markdown
 ## 커밋 설계 중단
@@ -147,9 +147,9 @@
 
 ---
 
-## 중단 예시 (include/exclude 경계 불명확)
+## Halt Example (unclear include/exclude boundary)
 
-### 입력
+### Input
 
 ```markdown
 ## 변경 사항 설명
@@ -161,7 +161,7 @@
 - UserController.java
 ```
 
-### 출력
+### Output
 
 ```markdown
 ## 커밋 설계 중단

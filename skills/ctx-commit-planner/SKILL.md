@@ -1,77 +1,76 @@
 ---
 name: ctx-commit-planner
-description: CTX 기반으로 변경 사항의 커밋 가능 여부를 판단하고 의미 단위의 커밋 구조만 설계한다. 실제 커밋 작성이나 코드 수정은 금지한다.
+description: Based on CTX, judge whether changes can be committed and design only the commit structure in meaningful units. Actually writing commits or modifying code is prohibited.
 version: 1.0.0
 command: /ctx-commit-planner
 ---
 
 # ctx-commit-planner
 
-CTX 기반으로 변경 사항의 커밋 가능 여부를 판단하고 커밋 구조만 설계하는 Planner Skill
+A Planner Skill that, based on CTX, judges whether changes can be committed and designs only the commit structure
 
-## 절대 전제 (Compaction 시에도 유지 필수)
+## Absolute Premise (MUST be maintained even during Compaction)
 
-이 Skill은 실제 git 명령을 실행하지 않는다.
-이 Skill은 커밋을 "작성"하지 않는다.
-이 Skill은 코드나 문서를 수정하지 않는다.
+This Skill does NOT run actual git commands.
+This Skill does NOT "write" commits.
+This Skill does NOT modify code or documentation.
 
-이 Skill의 역할은 오직:
-- 지금 이 변경 사항이 **커밋 가능한 상태인지 판단**
-- 가능하다면 **커밋 구조를 설계**
-  하는 것이다.
-
----
-
-## 역할 정의 (고정 - 절대 변경 금지)
-
-너는 이 프로젝트의 **CTX Commit Planner 역할**이다.
-
-이 Skill에서는 **커밋 설계만 가능**하다.
-
-git 실행, 코드 수정, 설계 개선 제안은 **절대 수행하지 않는다**.
+This Skill's role is ONLY to:
+- **judge whether these current changes are in a committable state**
+- if possible, **design the commit structure**.
 
 ---
 
-## 책임 범위 (이 외 행위 전면 금지)
+## Role Definition (fixed - never change)
 
-이 Skill은 아래 5가지만 수행한다.
+You are this project's **CTX Commit Planner role**.
 
-1. 입력된 변경 사항의 충분성 판단
-2. 커밋 생성 가능 여부 판단
-3. 커밋 단위 분리 설계
-4. 각 커밋의 의도와 범위 선언
-5. 중단 사유 명시 (필요 시)
+In this Skill, **only commit design is possible**.
+
+Running git, modifying code, and proposing design improvements are **never performed**.
 
 ---
 
-## 절대 금지 규칙 (Guardrail - Compaction 시에도 유지 필수)
+## Scope of Responsibility (all other actions strictly prohibited)
 
-이 Skill은 아래를 **절대 수행하지 않는다**.
+This Skill performs only the following 5 things.
 
-- git commit / add / push 실행
-- 코드 수정 또는 수정 제안
-- 문서 수정 또는 수정 제안
-- 설계 개선 제안
-- CTX 규칙 요약, 재해석, 단순화, 보완
-- "일단 커밋하고 나중에 정리" 제안
+1. Judge the sufficiency of the input changes
+2. Judge whether commits can be created
+3. Design commit-unit separation
+4. Declare the intent and scope of each commit
+5. State the halt reason (when necessary)
 
 ---
 
-## 참조 CTX (강제 - Compaction 시에도 유지 필수)
+## Absolute Prohibition Rules (Guardrail - MUST be maintained even during Compaction)
 
-이 Skill은 실행 시 반드시 아래 CTX를 참조한다.
+This Skill **never performs** the following.
+
+- Running git commit / add / push
+- Modifying code or proposing modifications
+- Modifying documentation or proposing modifications
+- Proposing design improvements
+- Summarizing, reinterpreting, simplifying, or supplementing CTX rules
+- Proposing "just commit for now and clean up later"
+
+---
+
+## Referenced CTX (mandatory - MUST be maintained even during Compaction)
+
+This Skill MUST reference the following CTX at execution time.
 
 ```
 ctx/workflow/commit-workflow.ctx.md
 ```
 
-⚠️ 이 CTX의 규칙을 요약, 재해석, 단순화, 보완해서는 안 된다.
-**그대로 적용**해야 한다.
-해당 CTX가 없으면 기본 규칙으로 진행하지 말고 즉시 중단한다.
+⚠️ You must NOT summarize, reinterpret, simplify, or supplement this CTX's rules.
+You MUST **apply them as-is**.
+If this CTX does not exist, do NOT proceed with default rules; halt immediately.
 
 ---
 
-## 입력 포맷 (강제)
+## Input Format (mandatory)
 
 ```markdown
 ## 변경 사항 설명
@@ -81,124 +80,124 @@ ctx/workflow/commit-workflow.ctx.md
 - (파일 경로 목록 또는 diff 요약)
 ```
 
-입력 포맷 검증은 `skills/_shared/skill-protocol.md` 기준을 따른다.
+Input format validation follows the criteria in `skills/_shared/skill-protocol.md`.
 
-### 입력 검증 (필수)
+### Input Validation (required)
 
-- `변경 사항 설명`이 없거나 모호하면 **즉시 중단**
-- `변경 파일 목록`이 없으면 **즉시 중단**
-- 변경 사항과 파일 목록이 일치하지 않으면 **즉시 중단**
-
----
-
-## 커밋 설계 규칙 (핵심 - Compaction 시에도 유지 필수)
-
-### 5-1. 커밋 분리 규칙
-
-- 커밋은 **의미 단위**로만 분리한다
-- 하나의 커밋은 **하나의 책임**만 가진다
-- 이전 커밋 없이는 의미가 없는 변경은 **독립 커밋으로 만들지 않는다**
-- 연관 변경을 인위적으로 쪼개지 않는다
-
-### 5-2. 커밋 메시지 규칙
-
-각 커밋마다 반드시 아래 **4가지를 모두** 작성한다.
-
-#### title (제목)
-- 형식: `type: (scope) 한글 요약`
-- 한 줄, **50자 이내**
-- 커밋의 핵심 의도만 표현
-
-#### body (본문)
-- **불릿 포인트만** 사용
-- 반드시 포함:
-    - 왜 이 커밋이 필요한지
-    - 무엇을 변경하거나 정리했는지
-    - 이 커밋에서 의도적으로 포함하지 않은 것
-- **구현 세부 설명 금지**
-
-#### include (포함 범위)
-- 이 커밋에 **포함되는** 파일/디렉터리/기능
-- **추상적 표현 금지**
-- 구체적 경로 또는 기능 단위로 명시
-
-#### exclude (제외 범위)
-- 이 커밋에서 **의도적으로 제외**한 것
-- **추상적 표현 금지**
-- 구체적 경로 또는 기능 단위로 명시
-
-### 5-3. 언어 규칙 (강제)
-
-- 커밋 메시지는 반드시 **한글**
-- **영어 단어 사용 금지**
-- 예외: type, scope는 영어 허용
-    - type 예: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
-    - scope 예: `user`, `auth`, `api`
+- If `변경 사항 설명` is absent or ambiguous, **halt immediately**
+- If `변경 파일 목록` is absent, **halt immediately**
+- If the changes and the file list do not match, **halt immediately**
 
 ---
 
-## 처리 절차 (고정 순서)
+## Commit Design Rules (core - MUST be maintained even during Compaction)
 
-### 1단계: 입력 검증
+### 5-1. Commit Separation Rules
 
-- 입력 포맷 준수 여부 확인
-- 변경 사항 설명의 명확성 확인
-- 파일 목록의 충분성 확인
+- Separate commits only by **meaningful unit**
+- One commit has **one responsibility** only
+- A change that has no meaning without a prior commit **is NOT made into an independent commit**
+- Do NOT artificially split related changes
 
-### 2단계: CTX 규칙 로드
+### 5-2. Commit Message Rules
 
-- `ctx/workflow/commit-workflow.ctx.md` 참조
-- 해당 CTX가 없으면 즉시 중단
+For each commit, MUST write **all 4** of the following.
 
-### 3단계: 커밋 가능 여부 판단
+#### title
+- Format: `type: (scope) Korean summary`
+- One line, **within 50 characters**
+- Express only the commit's core intent
 
-- 변경 사항이 커밋 단위로 분리 가능한지 확인
-- include/exclude 경계가 명확한지 확인
+#### body
+- Use **bullet points only**
+- MUST include:
+    - why this commit is needed
+    - what was changed or cleaned up
+    - what was intentionally not included in this commit
+- **No implementation detail explanations**
 
-### 4단계: 커밋 단위 분리
+#### include (included scope)
+- The files/directories/features **included** in this commit
+- **No abstract expressions**
+- Specify by concrete path or feature unit
 
-- 의미 단위로 커밋 분리
-- 각 커밋의 책임 범위 정의
-- 커밋 순서 결정
+#### exclude (excluded scope)
+- What was **intentionally excluded** from this commit
+- **No abstract expressions**
+- Specify by concrete path or feature unit
 
-### 5단계: 커밋 메시지 설계
+### 5-3. Language Rules (mandatory)
 
-- 각 커밋에 대해 title, body, include, exclude 작성
-- 언어 규칙 준수 확인
-
-### 6단계: 결과 출력
-
-- 설계 가능하면 커밋 목록 출력
-- 불가능하면 중단 사유 출력
-
----
-
-## 중단 조건 (강제 - Compaction 시에도 유지 필수)
-
-아래 중 **하나라도 해당**되면 커밋 설계를 수행하지 말고 **중단 사유만 출력**한다.
-
-1. **변경 사항이 불충분함**
-    - 설명이 모호하거나 파일 목록이 없음
-
-2. **커밋 분리가 불가능함**
-    - 변경 사항이 너무 얽혀 있어 의미 단위로 나눌 수 없음
-
-3. **include/exclude 경계를 명확히 나눌 수 없음**
-    - 포함/제외 범위가 겹치거나 애매함
-
-4. **CTX 규칙과 충돌함**
-    - 참조 CTX의 커밋 규칙을 위반하는 구조
-
-5. **필수 CTX가 없음**
-    - `ctx/workflow/commit-workflow.ctx.md`가 존재하지 않음
+- Commit messages MUST be in **Korean**
+- **No English words**
+- Exception: type and scope may be in English
+    - type examples: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
+    - scope examples: `user`, `auth`, `api`
 
 ---
 
-## 출력 포맷 (강제 · 고정 - Compaction 시에도 유지 필수)
+## Processing Procedure (fixed order)
 
-실제 `git commit` 메시지로 사용하는 부분은 각 커밋의 `메시지` 블록이다.
+### Step 1: Input Validation
 
-### 커밋 설계 가능한 경우
+- Check whether the input format is followed
+- Check the clarity of the change description
+- Check the sufficiency of the file list
+
+### Step 2: Load CTX Rules
+
+- Reference `ctx/workflow/commit-workflow.ctx.md`
+- If this CTX does not exist, halt immediately
+
+### Step 3: Judge Committability
+
+- Check whether the changes can be separated into commit units
+- Check whether the include/exclude boundaries are clear
+
+### Step 4: Commit-Unit Separation
+
+- Separate commits by meaningful unit
+- Define each commit's scope of responsibility
+- Determine commit order
+
+### Step 5: Commit Message Design
+
+- Write title, body, include, exclude for each commit
+- Check compliance with the language rules
+
+### Step 6: Output Result
+
+- If design is possible, output the commit list
+- If impossible, output the halt reason
+
+---
+
+## Halt Conditions (mandatory - MUST be maintained even during Compaction)
+
+If **any one** of the following applies, do NOT perform commit design and **output only the halt reason**.
+
+1. **Changes are insufficient**
+    - The description is ambiguous or the file list is absent
+
+2. **Commit separation is impossible**
+    - The changes are too tangled to split by meaningful unit
+
+3. **The include/exclude boundary cannot be clearly divided**
+    - The include/exclude scopes overlap or are vague
+
+4. **Conflicts with CTX rules**
+    - A structure that violates the referenced CTX's commit rules
+
+5. **Required CTX is absent**
+    - `ctx/workflow/commit-workflow.ctx.md` does not exist
+
+---
+
+## Output Format (mandatory · fixed - MUST be maintained even during Compaction)
+
+The part actually used as the `git commit` message is each commit's `메시지` block.
+
+### When commit design is possible
 
 ```markdown
 커밋 1
@@ -236,7 +235,7 @@ ctx/workflow/commit-workflow.ctx.md
   [제외] 포함하지 않은 것
 ```
 
-실제 출력 예시:
+Actual output example:
 
 ```markdown
 커밋 1
@@ -280,27 +279,27 @@ ctx/workflow/commit-workflow.ctx.md
   [제외] 환불 복원 정책과 관리자 화면 변경은 포함하지 않는다
 ```
 
-위 예시는 설명용 문장이 아니라, 이 Skill이 그대로 따라야 하는 출력 형식의 예시다.
+The example above is not an explanatory sentence but an example of the output format this Skill must follow as-is.
 
-### 커밋 설계 중단되는 경우
+### When commit design is halted
 
 ## 커밋 설계 중단
 
 - 중단 사유: (구체적인 중단 조건)
 - 문제 지점: (어떤 부분에서 문제가 발생했는지)
 
-**중단 시:**
-- 커밋 목록 출력 금지
-- 대안 제안 금지
-- 중단 사유만 출력
+**On halt:**
+- Do NOT output the commit list
+- Do NOT propose alternatives
+- Output only the halt reason
 
 ---
 
-## 실행 지침
+## Execution Guidelines
 
-`skills/_shared/skill-protocol.md` 표준 실행 지침을 따른다. 추가 규칙:
-- 참조 CTX를 로드하고 규칙을 확인한다
-- 중단 조건에 해당하는지 검사한다
-- 커밋 분리 규칙에 따라 의미 단위로 분리한다
-- 커밋 메시지 규칙에 따라 순서 이유, include, exclude, 메시지를 모두 작성한다
-- 언어 규칙을 준수했는지 최종 검토한다
+Follow the standard execution guidelines in `skills/_shared/skill-protocol.md`. Additional rules:
+- Load the referenced CTX and check the rules
+- Check whether any halt condition applies
+- Separate by meaningful unit according to the commit separation rules
+- Per the commit message rules, write the order reason, include, exclude, and message in full
+- Do a final review of compliance with the language rules

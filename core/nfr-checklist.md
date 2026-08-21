@@ -1,28 +1,28 @@
 # NFR Checklist
 
-기능 요구사항이 정리된 뒤 아래 항목을 반드시 점검한다.
+After the functional requirements are organized, the following items must be checked.
 
-## 성능
-- 응답 시간 목표가 있는가
-- 대량 처리/배치 처리가 필요한가
+## Performance
+- Is there a response time target
+- Is bulk/batch processing required
 
-## 정합성
-- 중복 처리 방지가 필요한가
-- 상태 전이 원자성이 필요한가
+## Consistency
+- Is duplicate-processing prevention required
+- Is state-transition atomicity required
 
-## 보안
-- 권한 검증이 필요한가
-- 개인정보/결제정보가 포함되는가
+## Security
+- Is authorization verification required
+- Is personal information/payment information included
 
-## 운영
-- 알림/실패 재처리/감사 로그가 필요한가
-- 예약 작업이나 스케줄러가 필요한가
+## Operations
+- Are notifications/failure retries/audit logs required
+- Is a scheduled job or scheduler required
 
-## 테스트
-- 단위 테스트
-- 통합 테스트
-- 예외 시나리오 테스트
+## Testing
+- Unit tests
+- Integration tests
+- Exception scenario tests
 
-## 확장성
-- 추후 정책 변경 가능성이 큰가
-- 비용 부담 주체/채널/유형이 늘어날 수 있는가
+## Scalability
+- Is there a high likelihood of future policy changes
+- Could the cost-bearing party/channel/type grow

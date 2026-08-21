@@ -1,122 +1,122 @@
-# Score Loop Guide — 의존성 인지 점수 루프
+# Score Loop Guide — Dependency-Aware Score Loop
 
-`/ctx-score-loop`은 구현 **이후** 의존성과 4축 검증을 자동 반복 채점하여, **85점을 초과(`> 85`)했을 때에만** 완료로 판정하는 루프 엔지니어링 기능이다. "코드 구현 단 한 번의 요청"으로 사용자 추가 개입 없이 자율 반복한다.
+`/ctx-score-loop` is a loop-engineering feature that, **after** implementation, automatically and repeatedly scores dependencies and 4-axis verification, and judges completion **only when the score exceeds 85 (`> 85`)**. From a "single request to implement the code," it iterates autonomously without further user intervention.
 
-> 핵심: 매 라운드 "검증해줘"를 반복 요청할 필요가 없다. 한 번 시작하면 85점 초과까지(또는 정체/상한까지) 알아서 돈다.
-
----
-
-## 1. 언제 쓰나
-
-- GATE-3(구현 승인)를 통과한 피처를 구현하면서, 의존성·빌드·테스트·AC를 객관 점수로 자동 완료 판정하고 싶을 때.
-- 여러 종류의 의존성(기능 선후 / 빌드·라이브러리 / 모듈 간)이 얽혀 있어 "어디가 막혔는지" 추적이 필요할 때.
-
-readiness-score(구현 **전** 준비도)와 혼동하지 말 것. 이 루프는 구현 **후** 산출물 점수다.
+> Key point: you do not need to repeatedly ask "please verify" every round. Once started, it runs on its own until the score exceeds 85 (or until stall/cap).
 
 ---
 
-## 2. 4축 점수 (각 25점 · 총 100점)
+## 1. When to use
 
-| 축 | 의미 | 채점 근거 |
+- When implementing a feature that has passed GATE-3 (implementation approval), and you want to auto-judge completion by objective scores across dependencies·build·test·AC.
+- When multiple kinds of dependencies (functional ordering / build·library / inter-module) are entangled and you need to trace "where it is stuck."
+
+Do not confuse this with readiness-score (readiness **before** implementation). This loop is an output score **after** implementation.
+
+---
+
+## 2. 4-axis score (25 each · 100 total)
+
+| Axis | Meaning | Scoring basis |
 |----|------|----------|
-| 의존성 해결 | 3종 의존성이 모두 충족되었는가 | `dependency-check.md` 체크리스트 |
-| 빌드/컴파일 | 실제로 빌드되고 컴파일 에러가 없는가 | **빌드 명령 실행 결과** (미실행 0점) |
-| 테스트/커버리지 | 테스트가 통과하고 커버리지가 기준 이상인가 | **테스트 명령 실행 결과** (미실행 0점) |
-| 요구사항/AC 충족 | 의도한 Acceptance Criteria가 충족되는가 | UOW 수용기준 + requirements FR |
+| Dependency resolution | Are all 3 kinds of dependencies satisfied | `dependency-check.md` checklist |
+| Build/compile | Does it actually build with no compile errors | **build command execution result** (0 if not run) |
+| Test/coverage | Do tests pass and is coverage at or above the bar | **test command execution result** (0 if not run) |
+| Requirements/AC satisfaction | Are the intended Acceptance Criteria met | UOW acceptance criteria + requirements FR |
 
-상세 기준: `core/dependency-score.md` / 스키마: `core/dependency-score.schema.yaml`
+Detailed criteria: `core/dependency-score.md` / schema: `core/dependency-score.schema.yaml`
 
-### 게이팅 (거짓 완료 방지)
-- **빌드 축이 0점이면 85점을 넘겨도 완료가 아니다** (GR-1).
-- BLOCK 미해결 의존성이 1건이라도 있으면 의존성 축은 최대 12점 (GR-2).
-- 빌드·테스트 축은 **추정 채점 금지** — 명령을 실제로 실행한 증빙만 인정.
-
----
-
-## 3. 의존성 검증 md 만들기
-
-의존성이 필요한 **각 피처/모듈 디렉토리 안**에 `dependency-check.md`를 둔다(분산 배치). 템플릿: `templates/dependency-check.md`.
-
-3종 의존성을 체크리스트로 분류한다:
-1. **기능 간 선후관계** — 예: "로그인 feature가 completed여야 함"
-2. **빌드/라이브러리** — 예: "retrofit, hilt 버전 설정 + 빌드 통과"
-3. **모듈 간** — 예: "feature-A가 core-network API X를 호출/구현"
-
-루프는 이 파일을 자동 생성/갱신하되, **사람이 작성한 항목(`<!-- src: human -->`)은 보존**한다.
+### Gating (preventing false completion)
+- **If the build axis is 0, it is not complete even if it exceeds 85** (GR-1).
+- If there is even 1 unresolved BLOCK dependency, the dependency axis is capped at 12 points (GR-2).
+- The build·test axes **forbid estimated scoring** — only evidence of actually running the command is accepted.
 
 ---
 
-## 4. 실행
+## 3. Creating the dependency verification md
+
+Place a `dependency-check.md` **inside each feature/module directory** that needs dependencies (distributed placement). Template: `templates/dependency-check.md`.
+
+Classify the 3 kinds of dependencies as a checklist:
+1. **Functional ordering** — e.g., "the login feature must be completed"
+2. **Build/library** — e.g., "retrofit, hilt version config + build passing"
+3. **Inter-module** — e.g., "feature-A calls/implements core-network API X"
+
+The loop auto-generates/updates this file, but **preserves human-written items (`<!-- src: human -->`)**.
+
+---
+
+## 4. Execution
 
 ```text
 /ctx-score-loop <feature-slug>
 ```
 
-선택 인자:
-- `engine=ralph|evolve|native` (기본 ralph)
-- `max_rounds=N`, `max_minutes=M` (기본 10 / 30 — `dependency-check.md`의 Loop Config로도 오버라이드)
+Optional arguments:
+- `engine=ralph|evolve|native` (default ralph)
+- `max_rounds=N`, `max_minutes=M` (default 10 / 30 — can also be overridden by the Loop Config in `dependency-check.md`)
 
-### 한 라운드 흐름
+### One-round flow
 ```
-의존성 md 동기화 → 빌드·테스트 실제 실행 → 4축 채점(근거 필수)
-  → verdict 판정 → Score History 기록 + 보고
+sync dependency md → actually run build·test → score 4 axes (evidence required)
+  → verdict judgment → record Score History + report
 ```
 
-### 종료/중단 조건
+### Termination/stop conditions
 
-| verdict | 조건 | 동작 |
+| verdict | Condition | Action |
 |---------|------|------|
-| COMPLETE | total > 85 AND 빌드축 ≠ 0 | "완료(85 초과)" 보고 후 **종료** |
-| CONTINUE | 위 미달, 정체/상한/회귀 아님 | 부족 축 보완 후 다음 라운드 |
-| STALLED | 2회 연속 점수 미개선 | **즉시 중단**, 막힌 축·사유 보고 |
-| EXHAUSTED | 10회 또는 30분 도달 | **즉시 중단**, 사유 보고 |
-| REGRESSED | 직전 대비 점수 하락 | **즉시 중단**, 경고 보고 (v1 자동 롤백 없음) |
+| COMPLETE | total > 85 AND build axis ≠ 0 | Report "complete (over 85)" then **terminate** |
+| CONTINUE | above not met, not stall/cap/regression | Improve deficient axes, then next round |
+| STALLED | 2 consecutive rounds with no score improvement | **Stop immediately**, report stuck axis·reason |
+| EXHAUSTED | reached 10 rounds or 30 minutes | **Stop immediately**, report reason |
+| REGRESSED | score dropped vs. previous | **Stop immediately**, report warning (no auto-rollback in v1) |
 
-중단 시 루프는 **자동 재시작하지 않고** 사람 결정을 기다린다.
+On stop, the loop **does not auto-restart** and waits for a human decision.
 
 ---
 
-## 5. 예시
+## 5. Examples
 
-### 완료까지 (S1)
+### To completion (S1)
 ```
 [ctx-score-loop] coupon-feature — round 1
-  의존성 18/25 · 빌드 25/25 · 테스트 12/25 · AC 20/25 = 75/100  (CONTINUE)
+  dependency 18/25 · build 25/25 · test 12/25 · AC 20/25 = 75/100  (CONTINUE)
 [ctx-score-loop] coupon-feature — round 2
-  의존성 25/25 · 빌드 25/25 · 테스트 22/25 · AC 23/25 = 95/100  (COMPLETE)
-  → 완료(85 초과). 루프 종료.
+  dependency 25/25 · build 25/25 · test 22/25 · AC 23/25 = 95/100  (COMPLETE)
+  → complete (over 85). Loop terminated.
 ```
 
-### 정체로 중단 (S2)
+### Stopped by stall (S2)
 ```
 [ctx-score-loop] coupon-feature — round 3 (STALLED)
-  최종 82/100. 막힌 축: 모듈 간 의존성 (core-network API 미배포)
-  → 중단. 사람 결정 대기.
+  final 82/100. Stuck axis: inter-module dependency (core-network API not deployed)
+  → Stopped. Waiting for human decision.
 ```
 
 ---
 
-## 6. 다른 엔진과의 관계
+## 6. Relationship to other engines
 
-- 기본 엔진은 OMC `ralph`다. 종료조건 "4축 점수 > 85 & 빌드축 ≠ 0"을 ralph에 주입한다 (`docs/omc-ouroboros-integration.md` §2-2-S).
-- 측정 가능 목표가 강하면 Ouroboros `evolve`로 대체 가능. 규약(채점 기준·종료 판정)은 엔진 독립적이다.
-
----
-
-## 7. 주의
-
-- 이 루프는 **GATE(사람 승인)를 자동 통과시키지 않는다.** GATE-3 이후 구현 구간에서만 동작한다.
-- 비즈니스 정책(환불/정산/권한) 미확정은 여전히 STOP 조건이다.
-- 완료는 오직 검증 통과 시에만 보고한다. 테스트 실패/스킵 시 그 사실을 명시한다.
+- The default engine is OMC `ralph`. The termination condition "4-axis score > 85 & build axis ≠ 0" is injected into ralph (`docs/omc-ouroboros-integration.md` §2-2-S).
+- If the measurable goal is strong, it can be replaced with Ouroboros `evolve`. The protocol (scoring criteria·termination judgment) is engine-independent.
 
 ---
 
-## 8. 전체 예시 (따라 하기)
+## 7. Cautions
 
-`/ctx-aidlc-run`부터 `/ctx-score-loop`까지 한 기능을 끝까지 진행한 walkthrough 예시:
+- This loop **does not auto-pass GATEs (human approval).** It operates only in the implementation section after GATE-3.
+- Unsettled business policy (refund/settlement/permissions) is still a STOP condition.
+- Completion is reported only when verification passes. On test failure/skip, state that fact explicitly.
 
-- `examples/score-loop-walkthrough/book-borrowing/` — "도서 대출" 기능
-  - `README.md` — 단계별 흐름
-  - `requirements.md` / `requirement-verification-questions.md` / `unit-of-work.md` / `status.md` — `/ctx-aidlc-run` 산출물
-  - `dependency-check.md` — 점수 루프 채점 입력 + Score History(75→82→92)
-  - `LOOP-RUN.md` — 라운드별 진행 + 정체/거짓완료 반례
+---
+
+## 8. Full example (walkthrough)
+
+A walkthrough example that carries one feature all the way from `/ctx-aidlc-run` to `/ctx-score-loop`:
+
+- `examples/score-loop-walkthrough/book-borrowing/` — the "book borrowing" feature
+  - `README.md` — step-by-step flow
+  - `requirements.md` / `requirement-verification-questions.md` / `unit-of-work.md` / `status.md` — `/ctx-aidlc-run` outputs
+  - `dependency-check.md` — score-loop scoring input + Score History (75→82→92)
+  - `LOOP-RUN.md` — per-round progress + stall/false-completion counterexamples

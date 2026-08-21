@@ -1,70 +1,70 @@
 <!-- workflow-step: STEP-5 | gate: GATE-2 | producer: ctx-aidlc-run | EXAMPLE -->
-# Feature Requirements — 도서 대출 (Book Borrowing)
+# Feature Requirements — Book Borrowing
 
-> **Request Anchor**: 회원이 도서를 대출할 수 있게 한다. 재고가 있으면 빌려주고, 1인당 최대 3권, 대출 기간 14일.
+> **Request Anchor**: Allow members to borrow books. If stock is available, lend it out; up to 3 books per person, with a 14-day loan period.
 
-> ⚠️ 이것은 walkthrough 예시 산출물이다. 가상의 도서관 백엔드를 기준으로 작성되었다.
+> ⚠️ This is a walkthrough example output. It is written against a fictional library backend.
 
 ## Goal
 
-회원이 재고가 있는 도서를 대출할 수 있게 한다. 1인당 동시 대출 3권, 대출 기간 14일을 기본 정책으로 한다.
+Allow members to borrow books that have available stock. The default policy is 3 concurrent loans per person and a 14-day loan period.
 
 ## Background
 
-작은 도서관 백엔드에 대출 기능이 없다. 회원·도서 데이터는 이미 존재한다고 가정한다(brownfield). 이 기능은 "대출(Loan)"이라는 신규 개념을 추가한다.
+A small library backend has no borrowing feature. Member and book data are assumed to already exist (brownfield). This feature adds a new concept called "Loan".
 
 ## In-Scope
 
-- 회원이 특정 도서를 대출하는 기능
-- 재고(가용 부수) 확인 후 대출 허용/거부
-- 1인당 동시 대출 한도(3권) 검증
-- 대출 기간(14일) 및 반납 예정일 계산
+- The ability for a member to borrow a specific book
+- Checking stock (available copies) and then allowing/denying the loan
+- Validating the per-person concurrent loan limit (3 books)
+- Calculating the loan period (14 days) and the due date
 
 ## Out-of-Scope
 
-- 반납 처리 (별도 feature)
-- 연체/연체료 정책 (별도 feature)
-- 예약/대기열 (재고 없을 때 줄 세우기 — 이번 범위 아님)
-- 알림(반납 임박 등)
+- Return processing (separate feature)
+- Overdue / late-fee policy (separate feature)
+- Reservations/waitlists (queuing when stock is unavailable — not in this scope)
+- Notifications (e.g., due date approaching)
 
 ## User Scenarios
 
-1. 회원이 재고 있는 책을 대출 → 대출 성공, 반납 예정일 안내.
-2. 회원이 재고 없는 책을 대출 시도 → 거부(재고 없음).
-3. 이미 3권 대출 중인 회원이 추가 대출 시도 → 거부(한도 초과).
+1. A member borrows a book with available stock → loan succeeds, due date is shown.
+2. A member attempts to borrow a book with no stock → denied (out of stock).
+3. A member already holding 3 loans attempts an additional loan → denied (limit exceeded).
 
-### 엣지 케이스
-- 회원이 **같은 책을 이미 대출 중**인데 또 빌리려 함 → Q1에서 정책 확정.
-- 마지막 1부를 두 회원이 동시에 대출 시도 → 동시성(재고 차감 원자성) 필요.
+### Edge Cases
+- A member who **already has the same book on loan** tries to borrow it again → policy fixed in Q1.
+- Two members simultaneously try to borrow the last remaining copy → concurrency (atomic stock decrement) required.
 
 ## Functional Requirements
 
-- **FR-1** 회원은 도서 ID를 지정해 대출을 요청할 수 있다. `[확신: 확실]`
-- **FR-2** 시스템은 도서의 가용 재고가 1 이상일 때만 대출을 허용한다. `[확신: 확실]`
-- **FR-3** 시스템은 회원의 현재 대출 수가 3 미만일 때만 대출을 허용한다. `[확신: 확실]`
-- **FR-4** 대출 성공 시 반납 예정일 = 대출일 + 14일로 계산한다. `[확신: 확실]`
-- **FR-5** 대출 성공 시 도서 가용 재고를 1 감소시킨다(원자적). `[확신: 확실]`
-- **FR-6** 같은 책 중복 대출은 거부한다. `[확신: AI추천 — Q1]`
+- **FR-1** A member can request a loan by specifying a book ID. `[confidence: certain]`
+- **FR-2** The system allows a loan only when the book's available stock is 1 or more. `[confidence: certain]`
+- **FR-3** The system allows a loan only when the member's current loan count is under 3. `[confidence: certain]`
+- **FR-4** On a successful loan, due date = loan date + 14 days. `[confidence: certain]`
+- **FR-5** On a successful loan, decrement the book's available stock by 1 (atomically). `[confidence: certain]`
+- **FR-6** Reject a duplicate loan of the same book. `[confidence: AI-recommended — Q1]`
 
 ## Derived Requirements
 
-- **DR-1** Loan(대출) 엔티티: 회원·도서·대출일·반납예정일·상태.
-- **DR-2** 재고 차감의 동시성 보장(낙관/비관 락 중 택1 — 기술 설계 단계).
+- **DR-1** Loan entity: member, book, loan date, due date, status.
+- **DR-2** Guarantee concurrency for stock decrement (choose one of optimistic/pessimistic lock — technical design stage).
 
 ## Requirement Gaps
 
-BLOCK 질문 Q1(중복 대출 정책)이 핵심. AI 추천(거부)으로 진행하거나 사람이 확정. P2(동시성 전략)는 자동 결정.
+BLOCK question Q1 (duplicate loan policy) is the key one. Proceed with the AI recommendation (reject) or have a human confirm it. P2 (concurrency strategy) is decided automatically.
 
 ## Approval Preconditions
 
-- [x] 대출 한도(3권) 확정 — 요청에 명시
-- [x] 대출 기간(14일) 확정 — 요청에 명시
-- [x] 중복 대출 정책(Q1) — AI추천 거부로 확정
-- [ ] GATE-2 사용자 승인
+- [x] Loan limit (3 books) confirmed — specified in the request
+- [x] Loan period (14 days) confirmed — specified in the request
+- [x] Duplicate loan policy (Q1) — confirmed as AI-recommended reject
+- [ ] GATE-2 user approval
 
 ## Initial Risk Assessment
 
-| 리스크 | 영향 | 대응 |
+| Risk | Impact | Mitigation |
 |--------|------|------|
-| 마지막 1부 동시 대출 → 재고 음수 | 데이터 정합성 | FR-5 원자적 차감, DR-2 락 전략 |
-| 중복 대출 허용 시 한도 우회 | 정책 우회 | FR-6 중복 거부 |
+| Concurrent loan of the last copy → negative stock | Data consistency | FR-5 atomic decrement, DR-2 lock strategy |
+| Limit bypass if duplicate loans are allowed | Policy bypass | FR-6 duplicate rejection |

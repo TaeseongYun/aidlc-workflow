@@ -1,56 +1,56 @@
 <!-- workflow-step: STEP-6.5 | gate: GATE-3.5 | producer: ctx-aidlc-run | condition: M/L units exist -->
 # Technical Design
 
-선행 산출물:
+Prerequisite outputs:
 - `requirements.md`
 - `unit-of-work.md`
 
-대상 UOW (M/L 규모):
-- UOW-3: 쿠폰 자동 발급 배치 (M)
-- UOW-5: 쿠폰 사용 검증 및 결제 연동 (M)
+Target UOWs (M/L size):
+- UOW-3: Coupon auto-issuance batch (M)
+- UOW-5: Coupon usage validation and payment integration (M)
 
 ---
 
 ## 1. Design Overview
 
-재구매 캠페인 쿠폰 자동 발급 및 결제 시 쿠폰 적용 기능의 기술 설계다.
+This is the technical design for the repurchase campaign coupon auto-issuance feature and coupon application at payment time.
 
-- 대상 모듈: campaign (신규), coupon (기존 확장), payment (기존 수정)
-- brownfield 연결점: 기존 `coupon` 도메인의 JPA + Spring Data 패턴을 따른다. 기존 `payment` 도메인의 Strategy 패턴 할인 적용 구조에 캠페인 쿠폰 전략을 추가한다.
+- Target modules: campaign (new), coupon (existing extension), payment (existing modification)
+- brownfield connection points: follow the JPA + Spring Data pattern of the existing `coupon` domain. Add a campaign coupon strategy to the Strategy-pattern discount-application structure of the existing `payment` domain.
 
 ---
 
 ## 2. Architecture Decisions
 
-### ADR-1: 캠페인 쿠폰 테이블 분리 vs 기존 쿠폰 테이블 확장
+### ADR-1: Separate campaign coupon table vs. extending the existing coupon table
 
-- 맥락: 기존 `coupon` 테이블은 수동 발급 전용. 캠페인 쿠폰은 자동 발급, 캠페인 단위 관리, 사용 조건이 다름.
-- 선택지:
-  - A) 기존 `coupon` 테이블에 `campaign_id` 컬럼 추가 → 마이그레이션 간단, 기존 쿠폰 쿼리에 영향
-  - B) `campaign`, `coupon_issue` 별도 테이블 생성 → 기존 쿠폰 영향 없음, 테이블 2개 추가
-- 결정: B) 별도 테이블
-- 영향: 기존 쿠폰 도메인 수정 없음. campaign 패키지 신규 생성. 결제 연동 시 쿠폰 타입 분기 필요.
+- Context: the existing `coupon` table is for manual issuance only. Campaign coupons differ in auto-issuance, per-campaign management, and usage conditions.
+- Options:
+  - A) Add a `campaign_id` column to the existing `coupon` table → simple migration, affects existing coupon queries
+  - B) Create separate `campaign` and `coupon_issue` tables → no impact on existing coupons, adds 2 tables
+- Decision: B) separate tables
+- Impact: no modification to the existing coupon domain. A new campaign package is created. Coupon-type branching is needed for payment integration.
 
-### ADR-2: 배치 발급 방식 — Spring Batch vs 단순 스케줄러
+### ADR-2: Batch issuance method — Spring Batch vs. a simple scheduler
 
-- 맥락: 대상 고객 10만 건 이상 예상. 기존 프로젝트에 Spring Batch 의존성 있음.
-- 선택지:
-  - A) Spring Batch Job → chunk 단위 처리, 재시작/실패 복구 내장
-  - B) @Scheduled + 페이징 쿼리 → 단순, 의존성 추가 없음, 실패 복구 직접 구현
-- 결정: A) Spring Batch
-- 영향: 기존 배치 인프라 재사용. Job/Step 설정 추가. 배치 메타 테이블 기존 것 공유.
+- Context: over 100,000 target customers are expected. The existing project has a Spring Batch dependency.
+- Options:
+  - A) Spring Batch Job → chunk-level processing, built-in restart/failure recovery
+  - B) @Scheduled + paging query → simple, no added dependency, failure recovery implemented manually
+- Decision: A) Spring Batch
+- Impact: reuse the existing batch infrastructure. Add Job/Step configuration. Share the existing batch metadata tables.
 
 ---
 
 ## 3. API Specification
 
 ### POST /admin/campaigns
-캠페인 생성
+Create a campaign
 
 Request:
 ```json
 {
-  "name": "재구매 30일 할인",
+  "name": "Repurchase 30-Day Discount",
   "periodDays": 30,
   "minOrderAmount": 15000,
   "discountAmount": 3000,
@@ -63,7 +63,7 @@ Response (201):
 ```json
 {
   "campaignId": 1,
-  "name": "재구매 30일 할인",
+  "name": "Repurchase 30-Day Discount",
   "periodDays": 30,
   "minOrderAmount": 15000,
   "discountAmount": 3000,
@@ -74,11 +74,11 @@ Response (201):
 ```
 
 Error:
-- 400: 필수 필드 누락
-- 409: 동일 이름 캠페인 존재
+- 400: required field missing
+- 409: a campaign with the same name exists
 
 ### PATCH /admin/campaigns/{campaignId}/toggle
-캠페인 ON/OFF
+Campaign ON/OFF
 
 Response (200):
 ```json
@@ -89,7 +89,7 @@ Response (200):
 ```
 
 ### GET /admin/campaigns/{campaignId}/stats
-발급/사용 현황
+Issuance/usage status
 
 Response (200):
 ```json
@@ -108,11 +108,11 @@ Response (200):
 | Entity | Field | Type | Constraints | Notes |
 |--------|-------|------|-------------|-------|
 | Campaign | id | BIGINT | PK, AUTO_INCREMENT | |
-| Campaign | name | VARCHAR(100) | NOT NULL, UNIQUE | 캠페인 이름 |
-| Campaign | period_days | INT | NOT NULL | 재구매 판정 기간 |
-| Campaign | min_order_amount | INT | NOT NULL | 최소 주문 금액 |
-| Campaign | discount_amount | INT | NOT NULL | 할인 금액 (정액) |
-| Campaign | valid_days | INT | NOT NULL | 쿠폰 유효 기간 (일) |
+| Campaign | name | VARCHAR(100) | NOT NULL, UNIQUE | campaign name |
+| Campaign | period_days | INT | NOT NULL | repurchase determination period |
+| Campaign | min_order_amount | INT | NOT NULL | minimum order amount |
+| Campaign | discount_amount | INT | NOT NULL | discount amount (fixed) |
+| Campaign | valid_days | INT | NOT NULL | coupon validity period (days) |
 | Campaign | active | BOOLEAN | NOT NULL, DEFAULT false | ON/OFF |
 | Campaign | created_at | DATETIME | NOT NULL | |
 | CouponIssue | id | BIGINT | PK, AUTO_INCREMENT | |
@@ -120,13 +120,13 @@ Response (200):
 | CouponIssue | user_id | BIGINT | NOT NULL | |
 | CouponIssue | issued_at | DATETIME | NOT NULL | |
 | CouponIssue | expires_at | DATETIME | NOT NULL | issued_at + valid_days |
-| CouponIssue | used_at | DATETIME | NULLABLE | 사용 시 기록 |
-| CouponIssue | order_id | BIGINT | NULLABLE, FK → Order | 사용된 주문 |
+| CouponIssue | used_at | DATETIME | NULLABLE | recorded on use |
+| CouponIssue | order_id | BIGINT | NULLABLE, FK → Order | the order it was used on |
 
-Unique constraint: `(campaign_id, user_id)` — 1인 1캠페인 1쿠폰
+Unique constraint: `(campaign_id, user_id)` — 1 coupon per person per campaign
 
 Migration strategy:
-- 신규 테이블 2개 생성 (기존 테이블 변경 없음)
+- Create 2 new tables (no changes to existing tables)
 - Flyway migration script: `V{next}__create_campaign_tables.sql`
 
 ---
@@ -135,17 +135,17 @@ Migration strategy:
 
 | Module/Class | Responsibility | New/Change | Target UOW |
 |-------------|----------------|------------|------------|
-| `campaign/entity/Campaign.java` | 캠페인 엔티티 | New | UOW-1 |
-| `campaign/entity/CouponIssue.java` | 발급 이력 엔티티 | New | UOW-1 |
-| `campaign/repository/CampaignRepository.java` | 캠페인 CRUD | New | UOW-1 |
-| `campaign/repository/CouponIssueRepository.java` | 발급 이력 CRUD | New | UOW-1 |
-| `order/repository/OrderRepository.java` | 재구매 판정 쿼리 추가 | Change | UOW-2 |
-| `campaign/batch/CouponIssueBatchJob.java` | 배치 Job/Step 정의 | New | UOW-3 |
-| `campaign/batch/CouponIssueProcessor.java` | 대상 필터링 + 발급 | New | UOW-3 |
-| `campaign/controller/AdminCampaignController.java` | 관리자 API | New | UOW-4 |
-| `payment/service/DiscountStrategy.java` | 캠페인 쿠폰 할인 전략 추가 | Change | UOW-5 |
-| `coupon/service/CampaignCouponValidator.java` | 쿠폰 유효성 검증 | New | UOW-5 |
-| `campaign/controller/CampaignStatsController.java` | 현황 조회 API | New | UOW-6 |
+| `campaign/entity/Campaign.java` | campaign entity | New | UOW-1 |
+| `campaign/entity/CouponIssue.java` | issuance history entity | New | UOW-1 |
+| `campaign/repository/CampaignRepository.java` | campaign CRUD | New | UOW-1 |
+| `campaign/repository/CouponIssueRepository.java` | issuance history CRUD | New | UOW-1 |
+| `order/repository/OrderRepository.java` | add repurchase determination query | Change | UOW-2 |
+| `campaign/batch/CouponIssueBatchJob.java` | batch Job/Step definition | New | UOW-3 |
+| `campaign/batch/CouponIssueProcessor.java` | target filtering + issuance | New | UOW-3 |
+| `campaign/controller/AdminCampaignController.java` | administrator API | New | UOW-4 |
+| `payment/service/DiscountStrategy.java` | add campaign coupon discount strategy | Change | UOW-5 |
+| `coupon/service/CampaignCouponValidator.java` | coupon validity check | New | UOW-5 |
+| `campaign/controller/CampaignStatsController.java` | status query API | New | UOW-6 |
 
 ---
 
@@ -158,27 +158,27 @@ sequenceDiagram
     participant OrderRepo
     participant CouponIssueRepo
 
-    Scheduler->>BatchJob: 배치 실행 (매일 02:00)
-    BatchJob->>OrderRepo: 활성 캠페인별 재구매 대상 조회
-    OrderRepo-->>BatchJob: 대상 고객 ID 목록
-    BatchJob->>CouponIssueRepo: 이미 발급된 고객 필터링
-    CouponIssueRepo-->>BatchJob: 미발급 고객 목록
-    BatchJob->>CouponIssueRepo: 쿠폰 발급 (bulk insert)
+    Scheduler->>BatchJob: run batch (daily 02:00)
+    BatchJob->>OrderRepo: query repurchase targets per active campaign
+    OrderRepo-->>BatchJob: list of target customer IDs
+    BatchJob->>CouponIssueRepo: filter out already-issued customers
+    CouponIssueRepo-->>BatchJob: list of not-yet-issued customers
+    BatchJob->>CouponIssueRepo: issue coupons (bulk insert)
 ```
 
-텍스트 대안:
-1. 스케줄러가 매일 02:00에 배치 실행
-2. 활성 캠페인마다 재구매 대상 고객 조회
-3. 이미 발급된 고객 제외
-4. 미발급 고객에게 쿠폰 bulk insert
+Text alternative:
+1. The scheduler runs the batch every day at 02:00
+2. For each active campaign, query the repurchase-target customers
+3. Exclude customers who have already been issued a coupon
+4. Bulk insert coupons for the customers who have not been issued one
 
 ---
 
 ## 7. Non-functional Design
 
-- 성능: 배치 chunk size 500, 10만 건 기준 5분 이내 목표. 재구매 판정 쿼리에 `(user_id, paid_at)` 인덱스 필요.
-- 정합성: `(campaign_id, user_id)` unique constraint로 중복 발급 방지. 배치 실패 시 Spring Batch 재시작으로 미처리 건만 재처리.
-- 운영: 배치 실행 로그를 Spring Batch 메타 테이블로 관리. 캠페인 ON/OFF로 발급 즉시 중단 가능.
+- Performance: batch chunk size 500, target of completing within 5 minutes for 100,000 records. The repurchase determination query needs a `(user_id, paid_at)` index.
+- Consistency: prevent duplicate issuance via the `(campaign_id, user_id)` unique constraint. On batch failure, only the unprocessed records are reprocessed via Spring Batch restart.
+- Operations: manage batch execution logs via the Spring Batch metadata tables. Issuance can be stopped immediately via campaign ON/OFF.
 
 ---
 
@@ -186,15 +186,15 @@ sequenceDiagram
 
 | UOW | Test Type | Verification |
 |-----|-----------|-------------|
-| UOW-1 | Unit | Entity 생성, Repository CRUD |
-| UOW-2 | Unit | 기간 조건별 재구매 대상 반환 정확성 |
-| UOW-3 | Integration | 배치 실행 → 발급 건수 검증, 중복 발급 차단 검증, chunk 단위 롤백 검증 |
-| UOW-4 | Integration | 캠페인 CRUD API 동작, ON/OFF 토글 |
-| UOW-5 | Integration | 유효 쿠폰 할인 적용, 만료 쿠폰 차단, 최소 금액 미달 차단 |
-| UOW-6 | Integration | 발급/사용 통계 정확성 |
+| UOW-1 | Unit | Entity creation, Repository CRUD |
+| UOW-2 | Unit | accuracy of repurchase targets returned per period condition |
+| UOW-3 | Integration | run batch → verify issuance count, verify duplicate-issuance blocking, verify chunk-level rollback |
+| UOW-4 | Integration | campaign CRUD API operation, ON/OFF toggle |
+| UOW-5 | Integration | valid coupon discount application, expired coupon blocking, below-minimum-amount blocking |
+| UOW-6 | Integration | accuracy of issuance/usage statistics |
 
 ---
 
 ## 9. Open Items
 
-없음
+None

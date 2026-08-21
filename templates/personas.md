@@ -1,39 +1,39 @@
 <!-- workflow-step: STEP-5.5 | gate: GATE-2.5 | producer: ctx-aidlc-run | condition: User Scenarios >= 3 or new user types -->
 # Personas
 
-이 파일은 `aidlc-docs/features/<feature-slug>/user-stories/personas.md`에 생성하는 것을 권장한다.
+It is recommended to create this file at `aidlc-docs/features/<feature-slug>/user-stories/personas.md`.
 
-선행 산출물:
+Prerequisite artifacts:
 - `aidlc-docs/features/<feature-slug>/requirements.md`
 
-관련 상태 파일:
+Related state file:
 - `aidlc-docs/features/<feature-slug>/status.md`
 
-## 작성 조건
+## Authoring Conditions
 
-- requirements.md의 User Scenarios가 3개 이상이거나 신규 사용자 유형이 포함될 때 작성한다.
-- 단순 기능 변경(기존 사용자 유형만 해당)이면 생략할 수 있다.
-- 생략 시 status.md에 "페르소나 생략 — 기존 사용자 유형만 해당"으로 기록한다.
+- Write this when requirements.md has 3 or more User Scenarios or when new user types are included.
+- It may be omitted for simple feature changes (only existing user types apply).
+- When omitted, record in status.md: "Personas omitted — only existing user types apply".
 
 ---
 
-## Persona 1. {페르소나 이름}
+## Persona 1. {persona name}
 
-- 역할: {사용자 역할 — 예: 일반 고객, 운영 관리자, 외부 파트너}
-- 목표: {이 기능을 통해 달성하려는 것}
-- 컨텍스트: {사용 환경, 빈도, 디바이스, 제약 조건}
-- 핵심 니즈: {반드시 충족되어야 하는 요구}
-- 불만/고충: {현재 방식의 문제점}
+- Role: {user role — e.g. general customer, operations manager, external partner}
+- Goal: {what they want to achieve through this feature}
+- Context: {usage environment, frequency, device, constraints}
+- Core needs: {requirements that must be met}
+- Complaints/pain points: {problems with the current approach}
 
-## Persona 2. {페르소나 이름}
+## Persona 2. {persona name}
 
-- 역할:
-- 목표:
-- 컨텍스트:
-- 핵심 니즈:
-- 불만/고충:
+- Role:
+- Goal:
+- Context:
+- Core needs:
+- Complaints/pain points:
 
-## 페르소나 간 관계
+## Relationships Between Personas
 
-- {Persona 1}과 {Persona 2}의 상호작용 또는 충돌 지점을 기술한다.
-- 운영자/관리자 페르소나가 있으면 일반 사용자와의 권한 경계를 명시한다.
+- Describe the interaction or conflict points between {Persona 1} and {Persona 2}.
+- If there is an operator/admin persona, specify the permission boundary versus general users.

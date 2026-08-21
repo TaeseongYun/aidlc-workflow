@@ -1,15 +1,15 @@
-# ctx-architect-judge 사용 방법
+# How to Use ctx-architect-judge
 
-## 사용 방법 요약
+## Usage Summary
 
-1. `/ctx-architect-judge` 명령어로 Skill을 호출한다
-2. 입력 포맷에 맞춰 작업 요구사항과 CTX 목록을 제공한다
-3. Skill이 도메인 범위와 CTX 참조 범위를 판단하여 구조화된 결과를 반환한다
-4. 판단 불가 시 중단 사유와 확인 질문이 반환된다
+1. Invoke the Skill with the `/ctx-architect-judge` command
+2. Provide the task requirements and CTX list according to the input format
+3. The Skill judges the domain scope and CTX reference scope and returns a structured result
+4. If judgment is impossible, the stop reason and confirmation questions are returned
 
 ---
 
-## 올바른 호출 예시
+## Correct Invocation Example
 
 ```
 /ctx-architect-judge
@@ -28,25 +28,25 @@
 - .ctx/domains/grade/grade-api.ctx.md
 ```
 
-**예상 출력:**
+**Expected output:**
 
-## 1. 영향 도메인 목록
-- Grade: 사용자 등급 조회 API가 Grade 도메인에 속함
+## 1. Affected Domain List
+- Grade: The user grade lookup API belongs to the Grade domain
 
-## 2. 반드시 참조해야 할 Local CTX
+## 2. Local CTX That Must Be Referenced
 - .ctx/domains/grade/grade-domain.ctx.md
 - .ctx/domains/grade/grade-api.ctx.md
 
-## 3. Global CTX 영향 여부
-- 영향 있음
-- 캐싱 적용 시 caching-policy.ctx.md 규칙 준수 필요
+## 3. Whether Global CTX Is Impacted
+- Impacted
+- When applying caching, compliance with the caching-policy.ctx.md rules is required
 
-## 4. 판단 불가 / 추가 확인 필요 지점
-- 없음
+## 4. Points That Cannot Be Judged / Require Additional Confirmation
+- None
 
 ---
 
-## 잘못된 호출 예시 (중단되는 경우)
+## Incorrect Invocation Example (case that stops)
 
 ```
 /ctx-architect-judge
@@ -61,15 +61,15 @@
 - 등급 관련 규칙 참조
 ```
 
-**예상 출력:**
+**Expected output:**
 
-## 판단 중단
+## Judgment Stopped
 
-중단 사유:
-- 작업 요구사항이 추상적임 (어떤 기능의 성능을 개선할지 특정 불가)
-- CTX가 파일 경로가 아닌 설명 텍스트로 제공됨
+Stop reason:
+- The task requirement is abstract (cannot pin down which feature's performance to improve)
+- CTX was provided as descriptive text rather than file paths
 
-확인이 필요한 질문:
-1. 성능 개선 대상이 되는 구체적인 API 또는 기능은 무엇인가요?
-2. Global CTX 파일의 정확한 경로를 제공해 주세요
-3. Local CTX 파일의 정확한 경로를 제공해 주세요
+Questions that need confirmation:
+1. What is the specific API or feature that is the target of the performance improvement?
+2. Please provide the exact paths of the Global CTX files
+3. Please provide the exact paths of the Local CTX files

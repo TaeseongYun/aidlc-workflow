@@ -1,45 +1,45 @@
 <!-- workflow-step: STEP-6 | gate: GATE-3 | producer: ctx-aidlc-run | EXAMPLE -->
-# Unit of Work — 도서 대출
+# Unit of Work — Book Borrowing
 
-> **Request Anchor**: 회원이 도서를 대출. 재고 있으면 빌려주고, 1인당 최대 3권, 14일.
+> **Request Anchor**: A member borrows a book. If stock is available, lend it out; up to 3 books per person, 14 days.
 
 ## Summary
 
-| ID | 책임 | 규모 | 의존성 | 상태 |
+| ID | Responsibility | Size | Dependencies | Status |
 |----|------|------|--------|------|
-| UOW-1 | Loan 엔티티/저장소 추가 | S | 없음 | TODO |
-| UOW-2 | 대출 도메인 서비스(재고·한도·중복·기간 검증 + 재고 차감) | M | UOW-1 | TODO |
-| UOW-3 | 대출 API 엔드포인트(POST /loans) | S | UOW-2 | TODO |
+| UOW-1 | Add Loan entity/repository | S | None | TODO |
+| UOW-2 | Loan domain service (stock/limit/duplicate/period validation + stock decrement) | M | UOW-1 | TODO |
+| UOW-3 | Loan API endpoint (POST /loans) | S | UOW-2 | TODO |
 
-규모: M 1개(UOW-2) → technical-design 권장(이 예시에선 핵심만 요약).
+Size: 1 M (UOW-2) → technical-design recommended (only the essentials are summarized in this example).
 
-## UOW-1. Loan 엔티티/저장소
-- 책임: 대출 레코드(회원·도서·대출일·반납예정일·상태) 정의와 저장.
-- 예상 위치: `domain/loan/*`
-- 의존성: 없음
-- 규모: S
-- 수용 기준: Loan 엔티티와 저장소가 생성되고, 회원·도서 참조가 올바르다.
-- 검증 방법: 단위 테스트
+## UOW-1. Loan entity/repository
+- Responsibility: Define and store the loan record (member, book, loan date, due date, status).
+- Expected location: `domain/loan/*`
+- Dependencies: None
+- Size: S
+- Acceptance criteria: The Loan entity and repository are created, and the member/book references are correct.
+- Verification method: Unit test
 
-## UOW-2. 대출 도메인 서비스
-- 책임: 재고 확인(FR-2) + 한도 검증(FR-3) + 중복 대출 거부(FR-6) + 반납예정일 계산(FR-4) + 재고 원자적 차감(FR-5).
-- 예상 위치: `domain/loan/LoanService`
-- 의존성: UOW-1
-- 규모: M
-- 수용 기준: 4개 규칙(재고/한도/중복/기간)이 모두 적용되고, 재고 차감이 동시성 안전하다.
-- 검증 방법: 단위 테스트 + 동시성 테스트(마지막 1부 경합)
+## UOW-2. Loan domain service
+- Responsibility: Stock check (FR-2) + limit validation (FR-3) + duplicate loan rejection (FR-6) + due date calculation (FR-4) + atomic stock decrement (FR-5).
+- Expected location: `domain/loan/LoanService`
+- Dependencies: UOW-1
+- Size: M
+- Acceptance criteria: All 4 rules (stock/limit/duplicate/period) are applied, and the stock decrement is concurrency-safe.
+- Verification method: Unit test + concurrency test (contention over the last copy)
 
-## UOW-3. 대출 API
-- 책임: POST /loans 엔드포인트로 대출 요청 수신, 결과/에러 응답.
-- 예상 위치: `api/LoanController`
-- 의존성: UOW-2
-- 규모: S
-- 수용 기준: 성공 시 반납예정일 포함 응답, 거부 시 사유별 에러 코드(재고없음/한도초과/중복).
-- 검증 방법: 통합 테스트
+## UOW-3. Loan API
+- Responsibility: Receive loan requests via the POST /loans endpoint, respond with result/error.
+- Expected location: `api/LoanController`
+- Dependencies: UOW-2
+- Size: S
+- Acceptance criteria: On success, response includes the due date; on rejection, an error code per reason (out of stock / limit exceeded / duplicate).
+- Verification method: Integration test
 
-## 응집도 검증 결과
-- 단일 도메인(대출)으로 응집. 위반 없음.
-- 외부 연동 없음.
+## Cohesion Verification Result
+- Cohesive around a single domain (loan). No violations.
+- No external integrations.
 
 ## Recommended Delivery Order
-1. UOW-1 (엔티티) → 2. UOW-2 (도메인 로직) → 3. UOW-3 (API). 직렬.
+1. UOW-1 (entity) → 2. UOW-2 (domain logic) → 3. UOW-3 (API). Serial.

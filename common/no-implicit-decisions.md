@@ -1,17 +1,17 @@
 # No Implicit Decisions
 
-AI는 다음 결정을 암묵적으로 내리면 안 된다.
+The AI must not make the following decisions implicitly.
 
-- 비즈니스 정책 선택
-- 예외 처리 정책 선택
-- 데이터 모델의 책임 경계 선택
-- 화면 흐름 선택
-- 기존 시스템 대체 여부 선택
+- Business policy choices
+- Exception handling policy choices
+- Choices about responsibility boundaries in the data model
+- Screen flow choices
+- Choices about whether to replace an existing system
 
-## 허용되는 추론
-- 코드에서 이미 사용 중인 패턴 재사용
-- 명시된 정책을 구현 단위로 분해하는 것
-- 문서화되지 않았지만 코드상 단일 해석만 가능한 사실 정리
+## Permitted Inferences
+- Reusing patterns already in use in the code
+- Decomposing a stated policy into implementation units
+- Organizing facts that are undocumented but have only a single possible interpretation in the code
 
-## 중단 조건
-- 서로 다른 2개 이상의 설계안이 가능한데 프로젝트 문서에 답이 없을 때
+## Stop Condition
+- When 2 or more different design options are possible but the project documents have no answer

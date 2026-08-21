@@ -1,63 +1,63 @@
 # Terminology
 
-이 프로젝트에서 사용하는 핵심 용어 정의다.
+These are the definitions of the core terms used in this project.
 
-## 요청 분류
+## Request classification
 
-| 용어 | 정의 |
-|------|------|
-| `raw-request` | 마케팅/운영/현업 원문 수준의 요청. 목표는 있으나 범위, 정책, 성공 기준이 정리되지 않은 상태. `request-intake.md`와 `planning-draft.md`를 먼저 작성한다. |
-| `prepared-requirement` | 이미 구조화된 요구사항. `requirements.md` 중심으로 바로 진행한다. |
-| `change-on-existing-feature` | 기존 feature에 대한 추가 변경 또는 후속 요구사항. 새 폴더보다 기존 feature 폴더 갱신을 우선 검토한다. |
+| Term | Definition |
+|------|------------|
+| `raw-request` | A request at the level of raw wording from marketing/operations/business. It has a goal but its scope, policy, and success criteria are not organized. Write `request-intake.md` and `planning-draft.md` first. |
+| `prepared-requirement` | An already-structured requirement. Proceed directly, centered on `requirements.md`. |
+| `change-on-existing-feature` | An additional change or follow-up requirement for an existing feature. Prefer updating the existing feature folder over creating a new one. |
 
-## 프로젝트 유형
+## Project type
 
-| 용어 | 정의 |
-|------|------|
-| `greenfield` | 완전 신규 프로젝트. 기존 코드/DB/API/운영 흐름이 없다. 요구사항과 도메인 정의부터 시작한다. |
-| `brownfield` | 기존 프로젝트. 기존 코드/DB/API/운영/배포 제약을 읽어야 한다. 새 기능도 기존 구조에 맞춰 들어간다. |
+| Term | Definition |
+|------|------------|
+| `greenfield` | A brand-new project. No existing code/DB/API/operational flows. Start from requirements and domain definition. |
+| `brownfield` | An existing project. You must read the existing code/DB/API/operational/deployment constraints. New features are also fitted into the existing structure. |
 
-## 질문/승인 상태
+## Question/approval status
 
-| 용어 | 정의 |
-|------|------|
-| `BLOCK` | 답 없이는 구현 진행 불가. high impact 질문의 기본값. |
-| `ASSUME-{X}` | 가정으로 진행 가능. medium/low impact 질문에서 사용. `{X}`는 선택된 가정 옵션. 가정 근거를 반드시 명시한다. |
-| `OPEN` | 질문이 아직 답변되지 않은 상태. |
-| `ANSWERED` | 질문에 답변이 완료된 상태. |
-| `implementation-ready` | BLOCK 질문이 0개이고 요구사항이 확정된 상태. 구현 진행 가능. |
+| Term | Definition |
+|------|------------|
+| `BLOCK` | Implementation cannot proceed without an answer. The default for high-impact questions. |
+| `ASSUME-{X}` | Can proceed on an assumption. Used for medium/low-impact questions. `{X}` is the chosen assumption option. The basis for the assumption must always be stated. |
+| `OPEN` | The question has not yet been answered. |
+| `ANSWERED` | The question has been answered. |
+| `implementation-ready` | State with 0 BLOCK questions and confirmed requirements. Implementation can proceed. |
 
-## 산출물/구조
+## Deliverable/structure
 
-| 용어 | 정의 |
-|------|------|
-| `CTX` (Context) | 프로젝트 로컬 사실을 담는 `ctx/` 디렉토리. 기존 구조, 금지 규칙, 재사용 컴포넌트 등을 정의한다. |
-| `aidlc-docs` | 기능 작업 산출물 디렉토리. 요구사항, 질문, unit-of-work, 상태 추적 문서를 보관한다. |
-| `feature-slug` | 기능별 산출물 폴더명. lowercase kebab-case를 사용한다. 예: `coupon-feature`, `b2b-approval-flow` |
-| `UOW` (Unit of Work) | 독립적으로 검증 가능한 작업 단위. 도메인 책임, 배포 단위, 실패 영향 등으로 분해한다. |
-| `ADR` (Architecture Decision Record) | 기술 결정 기록. 맥락/선택지/결정/영향을 구조적으로 남긴다. |
+| Term | Definition |
+|------|------------|
+| `CTX` (Context) | The `ctx/` directory holding project-local facts. Defines existing structure, prohibition rules, reusable components, etc. |
+| `aidlc-docs` | The feature-work deliverable directory. Holds requirements, questions, unit-of-work, and status-tracking documents. |
+| `feature-slug` | The per-feature deliverable folder name. Use lowercase kebab-case. e.g., `coupon-feature`, `b2b-approval-flow` |
+| `UOW` (Unit of Work) | An independently verifiable unit of work. Decomposed by domain responsibility, deployment unit, failure impact, etc. |
+| `ADR` (Architecture Decision Record) | A record of a technical decision. Captures context/options/decision/impact structurally. |
 
-## 승인 게이트
+## Approval gates
 
-| 용어 | 정의 |
-|------|------|
-| `GATE-1` | planning-draft 리뷰. `raw-request`일 때만 발동. |
-| `GATE-2` | requirements + questions 리뷰. 항상 발동. |
-| `GATE-3` | unit-of-work 리뷰. 항상 발동. |
-| `GATE-3.5` | technical-design 리뷰. M/L 규모 단위가 있을 때만 발동. |
+| Term | Definition |
+|------|------------|
+| `GATE-1` | planning-draft review. Triggered only for a `raw-request`. |
+| `GATE-2` | requirements + questions review. Always triggered. |
+| `GATE-3` | unit-of-work review. Always triggered. |
+| `GATE-3.5` | technical-design review. Triggered only when M/L-sized units exist. |
 
 ## Readiness Score
 
-| 용어 | 정의 |
-|------|------|
-| `READY` (80+) | 구현 가능 상태. |
-| `CONDITIONAL` (60-79) | ASSUME 조건부 진행 가능. 재작업 위험 있음. |
-| `NOT_READY` (60 미만) | 구현 불가. 질문 해결 필요. |
+| Term | Definition |
+|------|------------|
+| `READY` (80+) | Ready to implement. |
+| `CONDITIONAL` (60-79) | Can proceed conditionally under ASSUME. Rework risk exists. |
+| `NOT_READY` (below 60) | Cannot implement. Questions must be resolved. |
 
-## 규모
+## Size
 
-| 용어 | 정의 |
-|------|------|
-| `S` | 단일 파일/함수 수준 변경. 반나절 이내. |
-| `M` | 여러 파일 변경, 테스트 포함. 1~2일. |
-| `L` | 모듈 단위 변경, 외부 연동/마이그레이션 포함. 3일 이상. |
+| Term | Definition |
+|------|------------|
+| `S` | Single-file/function-level change. Within half a day. |
+| `M` | Multiple file changes, including tests. 1–2 days. |
+| `L` | Module-level change, including external integration/migration. 3 days or more. |

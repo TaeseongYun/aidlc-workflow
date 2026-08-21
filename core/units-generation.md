@@ -1,49 +1,49 @@
 # Units Generation
 
-## 목표
-- 요구사항을 구현 가능한 작업 단위로 분해한다.
-- AI가 분해를 주도하고, 인간이 검토·승인한다.
+## Goal
+- Decompose the requirements into implementable units of work.
+- The AI leads the decomposition, and the human reviews and approves.
 
-## 분해 주체
+## Who decomposes
 
-### AI 먼저 제안, 인간이 승인
-1. AI가 요구사항과 application-design 산출물을 기반으로 유닛 분해안을 **먼저 제안**한다.
-2. 각 유닛에 대해 의존관계, 선행조건, 예상 질문 수를 함께 제시한다.
-3. 인간은 유닛 구성을 검토하고 승인/조정한다.
-4. 인간이 유닛을 직접 지정하는 것은 **비권장**이다. 인간이 유닛을 강제 특정하면 AI의 도메인 응집도 판단이 무시되어, 이질적 기능이 하나의 유닛에 묶이는 문제가 발생한다.
+### AI proposes first, human approves
+1. Based on the requirements and application-design artifacts, the AI **proposes first** a unit decomposition plan.
+2. For each unit, it also presents the dependencies, preconditions, and expected number of questions.
+3. The human reviews the unit composition and approves/adjusts it.
+4. Having the human specify units directly is **not recommended**. If the human force-specifies the units, the AI's domain-cohesion judgment is ignored, causing the problem of heterogeneous features being bundled into a single unit.
 
-### 인간의 역할
-- "이 유닛이 너무 크다/작다"는 피드백
-- 비즈니스 우선순위에 따른 유닛 실행 순서 조정
-- 유닛 병합/분리 요청 (근거와 함께)
+### The human's role
+- Feedback that "this unit is too large/too small"
+- Adjusting unit execution order according to business priority
+- Requesting unit merge/split (with rationale)
 
-## 분해 기준
-- 도메인 책임이 다른가
-- 배포 단위가 다른가
-- 팀/역할이 다른가
-- 실패 영향 범위가 다른가
-- 테스트 방식이 다른가
+## Decomposition criteria
+- Is the domain responsibility different
+- Is the deployment unit different
+- Is the team/role different
+- Is the failure blast radius different
+- Is the testing approach different
 
-## 응집도 검증 규칙
+## Cohesion verification rules
 
-유닛 분해 후 아래 기준으로 응집도를 검증한다. 위반 시 유닛을 분리한다.
+After unit decomposition, verify cohesion by the criteria below. On violation, split the unit.
 
-### 단일 도메인 원칙
-- 하나의 유닛에 2개 이상의 독립 도메인이 포함되면 분리를 검토한다.
-- 예: "채팅 + AI 에이전트 + 파일 첨부 + 크레딧 추적"은 4개 도메인 → 분리 필요.
-- 판단 기준: 해당 기능들이 동일 트랜잭션/요청 흐름에서 반드시 함께 동작하는가? 아니면 독립적으로 배포·테스트 가능한가?
+### Single-domain principle
+- If a single unit contains 2 or more independent domains, consider splitting.
+- Example: "chat + AI agent + file attachment + credit tracking" is 4 domains → split required.
+- Judgment criterion: do these features necessarily operate together in the same transaction/request flow? Or can they be deployed/tested independently?
 
-### 질문 수 기반 크기 검증
-- 유닛별 예상 질문 수를 산출한다.
-- **3개 이하**: 적정 크기
-- **4-7개**: 주의 — 분리 가능성 검토
-- **8개 이상**: 과대 — 반드시 분리
+### Size verification based on question count
+- Compute the expected number of questions per unit.
+- **3 or fewer**: appropriate size
+- **4-7**: caution — consider possibility of splitting
+- **8 or more**: oversized — split required
 
-### 외부 연동 분리
-- 외부 API/시스템 연동은 별도 유닛으로 분리한다.
-- 이유: 외부 시스템의 제약과 불안정성이 내부 기능에 전파되는 것을 방지한다.
+### External integration separation
+- Separate external API/system integrations into their own unit.
+- Reason: prevents the constraints and instability of external systems from propagating into internal features.
 
-## 기본 단위 예시
+## Default unit examples
 - Domain foundation
 - Admin/API
 - User flow
@@ -52,13 +52,13 @@
 - Batch/scheduler
 - Reporting/settlement
 
-## 출력 형식
+## Output format
 - `unit-of-work.md`
 - `unit-of-work-dependency.md`
 - `unit-of-work-story-map.md`
 
-## 규칙
-- 결제/환불/정산은 항상 별도 단위로 검토한다.
-- 알림/배치는 앱 기능에 종속되더라도 별도 단위 후보로 본다.
-- 공통 모듈 변경이 크면 별도 단위로 뺀다.
-- 유닛 분해 결과에 **응집도 검증 결과**를 함께 기록한다. 위반 항목이 있으면 GATE-3에서 사유를 설명한다.
+## Rules
+- Payment/refund/settlement are always reviewed as a separate unit.
+- Notification/batch are treated as separate-unit candidates even when they depend on app features.
+- If a common-module change is large, split it out into a separate unit.
+- Record the **cohesion verification result** together with the unit decomposition result. If there are violations, explain the rationale at GATE-3.

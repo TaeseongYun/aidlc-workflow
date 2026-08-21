@@ -1,96 +1,96 @@
-<!-- producer: ctx-score-loop | EXAMPLE | 라운드별 진행 로그 -->
+<!-- producer: ctx-score-loop | EXAMPLE | per-round progress log -->
 # Loop Run Log — book-borrowing
 
-`/ctx-score-loop book-borrowing`을 **한 번** 실행했을 때, 사용자 추가 개입 없이 루프가 어떻게 도는지 보여준다.
+Shows how the loop runs — with no additional user intervention — when `/ctx-score-loop book-borrowing` is executed **once**.
 
 ---
 
-## 실행
+## Execution
 
 ```
 /ctx-score-loop book-borrowing
 ```
 
-사용자는 이 한 줄만 입력한다. 이후는 전부 자동이다.
+The user types just this one line. Everything after is fully automatic.
 
 ---
 
-## 라운드별 진행
+## Per-Round Progress
 
 ### Round 1
 ```
 [ctx-score-loop] book-borrowing — round 1
-  의존성 18/25 · 빌드 25/25 · 테스트 12/25 · AC 20/25 = 75/100
+  dependency 18/25 · build 25/25 · test 12/25 · AC 20/25 = 75/100
   verdict: CONTINUE
-  부족 축: 테스트(12) — 한도/중복 케이스 테스트 누락. AC(20) — 동시성 미검증.
-  → 부족 축 보완 구현 후 재채점.
+  weak axes: test(12) — missing limit/duplicate case tests. AC(20) — concurrency unverified.
+  → implement fixes for weak axes, then re-score.
 ```
-- 빌드는 통과하지만 테스트가 약하다. 루프가 멈추지 않고 **테스트를 보완**한다.
+- The build passes but the tests are weak. Instead of stopping, the loop **improves the tests**.
 
 ### Round 2
 ```
 [ctx-score-loop] book-borrowing — round 2
-  의존성 22/25 · 빌드 25/25 · 테스트 15/25 · AC 20/25 = 82/100
+  dependency 22/25 · build 25/25 · test 15/25 · AC 20/25 = 82/100
   verdict: CONTINUE
-  직전 75 → 82 (개선 +7). 정체 아님.
-  부족 축: 테스트(15) — 동시성 테스트 여전히 없음.
-  → 동시성 테스트 추가 후 재채점.
+  previous 75 → 82 (improvement +7). Not stalled.
+  weak axes: test(15) — concurrency test still missing.
+  → add concurrency test, then re-score.
 ```
-- 82점. 아직 85 이하라 완료가 아니다. 개선 중이므로 계속 진행.
+- 82 points. Still at or below 85, so not complete. Since it's improving, keep going.
 
 ### Round 3
 ```
 [ctx-score-loop] book-borrowing — round 3
-  의존성 25/25 · 빌드 25/25 · 테스트 20/25 · AC 22/25 = 92/100
-  verdict: COMPLETE  (92 > 85 AND 빌드 ≠ 0)
-  → 완료(85 초과). 루프 종료.
+  dependency 25/25 · build 25/25 · test 20/25 · AC 22/25 = 92/100
+  verdict: COMPLETE  (92 > 85 AND build ≠ 0)
+  → complete (over 85). Loop ends.
 ```
-- **92점 > 85 → 완료.** 빌드 축이 0이 아니므로 GR-1 통과. 사용자에게 완료 보고 후 종료.
+- **92 points > 85 → complete.** Since the build axis is not 0, GR-1 passes. Report completion to the user and end.
 
 ---
 
-## 만약 정체했다면 (반례)
+## What If It Had Stalled (counter-example)
 
-루프가 항상 성공하는 건 아니다. 예를 들어 동시성 버그를 못 잡아 테스트가 계속 막히면:
+The loop doesn't always succeed. For example, if a concurrency bug can't be caught and the tests keep getting blocked:
 
 ```
-[ctx-score-loop] book-borrowing — round 3 (정체 감지)
-  의존성 22/25 · 빌드 25/25 · 테스트 15/25 · AC 20/25 = 82/100
-  직전 82 → 82 (개선 0). round 2도 80→82(미미). 2회 연속 미개선.
+[ctx-score-loop] book-borrowing — round 3 (stall detected)
+  dependency 22/25 · build 25/25 · test 15/25 · AC 20/25 = 82/100
+  previous 82 → 82 (improvement 0). round 2 was also 80→82 (marginal). 2 consecutive rounds without improvement.
   verdict: STALLED
-  → 중단. 막힌 축: 테스트(15/25 — LoanConcurrencyTest 데드락으로 실패).
-  → 사람 결정 대기. 자동 재시작 안 함.
+  → stop. Blocked axis: test(15/25 — LoanConcurrencyTest failing due to deadlock).
+  → awaiting human decision. Does not auto-restart.
 ```
 
-이 경우 루프는 **무한히 돌지 않고** 멈춰서 막힌 지점을 사람에게 보고한다.
-- **정체**: 2회 연속 점수 미개선
-- **상한**: 10회 또는 30분 도달
-- **회귀**: 직전보다 점수 하락 (보고만, 자동 롤백 없음)
+In this case the loop **does not spin forever** — it stops and reports the blocked point to a human.
+- **Stall**: 2 consecutive rounds with no score improvement
+- **Cap**: 10 rounds or 30 minutes reached
+- **Regression**: score dropped from the previous round (report only, no auto-rollback)
 
 ---
 
-## 거짓 완료 방지 (반례 2)
+## Preventing False Completion (counter-example 2)
 
-빌드가 깨졌는데 다른 축 점수로 85를 넘기면?
+What if the build is broken but other axes push the score past 85?
 
 ```
 [ctx-score-loop] book-borrowing — round N
-  의존성 25/25 · 빌드 0/25 · 테스트 25/25 · AC 25/25 = 75/100
-  (가정: 빌드 0 + 나머지 만점이어도 총점은 75라 어차피 미달)
+  dependency 25/25 · build 0/25 · test 25/25 · AC 25/25 = 75/100
+  (assumption: even with build 0 + full marks elsewhere, the total is 75, so it falls short anyway)
 
-  설령 총점이 85를 넘더라도 빌드 축이 0이면:
-  verdict: INCOMPLETE  (GR-1: 빌드 0점이면 완료 금지)
-  → "빌드 실패 상태를 완료로 부르지 않는다."
+  Even if the total exceeded 85, if the build axis is 0:
+  verdict: INCOMPLETE  (GR-1: completion is forbidden when build is 0)
+  → "a broken-build state is not called complete."
 ```
 
-빌드·테스트 축은 **실제 명령 실행 결과만** 인정한다. 명령을 안 돌리면 그 축은 0점이다. 그래서 "돌려보지도 않고 완료"가 불가능하다.
+The build and test axes only credit **actual command execution results**. If you don't run the commands, that axis scores 0. So "completing without ever running it" is impossible.
 
 ---
 
-## 핵심 요약 (다른 사람에게 설명할 때)
+## Key Summary (when explaining to someone else)
 
-1. `/ctx-score-loop <feature>` **한 번**이면 끝. 매번 검증 요청 불필요.
-2. 4축(의존성·빌드·테스트·AC, 각 25점)을 **반복 채점**.
-3. **85점 초과**해야만 완료. 정확히 85점은 미완료.
-4. 빌드·테스트는 **실제로 돌린 결과**만 점수로 인정(거짓 완료 차단).
-5. 정체(2회)·상한(10회/30분)·회귀 시 **멈추고 사유 보고**. 무한 루프 없음.
+1. `/ctx-score-loop <feature>` **once** is all it takes. No need to request verification each time.
+2. The 4 axes (dependency, build, test, AC — 25 points each) are **scored repeatedly**.
+3. It's only complete once it **exceeds 85**. Exactly 85 is incomplete.
+4. Build and test only count as score when **actually run** (blocks false completion).
+5. On stall (2 rounds) / cap (10 rounds / 30 min) / regression, it **stops and reports the reason**. No infinite loop.

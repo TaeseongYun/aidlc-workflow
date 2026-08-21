@@ -1,15 +1,15 @@
 <!-- workflow-step: STEP-3 | gate: GATE-1 | producer: ctx-aidlc-run | condition: raw-request only -->
 # Planning Draft
 
-이 파일은 `aidlc-docs/features/<feature-slug>/planning-draft.md`에 생성하는 것을 권장한다.
+It is recommended to create this file at `aidlc-docs/features/<feature-slug>/planning-draft.md`.
 
-관련 상태 파일:
+Related state file:
 - `aidlc-docs/features/<feature-slug>/status.md`
 
-선행 문서:
+Prerequisite documents:
 - `aidlc-docs/features/<feature-slug>/request-intake.md`
 
-후행 문서:
+Follow-on documents:
 - `aidlc-docs/features/<feature-slug>/requirements.md`
 
 ---
@@ -24,96 +24,96 @@
 
 ## 1. Executive Summary
 
-문제, 솔루션, 기대 효과를 1~2문단으로 요약한다.
-비개발자(기획자, 사업담당자, 경영진)가 이 문단만 읽고 전체 맥락을 파악할 수 있어야 한다.
+Summarize the problem, solution, and expected impact in 1~2 paragraphs.
+A non-developer (planner, business owner, executive) should be able to grasp the full context by reading only this paragraph.
 
-> {요약 작성}
+> {write summary}
 
 ---
 
 ## 2. Problem Statement
 
-### 누가 겪는가
+### Who experiences it
 -
 
-### 무엇이 문제인가
+### What is the problem
 -
 
-### 왜 문제인가 (비즈니스 영향)
+### Why it is a problem (business impact)
 -
 
-### 근거
-- 고객 피드백:
-- 데이터/지표:
-- 내부 관찰:
+### Evidence
+- Customer feedback:
+- Data/metrics:
+- Internal observations:
 
 ---
 
 ## 3. Target Users & Personas
 
 ### Primary Users
-- 역할:
-- 핵심 과업 (Jobs-to-be-Done):
-- 현재 해결 방법:
+- Role:
+- Core tasks (Jobs-to-be-Done):
+- Current workaround:
 
 ### Secondary Users
-- 역할:
-- 핵심 과업:
+- Role:
+- Core tasks:
 
 ### Operators / Admin
-- 역할:
-- 필요 권한:
-- 운영 시나리오:
+- Role:
+- Required permissions:
+- Operations scenarios:
 
 ### Stakeholders
-- 의사결정권자:
-- 승인 필요 사항:
+- Decision-makers:
+- Items requiring approval:
 
 ---
 
 ## 4. Strategic Context
 
 ### Business Goals
-- 연관 OKR/KPI:
-- 비즈니스 임팩트:
+- Related OKR/KPI:
+- Business impact:
 
-### 경쟁 환경 (해당 시)
-- 유사 서비스/기능:
-- 차별화 포인트:
+### Competitive Landscape (if applicable)
+- Similar services/features:
+- Differentiation points:
 
-### 왜 지금인가
-- 시장/내부 트리거:
-- 지연 시 리스크:
+### Why now
+- Market/internal trigger:
+- Risk of delay:
 
-이 섹션은 선택적이다. 내부 도구나 운영 개선처럼 시장 맥락이 불필요한 경우 "해당 없음"으로 표기한다.
+This section is optional. When market context is unnecessary, such as for internal tools or operational improvements, mark it as "Not applicable".
 
 ---
 
 ## 5. Solution Overview
 
-### 상위 설명
+### High-level description
 -
 
-### 핵심 기능 목록
+### Core feature list
 1.
 2.
 3.
 
-### 사용자 플로우 (주요 시나리오)
+### User flows (key scenarios)
 
-핵심 시나리오를 텍스트로 기술한다.
-복잡한 플로우는 `diagram-standards.md`에 따라 다이어그램을 추가한다.
+Describe the key scenarios in text.
+For complex flows, add diagrams following `diagram-standards.md`.
 
-1. {시나리오명}:
-   - 시작 조건:
-   - 사용자 행동:
-   - 시스템 응답:
-   - 종료 상태:
+1. {scenario name}:
+   - Start condition:
+   - User action:
+   - System response:
+   - End state:
 
-### Brownfield 연결점 (기존 시스템이 있을 때)
-- 연관 모듈/서비스:
-- 연관 테이블/API:
-- 기존 흐름과의 관계 (대체 / 확장 / 병행):
+### Brownfield touchpoints (when an existing system exists)
+- Related modules/services:
+- Related tables/APIs:
+- Relationship to existing flow (replace / extend / coexist):
 
 ---
 
@@ -123,13 +123,13 @@
 -
 
 ### Out-of-Scope Draft
-- {제외 항목}: {제외 이유}
+- {excluded item}: {reason for exclusion}
 
 ---
 
 ## 7. Policy Draft
 
-비즈니스 정책이 관련된 항목만 작성한다. 해당 없는 항목은 삭제한다.
+Write only items related to business policy. Delete non-applicable items.
 
 - Pricing / Discount:
 - Eligibility:
@@ -143,35 +143,35 @@
 ## 8. Success Metrics
 
 ### Primary Metric
-- 지표:
-- 현재 기준값 (baseline):
-- 목표값:
-- 측정 기간:
+- Metric:
+- Current baseline:
+- Target value:
+- Measurement period:
 
 ### Secondary Metrics
-- [ ] {지표}: {목표값} (측정 기간: ___)
+- [ ] {metric}: {target value} (measurement period: ___)
 
 ### Guardrail Metrics
-이 기능이 악화시키면 안 되는 지표를 기록한다.
-- [ ] {지표}: {허용 범위}
+Record metrics this feature must not worsen.
+- [ ] {metric}: {allowed range}
 
-### 판정 방법
-- 측정 도구:
-- 판정 시점:
-- 판정 주체:
+### Judgment Method
+- Measurement tool:
+- Judgment timing:
+- Judgment owner:
 
 ---
 
 ## 9. Dependencies & Risks
 
-### 기술 의존성
+### Technical Dependencies
 -
 
-### 외부 의존성 (연동, 파트너, 인프라)
+### External Dependencies (integrations, partners, infrastructure)
 -
 
-### 리스크 & 대응
-| 리스크 | 영향 | 발생 가능성 | 대응 방안 |
+### Risks & Mitigations
+| Risk | Impact | Likelihood | Mitigation |
 |--------|------|------------|----------|
 | | high/medium/low | high/medium/low | |
 

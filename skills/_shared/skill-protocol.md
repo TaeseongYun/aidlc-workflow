@@ -1,32 +1,32 @@
 # Skill Protocol
 
-모든 스킬이 공통으로 따르는 실행 프로토콜이다. 각 스킬의 SKILL.md는 이 문서를 참조하고, 스킬 고유 내용만 정의한다.
+The common execution protocol that all skills follow. Each skill's SKILL.md references this document and defines only its skill-specific content.
 
-## 공통 구조 규칙
+## Common Structure Rules
 
-모든 스킬은 아래 섹션을 반드시 포함한다 (순서 자유):
-1. 역할 정의 (고정 - 절대 변경 금지)
-2. 책임 범위 (이 외 행위 금지)
-3. 절대 금지 규칙 (Guardrail)
-4. 입력 포맷 + 입력 검증
-5. 처리/판단/구현 절차
-6. 출력 포맷
-7. 중단 조건 + 중단 시 출력 형식
-8. 실행 지침
+Every skill MUST include the following sections (order is free):
+1. Role definition (fixed - never change)
+2. Scope of responsibility (no actions beyond this)
+3. Absolute prohibition rules (Guardrail)
+4. Input format + input validation
+5. Processing/judgment/implementation procedure
+6. Output format
+7. Halt conditions + output format on halt
+8. Execution guidelines
 
-## 입력 포맷 검증 기준
+## Input Format Validation Criteria
 
-입력 포맷 검증은 **논리 구조 기준**이다.
-- 선행 공백, UI 문자(`›`, `•`), 빈 줄 차이는 무시한다.
-- 필수 섹션의 존재 여부와 내용 유무만 검증한다.
+Input format validation is based on **logical structure**.
+- Ignore leading whitespace, UI characters (`›`, `•`), and blank-line differences.
+- Validate only whether required sections exist and whether they have content.
 
-## 출력 제약
+## Output Constraints
 
-- 출력 순서 변경 금지
-- 항목 생략 금지 (없으면 "없음" 또는 "해당 없음" 명시)
-- 코드 블록 사용은 스킬별 규칙을 따른다
+- Do NOT change output order
+- Do NOT omit items (if absent, state "없음" or "해당 없음" explicitly)
+- Code block usage follows per-skill rules
 
-## 표준 중단 시 출력 형식
+## Standard Output Format on Halt
 
 ```markdown
 ## [동작명] 중단
@@ -38,26 +38,26 @@
 1. ...
 ```
 
-중단 시:
-- 대안 제안 금지
-- 수정 방법 안내 금지
-- 중단 사유만 출력
+On halt:
+- Do NOT propose alternatives
+- Do NOT explain how to fix
+- Output only the halt reason
 
-## 표준 실행 지침
+## Standard Execution Guidelines
 
-모든 스킬은 아래 순서로 실행한다.
+Every skill executes in the following order.
 
-1. 사용자 입력이 입력 포맷을 따르는지 검증한다
-2. 입력 검증 규칙에 따라 유효성을 확인한다
-3. 유효하지 않으면 중단 시 출력 형식으로 응답한다
-4. 유효하면 스킬 고유 절차를 순서대로 수행한다
-5. 절대 금지 규칙을 위반하지 않도록 출력을 검토한다
-6. 출력 포맷에 맞춰 결과를 반환한다
+1. Validate whether the user input follows the input format
+2. Check validity according to the input validation rules
+3. If invalid, respond with the output format on halt
+4. If valid, perform the skill-specific procedure in order
+5. Review the output so as not to violate the absolute prohibition rules
+6. Return the result according to the output format
 
-스킬별 추가 지침이 있으면 4~6 사이에 삽입한다.
+If there are additional per-skill guidelines, insert them between 4 and 6.
 
-## Execution Boundary 원칙
+## Execution Boundary Principle
 
-- 각 스킬은 자신의 책임 범위 밖 행위를 하지 않는다.
-- 스킬의 출력만으로 다음 단계로 자동 분기하지 않는다.
-- 사용자의 명시적 승인 명령이 있어야 다음 단계로 진행한다.
+- Each skill does not perform actions beyond its scope of responsibility.
+- Do not automatically branch to the next step based on a skill's output alone.
+- Proceed to the next step only when there is an explicit approval command from the user.

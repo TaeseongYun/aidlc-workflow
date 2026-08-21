@@ -1,41 +1,41 @@
 <!-- workflow-step: STEP-6 | gate: GATE-3 | producer: ctx-aidlc-run -->
 # Unit of Work
 
-이 파일은 `aidlc-docs/features/<feature-slug>/unit-of-work.md`에 생성하는 것을 권장한다.
+It is recommended to create this file at `aidlc-docs/features/<feature-slug>/unit-of-work.md`.
 
-관련 상태 파일:
+Related state file:
 - `aidlc-docs/features/<feature-slug>/status.md`
 
-분해 기준:
-- `core/units-generation.md`를 따른다.
-- 결제/환불/정산은 항상 별도 단위로 검토한다.
+Decomposition criteria:
+- Follows `core/units-generation.md`.
+- Payment/refund/settlement are always reviewed as separate units.
 
 ## Summary
 
-| ID | 책임 | 규모 | 의존성 | 상태 |
+| ID | Responsibility | Scale | Dependencies | Status |
 |----|------|------|--------|------|
-| UOW-1 | | S/M/L | 없음 | TODO |
+| UOW-1 | | S/M/L | none | TODO |
 | UOW-2 | | S/M/L | UOW-1 | TODO |
 
-## UOW-1. {단위 제목}
-- 책임: {이 단위가 담당하는 것}
-- 예상 위치: {코드/문서 경로}
-- 의존성: 없음 / UOW-{N}
-- 규모: S / M / L
-- 수용 기준: {이 단위가 완료된 상태의 정의}
-- 검증 방법: 단위 테스트 / 통합 테스트 / 수동 확인 / 코드 리뷰
+## UOW-1. {unit title}
+- Responsibility: {what this unit is in charge of}
+- Expected location: {code/document path}
+- Dependencies: none / UOW-{N}
+- Scale: S / M / L
+- Acceptance criteria: {definition of the completed state of this unit}
+- Verification method: unit test / integration test / manual check / code review
 
-## UOW-2. {단위 제목}
-- 책임: {이 단위가 담당하는 것}
-- 예상 위치: {코드/문서 경로}
-- 의존성: UOW-1
-- 규모: S / M / L
-- 수용 기준: {이 단위가 완료된 상태의 정의}
-- 검증 방법: 단위 테스트 / 통합 테스트 / 수동 확인 / 코드 리뷰
+## UOW-2. {unit title}
+- Responsibility: {what this unit is in charge of}
+- Expected location: {code/document path}
+- Dependencies: UOW-1
+- Scale: S / M / L
+- Acceptance criteria: {definition of the completed state of this unit}
+- Verification method: unit test / integration test / manual check / code review
 
 ## Recommended Delivery Order
-1. UOW-1 — {이유}
-2. UOW-2 — {이유}
+1. UOW-1 — {reason}
+2. UOW-2 — {reason}
 
-## 규모 기준
-`core/unit-sizing.md`를 따른다.
+## Scale Criteria
+Follows `core/unit-sizing.md`.

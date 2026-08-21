@@ -1,47 +1,47 @@
 # Jobs-to-be-Done (JTBD)
 
-사용자가 "고용하려는 일"을 기준으로 요구사항을 분석하는 프레임워크.
+A framework that analyzes requirements based on the "job" the user is trying to hire the product for.
 
-## 핵심 질문
-"사용자가 이 기능을 통해 어떤 일을 완수하려 하는가?"
+## Core Question
+"What job is the user trying to get done through this feature?"
 
-## Job Statement 포맷
-
-```
-[상황]에서 [사용자]가 [동기]를 위해 [원하는 결과]를 달성하려 한다.
-```
-
-## 예시
+## Job Statement Format
 
 ```
-재구매 시점에 기존 고객이 비용 절감을 위해 할인 혜택을 받고 싶다.
+In [situation], [user] wants to achieve [desired outcome] in order to [motivation].
 ```
 
-## 분석 단계
+## Example
 
-### 1. Job 식별
-- 사용자가 실제로 완수하려는 일은 무엇인가?
-- 마케팅 표현과 실제 Job이 다를 수 있다.
+```
+At the point of repurchase, an existing customer wants to receive a discount benefit in order to save costs.
+```
 
-### 2. 현재 해결 방식
-- 이 Job을 지금은 어떻게 해결하고 있는가?
-- 기존 방식의 불편함은 무엇인가?
+## Analysis Steps
 
-### 3. 성공/실패 기준
-- 이 Job이 성공적으로 완료된 상태는?
-- 실패한 상태는?
+### 1. Identify the Job
+- What is the job the user is actually trying to get done?
+- The marketing framing and the actual Job may differ.
 
-### 4. 제약 조건
-- 이 Job을 수행할 때의 제약은?
-- 시간, 비용, 기술적 제약
+### 2. Current Solution
+- How is this Job being solved right now?
+- What are the pain points of the current approach?
 
-## planning-draft 연결
+### 3. Success/Failure Criteria
+- What does a successfully completed state of this Job look like?
+- What does a failed state look like?
+
+### 4. Constraints
+- What are the constraints when performing this Job?
+- Time, cost, technical constraints
+
+## planning-draft Connection
 - Job Statement → Goal And Background
-- 현재 해결 방식 → Background
-- 성공/실패 기준 → Success Criteria Draft
-- 제약 조건 → Assumptions / Open Decisions
+- Current solution → Background
+- Success/failure criteria → Success Criteria Draft
+- Constraints → Assumptions / Open Decisions
 
-## 주의
-- JTBD는 "무엇을 만들지"가 아니라 "왜 만드는지"를 명확히 하는 도구다.
-- Job이 명확해지면 scope와 질문이 자연스럽게 나온다.
-- 마케팅 원문을 Job으로 바꿀 때 추정하지 말고 질문으로 확인한다.
+## Notes
+- JTBD is a tool for clarifying "why we are building it," not "what we are building."
+- Once the Job is clear, scope and questions naturally follow.
+- When converting marketing copy into a Job, do not assume — confirm with a question.

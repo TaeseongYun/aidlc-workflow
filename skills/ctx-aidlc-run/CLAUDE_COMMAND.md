@@ -67,7 +67,7 @@ Shared:
 - `aidlc-docs/features/<feature-slug>/requirements.md`
 - `aidlc-docs/features/<feature-slug>/requirement-verification-questions.md`
 - `aidlc-docs/features/<feature-slug>/unit-of-work.md`
-- `aidlc-docs/features/<feature-slug>/technical-design.md` — M/L 규모 UOW가 1개 이상일 때 필수
+- `aidlc-docs/features/<feature-slug>/technical-design.md` — mandatory when 1 or more M/L sized UOWs exist
 - Optional:
   - `aidlc-docs/features/<feature-slug>/unit-of-work-dependency.md`
   - `aidlc-docs/features/<feature-slug>/unit-of-work-story-map.md`
@@ -117,16 +117,16 @@ Create these additional files only for `raw-request`:
 - Reuse existing feature folders only if the user is clearly continuing the same feature.
 
 ## Technical Design (STEP 6.5 + GATE-3.5)
-- unit-of-work 작성 후 모든 UOW의 규모(S/M/L)를 확인한다.
-- M 또는 L 규모가 1개 이상이면 `technical-design.md`를 반드시 작성한다.
-- 전체가 S 규모이면 기술 설계를 생략하고 `status.md`에 "기술 설계 생략 — 전체 S 규모"를 기록한다.
-- 템플릿: `{{TEAM_AI_WORKFLOW_DIR}}/templates/technical-design.md`
-- 작성 후 GATE-3.5를 제시한다. 사용자 승인 없이 다음 단계로 진행하지 않는다.
-- GATE-3.5 리뷰 항목:
-  - ADR 결정이 근거 있는 선택인가
-  - API 응답 형태가 명시적이고 완전한가
-  - 데이터 모델 변경이 기존 스키마와 호환되는가
-  - 모듈 구조가 unit-of-work 분해와 일치하는가
+- After writing unit-of-work, verify the size (S/M/L) of every UOW.
+- If 1 or more M or L sizes exist, `technical-design.md` MUST be written.
+- If everything is S size, skip technical design and record "technical design skipped — all S size" in `status.md`.
+- Template: `{{TEAM_AI_WORKFLOW_DIR}}/templates/technical-design.md`
+- After writing, present GATE-3.5. Do not proceed to the next step without user approval.
+- GATE-3.5 review items:
+  - Is the ADR decision a well-grounded choice
+  - Is the API response shape explicit and complete
+  - Is the data model change compatible with the existing schema
+  - Does the module structure match the unit-of-work decomposition
 
 ## Readiness Score
 - After writing requirements, calculate a Readiness Score (0-100) using `core/readiness-score.md`.

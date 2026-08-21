@@ -1,139 +1,139 @@
-# 2026-04-29: Phase 0 Roadmapping과 멀티피처 협업 워크플로우
+# 2026-04-29: Phase 0 Roadmapping and Multi-Feature Coordination Workflow
 
-## 배경
+## Background
 
-큰 prepared 기획서가 자연스럽게 여러 피처로 분해되는 경우, 팀이 분업할 때 다음 문제가 반복적으로 보고됨:
+When a large prepared planning document naturally decomposes into several features, the following problems were repeatedly reported when a team divides the work:
 
-1. **피처 간 자원 중복** — 서로 다른 피처가 같은 컴포넌트/테이블/공통 모듈을 만들려고 함
-2. **선행 의존성 비가시화** — 피처 B가 피처 A의 산출물을 필요로 하지만 어디에도 명시되지 않음
-3. **분업 기준 부재** — 누가 무엇을 맡을지 결정할 근거 자료가 없음
+1. **Cross-feature resource duplication** — different features try to build the same component/table/shared module
+2. **Invisible upstream dependencies** — feature B needs feature A's output, but this is not stated anywhere
+3. **No basis for dividing work** — there is no reference material to decide who handles what
 
-기존 `ctx-aidlc-run` STEP 1-A의 1번 라운드는 "여러 피처면 분해하라"고 안내만 할 뿐 차단·로드맵 산출·핸드오프가 없었다. 그 결과 사용자는 (a) 한 피처 폴더에 모든 작업을 강제로 묶거나, (b) 피처별로 ctx-aidlc-run을 따로 돌리며 머지 충돌·정책 불일치를 사후에 발견하는 방식으로만 대응 가능했다.
+The first round of the existing `ctx-aidlc-run` STEP 1-A only advised "if there are multiple features, decompose them," with no blocking, roadmap output, or handoff. As a result, users could only respond by either (a) forcibly bundling all work into a single feature folder, or (b) running ctx-aidlc-run separately per feature and discovering merge conflicts and policy mismatches after the fact.
 
-본 변경은 **Phase 0 — Roadmapping** 단계를 워크플로우에 정식 편입하여 이 빈 영역을 메운다.
+This change fills that gap by formally incorporating a **Phase 0 — Roadmapping** stage into the workflow.
 
-## 변경 사항
+## Changes
 
-### 1. 새 스킬 — `ctx-aidlc-roadmap`
+### 1. New skill — `ctx-aidlc-roadmap`
 
-**파일**: `skills/ctx-aidlc-roadmap/SKILL.md`, `skills/ctx-aidlc-roadmap/CLAUDE_COMMAND.md` (신규)
+**Files**: `skills/ctx-aidlc-roadmap/SKILL.md`, `skills/ctx-aidlc-roadmap/CLAUDE_COMMAND.md` (new)
 
-- Phase 0 단독 실행 스킬. STEP R1 ~ R6 + GATE-0으로 구성.
-- 입력: prepared-requirement 원본 기획서. raw-request / change-on-existing-feature / single-feature는 거절하고 적절한 스킬로 안내.
-- 출력: 프로젝트-레벨 단일 파일 `aidlc-docs/_roadmap.md` 1개.
-- BOOTSTRAP / Lazy Loading / 실시간 audit·state 갱신은 ctx-aidlc-run과 동일 패턴으로 통일.
-- 피처별 `requirements.md`, `unit-of-work.md`는 만들지 않는다 (그건 ctx-aidlc-run의 책임).
+- A standalone Phase 0 skill. Composed of STEP R1 ~ R6 + GATE-0.
+- Input: the original prepared-requirement planning document. raw-request / change-on-existing-feature / single-feature are rejected and routed to the appropriate skill.
+- Output: a single project-level file, `aidlc-docs/_roadmap.md`.
+- BOOTSTRAP / Lazy Loading / real-time audit·state updates are unified to the same pattern as ctx-aidlc-run.
+- Does not create per-feature `requirements.md` or `unit-of-work.md` (that is ctx-aidlc-run's responsibility).
 
-스킬 단계:
-- **STEP R1** Input Validation — 분류 확인, multi-feature 신호 판정. 단일이면 모든 R-step `[-]` 스킵.
-- **STEP R2** Feature Decomposition — 피처 슬러그(kebab-case) + 1줄 책임. Single Domain Principle 적용.
-- **STEP R3** Resource Matrix — 컴포넌트/테이블/API/이벤트의 피처별 점유 표. 동일 자원이 2+ 피처에 등장하면 ⚠.
-- **STEP R4** Dependency Graph — 피처 간 의존, 순환 검사, ⚠ 자원 처리 (foundation 추출 또는 단일 소유 지정).
-- **STEP R5** Allocation Recommendation — 직렬/병렬 그룹화, 역할 기반 분업 권고, 머지 충돌 위험 표기.
-- **STEP R6** Roadmap File Output — `_roadmap.md` 작성, `aidlc-state.md` 동기화.
-- **GATE-0** — 사용자 승인 후 피처별 핸드오프 메시지 출력.
+Skill steps:
+- **STEP R1** Input Validation — confirm classification, judge multi-feature signal. If single, skip all R-steps as `[-]`.
+- **STEP R2** Feature Decomposition — feature slug (kebab-case) + one-line responsibility. Apply the Single Domain Principle.
+- **STEP R3** Resource Matrix — a per-feature occupancy table of components/tables/APIs/events. If the same resource appears in 2+ features, mark ⚠.
+- **STEP R4** Dependency Graph — inter-feature dependencies, cycle check, ⚠ resource handling (foundation extraction or single-owner assignment).
+- **STEP R5** Allocation Recommendation — serial/parallel grouping, role-based work-split recommendation, merge-conflict risk annotation.
+- **STEP R6** Roadmap File Output — write `_roadmap.md`, sync `aidlc-state.md`.
+- **GATE-0** — after user approval, print per-feature handoff messages.
 
-### 2. ctx-aidlc-run 확장 — 양방향 진입 지원
+### 2. ctx-aidlc-run extension — bidirectional entry support
 
-**파일**: `skills/ctx-aidlc-run/SKILL.md`, `skills/ctx-aidlc-run/CLAUDE_COMMAND.md`
+**Files**: `skills/ctx-aidlc-run/SKILL.md`, `skills/ctx-aidlc-run/CLAUDE_COMMAND.md`
 
-- BOOTSTRAP에 `aidlc-docs/_roadmap.md` 즉시 읽기 추가.
-- CORE RULES에 "로드맵이 있으면 그 의존성·공유 자원 정보를 무시하지 않는다" 한 줄 추가.
-- STEP 1 Roadmap awareness 추가 — 로드맵 존재 시 working feature-slug가 항목에 있는지 검증, 의존하는 선행 피처 산출물을 `status.md` "Roadmap Context" 섹션에 인용. 슬러그 미일치 시 (a) 추가 / (b) standalone / (c) 중단 중 하나를 사용자에게 묻고 audit 기록.
-- STEP 1-A 1번 라운드에 멀티피처 핸드오프 분기 — "multiple" AND `_roadmap.md` 미존재 → STOP, audit.md `[HANDOFF] ctx-aidlc-run → ctx-aidlc-roadmap` 기록, `/ctx-aidlc-roadmap` 실행 안내.
+- Added immediate reading of `aidlc-docs/_roadmap.md` to BOOTSTRAP.
+- Added one line to CORE RULES: "if a roadmap exists, do not ignore its dependency and shared-resource information."
+- Added Roadmap awareness to STEP 1 — when a roadmap exists, verify the working feature-slug is in its items, and cite the outputs of upstream features it depends on in the "Roadmap Context" section of `status.md`. On a slug mismatch, ask the user to choose one of (a) add / (b) standalone / (c) abort and record it in the audit.
+- Added a multi-feature handoff branch to the first round of STEP 1-A — "multiple" AND `_roadmap.md` missing → STOP, record `[HANDOFF] ctx-aidlc-run → ctx-aidlc-roadmap` in audit.md, and advise running `/ctx-aidlc-roadmap`.
 
-### 3. 게이트 — GATE-0 신설
+### 3. Gate — new GATE-0
 
-**파일**: `common/stage-gate-rules.md`
+**File**: `common/stage-gate-rules.md`
 
-- 게이트 목록 표 최상단에 GATE-0 추가 (Roadmap Review).
-- 화이트리스트형 스킵 규칙: GATE-0은 single-feature일 때만 스킵 가능.
-- 명시적 스킵 불가 게이트에 GATE-0 추가 — 한번 발동되면 사용자 일괄 승인으로도 스킵 불가.
-- 리뷰 항목 신설: 피처 분해 적절성, ⚠ 자원 해소, 순환 의존 부재, 분업 권고 직렬/병렬 구분, 슬러그 명명 규칙, aidlc-state 동기화.
+- Added GATE-0 (Roadmap Review) at the top of the gate list table.
+- Whitelist-style skip rule: GATE-0 can only be skipped when single-feature.
+- Added GATE-0 to the gates that cannot be explicitly skipped — once triggered, it cannot be skipped even by a bulk user approval.
+- New review items: appropriateness of feature decomposition, resolution of ⚠ resources, absence of cyclic dependencies, serial/parallel distinction in the work-split recommendation, slug naming rules, aidlc-state sync.
 
-### 4. 산출물 / 상태 / 감사 — 멀티피처 메타데이터 정착
+### 4. Outputs / state / audit — settling multi-feature metadata
 
-**파일**: `templates/feature-roadmap.md` (신규), `templates/aidlc-state.md`, `templates/audit.md`, `core/core-workflow.md`
+**Files**: `templates/feature-roadmap.md` (new), `templates/aidlc-state.md`, `templates/audit.md`, `core/core-workflow.md`
 
-- `templates/feature-roadmap.md` 신규 — `_roadmap.md`의 8개 섹션 (Source / Feature List / Resource Matrix / Dependency Graph / Allocation / Handoff Plan / Open Items / GATE-0 Pointers).
+- `templates/feature-roadmap.md` new — the 8 sections of `_roadmap.md` (Source / Feature List / Resource Matrix / Dependency Graph / Allocation / Handoff Plan / Open Items / GATE-0 Pointers).
 - `templates/aidlc-state.md`:
-  - `Roadmap State` 섹션 신설 (Roadmap Path, Multi-Feature Mode, GATE-0 Decision, Last Update)
-  - `Feature Index`를 표 형식으로 변경 + Roadmap Source 컬럼 추가
-  - `Cross-Feature Dependencies` 섹션 신설 (Source/Depends On/Shared Resource/Resolution)
-  - `Roadmap Phase Progress` 체크리스트 신설 (R1~R6 + GATE-0)
+  - New `Roadmap State` section (Roadmap Path, Multi-Feature Mode, GATE-0 Decision, Last Update)
+  - Changed `Feature Index` to table format + added a Roadmap Source column
+  - New `Cross-Feature Dependencies` section (Source/Depends On/Shared Resource/Resolution)
+  - New `Roadmap Phase Progress` checklist (R1~R6 + GATE-0)
 - `templates/audit.md`:
-  - Phase 0 STEP / GATE-0의 Feature 필드는 `roadmap`으로 표기한다는 규칙 명시
-  - `[HANDOFF]` 이벤트 포맷 신설 (from-skill / to-skill / Reason / Resume Hint)
+  - Specified the rule that the Feature field of Phase 0 STEP / GATE-0 is written as `roadmap`
+  - New `[HANDOFF]` event format (from-skill / to-skill / Reason / Resume Hint)
 - `core/core-workflow.md`:
-  - 공통 수행 순서 0번에 Phase 0 진입 조건 추가
-  - 승인 게이트 목록에 GATE-0 추가
-  - 산출물 목록에 `aidlc-docs/_roadmap.md` 등재 (multi-feature prepared-requirement 전용 프로젝트 레벨 산출물)
+  - Added the Phase 0 entry condition to step 0 of the common execution order
+  - Added GATE-0 to the approval gate list
+  - Registered `aidlc-docs/_roadmap.md` in the output list (a project-level output exclusively for multi-feature prepared-requirement)
 
-### 5. 운용 가이드 / 빠른 시작 / 워크플로우 가이드
+### 5. Operations guide / quick start / workflow guide
 
-**파일**: `docs/multi-feature-coordination.md` (신규), `docs/workflow-guide.md`, `README.md`, `QUICKSTART.md`, `skills/README.md`
+**Files**: `docs/multi-feature-coordination.md` (new), `docs/workflow-guide.md`, `README.md`, `QUICKSTART.md`, `skills/README.md`
 
-- `docs/multi-feature-coordination.md` 신규 — 7개 섹션 (적용 조건 / 양방향 진입 / 산출물 해석 / 분업 패턴 3종 / 충돌 해결 / 피처별 실행 / FAQ).
-- `docs/workflow-guide.md` — Phase A 앞에 "Phase 0: Roadmapping" 섹션 추가, 세션 분리 표에 Phase 0 행 추가.
-- `README.md` — 워크플로우 흐름 다이어그램에 Phase 0 블록, 디렉터리 구조에 `_roadmap.md`, 스킬 표에 `/ctx-aidlc-roadmap` 등재.
-- `QUICKSTART.md` — 멀티피처 시나리오 단락 추가 (단일 피처 흐름 다음).
-- `skills/README.md` — 새 스킬 등재, 단일/멀티 흐름을 별도 권장 흐름으로 분리.
+- `docs/multi-feature-coordination.md` new — 7 sections (Applicability / Bidirectional Entry / Interpreting Outputs / 3 Work-Split Patterns / Conflict Resolution / Per-Feature Execution / FAQ).
+- `docs/workflow-guide.md` — added a "Phase 0: Roadmapping" section before Phase A, added a Phase 0 row to the session-separation table.
+- `README.md` — a Phase 0 block in the workflow flow diagram, `_roadmap.md` in the directory structure, `/ctx-aidlc-roadmap` registered in the skills table.
+- `QUICKSTART.md` — added a multi-feature scenario paragraph (after the single-feature flow).
+- `skills/README.md` — registered the new skill, separated single/multi flows into distinct recommended flows.
 
-### 6. 설치 / 초기화 스크립트 동기화
+### 6. Install / init script sync
 
-**파일**: `scripts/install-skills.sh`, `scripts/init-project.sh`
+**Files**: `scripts/install-skills.sh`, `scripts/init-project.sh`
 
-- `install-skills.sh` SKILLS 배열에 `ctx-aidlc-roadmap` 등록 — 새 스킬이 글로벌 경로(`~/.codex/skills/`, `~/.claude/commands/`)에도 함께 배포된다.
-- `init-project.sh`의 `aidlc-state.md` / `audit.md` 인라인 heredoc 생성을 `cp templates/*.md` 기반으로 전환:
-  - `aidlc-state.md` — 템플릿 복사 후 Start Date만 sed로 채움. Roadmap State, Cross-Feature Dependencies가 새 프로젝트에서도 즉시 사용 가능.
-  - `audit.md` — `sed '/^---$/q'`로 첫 구분선까지만 잘라 복사 (규칙·트리거·HANDOFF 포맷까지 이식, 샘플 Feature Start 엔트리 제거).
-- 이후 템플릿 변경은 init 스크립트 수정 없이 자동 반영된다.
+- Registered `ctx-aidlc-roadmap` in the `install-skills.sh` SKILLS array — the new skill is also deployed to the global paths (`~/.codex/skills/`, `~/.claude/commands/`).
+- Switched the inline heredoc creation of `aidlc-state.md` / `audit.md` in `init-project.sh` to a `cp templates/*.md` basis:
+  - `aidlc-state.md` — copy the template, then fill in only Start Date via sed. Roadmap State and Cross-Feature Dependencies are immediately usable even in a new project.
+  - `audit.md` — copy only up to the first separator with `sed '/^---$/q'` (porting the rules, triggers, and HANDOFF format, while removing the sample Feature Start entry).
+- Subsequent template changes are then reflected automatically without editing the init script.
 
-## 사용자 질문 — "별도 스킬을 만들면 어느 시점에 실행해야 하나?"
+## User question — "If we make a separate skill, at what point should it run?"
 
-본 변경의 발단이 된 사용자 질문에 대한 결론:
+Conclusion for the user question that prompted this change:
 
-| 진입 경로 | 시점 | 트리거 조건 |
+| Entry path | Timing | Trigger condition |
 |----------|------|-----------|
-| 1. 직접 호출 | prepared 기획서 수령 직후 | 사용자가 큰 기획서임을 알고 `/ctx-aidlc-roadmap`을 먼저 실행 |
-| 2. 핸드오프 | `/ctx-aidlc-run` STEP 1-A 1번 라운드 | "multiple independent features" 답변 AND `_roadmap.md` 미존재 → ctx-aidlc-run이 차단하고 안내 |
-| 종료 | GATE-0 승인 후 | `_roadmap.md` 확정 → 각 팀원이 자기 피처 슬러그를 인자로 `/ctx-aidlc-run` (prepared-requirement, 해당 피처 발췌물 입력) |
+| 1. Direct call | Immediately after receiving the prepared planning document | The user knows it is a large planning document and runs `/ctx-aidlc-roadmap` first |
+| 2. Handoff | First round of `/ctx-aidlc-run` STEP 1-A | "multiple independent features" answer AND `_roadmap.md` missing → ctx-aidlc-run blocks and advises |
+| Exit | After GATE-0 approval | `_roadmap.md` finalized → each teammate runs `/ctx-aidlc-run` with their own feature slug as an argument (prepared-requirement, with the relevant feature excerpt as input) |
 
-## 수정/신규 파일 전체 목록
+## Full list of modified/new files
 
-| 파일 | 변경 유형 |
+| File | Change type |
 |------|----------|
-| `skills/ctx-aidlc-roadmap/SKILL.md` | 신규 |
-| `skills/ctx-aidlc-roadmap/CLAUDE_COMMAND.md` | 신규 |
-| `templates/feature-roadmap.md` | 신규 |
-| `docs/multi-feature-coordination.md` | 신규 |
-| `docs/changelog/2026-04-29-multi-feature-roadmap-phase0.md` | 신규 |
-| `skills/ctx-aidlc-run/SKILL.md` | BOOTSTRAP / CORE RULES / STEP 1 / STEP 1-A 갱신 |
-| `skills/ctx-aidlc-run/CLAUDE_COMMAND.md` | Required Reading / Behavior Rules 동기 |
-| `common/stage-gate-rules.md` | GATE-0 항목·스킵 규칙·리뷰 항목 추가 |
-| `core/core-workflow.md` | Phase 0 진입 조건 / 게이트 목록 / 산출물 등재 |
+| `skills/ctx-aidlc-roadmap/SKILL.md` | New |
+| `skills/ctx-aidlc-roadmap/CLAUDE_COMMAND.md` | New |
+| `templates/feature-roadmap.md` | New |
+| `docs/multi-feature-coordination.md` | New |
+| `docs/changelog/2026-04-29-multi-feature-roadmap-phase0.md` | New |
+| `skills/ctx-aidlc-run/SKILL.md` | BOOTSTRAP / CORE RULES / STEP 1 / STEP 1-A updates |
+| `skills/ctx-aidlc-run/CLAUDE_COMMAND.md` | Required Reading / Behavior Rules sync |
+| `common/stage-gate-rules.md` | Added GATE-0 item·skip rule·review items |
+| `core/core-workflow.md` | Phase 0 entry condition / gate list / output registration |
 | `templates/aidlc-state.md` | Roadmap State / Cross-Feature Deps / Roadmap Phase Progress |
-| `templates/audit.md` | Phase 0 Feature 표기 / [HANDOFF] 포맷 |
-| `docs/workflow-guide.md` | Phase 0 섹션 + 세션 분리 표 |
-| `README.md` | 흐름 다이어그램 / 디렉터리 / 스킬 / 변경 이력 |
-| `QUICKSTART.md` | 멀티피처 시나리오 |
-| `skills/README.md` | 새 스킬 등재 + 흐름 분기 |
-| `scripts/install-skills.sh` | SKILLS 배열에 새 스킬 등록 |
-| `scripts/init-project.sh` | 인라인 heredoc → 템플릿 cp 기반 전환 |
+| `templates/audit.md` | Phase 0 Feature notation / [HANDOFF] format |
+| `docs/workflow-guide.md` | Phase 0 section + session-separation table |
+| `README.md` | Flow diagram / directory / skills / changelog |
+| `QUICKSTART.md` | Multi-feature scenario |
+| `skills/README.md` | New skill registration + flow branching |
+| `scripts/install-skills.sh` | Registered the new skill in the SKILLS array |
+| `scripts/init-project.sh` | Inline heredoc → template-cp based switch |
 
-## 검증
+## Validation
 
-- `tools/validate-skills.sh`: 38 PASS / 0 FAIL (새 스킬 5개 검사 항목 모두 통과)
-- `init-project.sh`를 임시 디렉터리에서 실행하여 `aidlc-state.md` Start Date 자동 채움, `audit.md`가 규칙·트리거·HANDOFF 포맷까지 이식되고 샘플 엔트리는 제거되는 것을 확인.
+- `tools/validate-skills.sh`: 38 PASS / 0 FAIL (all 5 check items for the new skill pass)
+- Ran `init-project.sh` in a temporary directory and confirmed that `aidlc-state.md` Start Date is auto-filled, and `audit.md` ports the rules, triggers, and HANDOFF format while the sample entry is removed.
 
-## 기대 효과
+## Expected effect
 
-- 큰 prepared 기획서를 바로 분업하기 전에 **피처 분해·자원 매트릭스·의존 그래프**를 강제 산출하므로 사후 머지 충돌과 정책 불일치가 줄어든다.
-- ctx-aidlc-run의 STEP 1-A에서 멀티피처가 감지되면 자동 차단되므로 단일 피처 폴더에 이질적 도메인이 묶이는 패턴이 차단된다.
-- `aidlc-state.md`의 Cross-Feature Dependencies 표가 단일 출처가 되어, 어느 팀원이 어느 피처를 맡고 있고 무엇을 기다리는지가 가시화된다.
-- 단일 피처 프로젝트에는 영향이 없다 (STEP R1에서 `[-]` 스킵).
+- Because it forces the output of **feature decomposition·resource matrix·dependency graph** before dividing a large prepared planning document, after-the-fact merge conflicts and policy mismatches are reduced.
+- Because ctx-aidlc-run's STEP 1-A automatically blocks when multi-feature is detected, the pattern of bundling heterogeneous domains into a single feature folder is blocked.
+- The Cross-Feature Dependencies table in `aidlc-state.md` becomes the single source of truth, making it visible which teammate is handling which feature and what they are waiting on.
+- No impact on single-feature projects (skipped as `[-]` at STEP R1).
 
-## 후속 과제 (이번 작업 범위 외)
+## Follow-up tasks (out of scope for this work)
 
-- Phase 0 산출물에 대한 Golden Baseline 예시 (`examples/golden-baselines/multi-feature/_roadmap.md`)
-- `tools/evaluator/`에 GATE-0 통과 조건 검증 룰 추가 (피처 슬러그 명명, ⚠ 자원 해소, 순환 의존 부재)
+- A Golden Baseline example for Phase 0 outputs (`examples/golden-baselines/multi-feature/_roadmap.md`)
+- Adding GATE-0 pass-condition validation rules to `tools/evaluator/` (feature slug naming, ⚠ resource resolution, absence of cyclic dependencies)

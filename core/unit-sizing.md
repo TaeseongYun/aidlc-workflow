@@ -1,17 +1,17 @@
 # Unit Sizing
 
-작업 단위(UOW)의 규모 기준이다. 모든 UOW에는 반드시 아래 중 하나의 규모를 할당한다.
+This is the sizing standard for units of work (UOW). Every UOW must be assigned exactly one of the sizes below.
 
-## 규모 기준
+## Sizing criteria
 
-| 규모 | 기준 |
+| Size | Criteria |
 |------|------|
-| **S** | 단일 파일 또는 단일 함수 수준 변경. 반나절 이내. |
-| **M** | 여러 파일 변경, 테스트 포함. 1~2일. |
-| **L** | 모듈 단위 변경, 외부 연동 또는 마이그레이션 포함. 3일 이상. |
+| **S** | Single-file or single-function level change. Within half a day. |
+| **M** | Changes across multiple files, tests included. 1~2 days. |
+| **L** | Module-level change, including external integration or migration. 3 days or more. |
 
-## 규모 필드 규칙
-- 모든 UOW의 규모 필드는 필수다. 빈 값이나 "S/M/L" 플레이스홀더를 남기지 않는다.
-- GATE-3 통과 전 모든 UOW의 규모가 채워져 있어야 한다.
-- M 또는 L 규모 단위가 1개 이상 있으면 기술 설계(STEP 6.5)를 실행한다.
-- 전체가 S 규모이면 기술 설계를 생략한다.
+## Size field rules
+- The size field of every UOW is mandatory. Do not leave an empty value or a "S/M/L" placeholder.
+- Before passing GATE-3, the size of every UOW must be filled in.
+- If there is one or more M or L sized units, run technical design (STEP 6.5).
+- If all are S sized, skip technical design.

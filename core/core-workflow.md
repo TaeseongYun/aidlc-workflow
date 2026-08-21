@@ -1,77 +1,77 @@
 # Core Workflow
 
-이 문서는 전 프로젝트 공통 AI 판단 흐름이다.
+This document is the AI judgment flow common to all projects.
 
-## 1. 프로젝트 상태 판별
-- 먼저 현재 작업이 `greenfield`인지 `brownfield`인지 판별한다.
-- 기존 코드, DB, 운영 플로우, 외부 연동이 있으면 `brownfield`로 본다.
+## 1. Determine project state
+- First determine whether the current work is `greenfield` or `brownfield`.
+- If there is existing code, DB, operational flow, or external integration, treat it as `brownfield`.
 
-## 2. 요구사항 분석 시작 조건
-- 신규 기능 요청
-- 정책 변경 요청
-- 기존 기능 확장 요청
-- 구조 영향이 있는 버그 수정
+## 2. Conditions to start requirements analysis
+- New feature request
+- Policy change request
+- Existing feature extension request
+- Bug fix with structural impact
 
-## 3. 공통 수행 순서
-0. (multi-feature prepared-requirement인 경우) Phase 0 — Roadmapping을 선행한다 (`ctx-aidlc-roadmap`). 피처 분해, 자원 매트릭스, 의존 그래프, 분업 권고를 산출하고 GATE-0을 통과한 뒤 피처별 흐름으로 진입한다.
-1. 현재 프로젝트 구조와 관련 도메인을 탐색한다.
-1-A. (raw-request인 경우) Discovery 질문을 통해 요청을 명확화한다. multi-feature 답변이고 `_roadmap.md`가 없으면 Phase 0으로 핸드오프한다.
-1-B. Depth Level을 판정한다 (`common/depth-levels.md`). minimal / standard / comprehensive.
-1-C. (prepared-requirement인 경우) 입력 문서 검증을 수행한다 (`core/input-validation.md`).
-1.5. (brownfield이고 기존 RE 산출물이 없는 경우) Reverse Engineering을 수행한다 (`core/reverse-engineering.md`).
-2. 요구사항을 기능/정책/운영 관점으로 분해한다.
-3. 추정이 필요한 빈칸을 질문으로 변환한다. 질문 거버넌스는 `common/question-governance.md`를 따른다.
-4. 질문 답변 전에는 설계 결정을 확정하지 않는다. 답변의 모순은 `common/content-validation.md`로 검증한다.
-5. 답변 후 요구사항 문서를 고정한다.
-5.5. (조건부) 사용자 스토리를 정의한다.
-5.7. (조건부) 시스템 구조를 설계한다.
-6. 유닛 분해와 설계를 진행한다.
-6.5. (조건부) 기술 설계를 진행한다.
-6.7. (조건부) 인프라 설계를 진행한다.
-7. 구현 전 테스트/운영/NFR 누락을 점검한다.
-8. Readiness Score를 산출하고 구현 가능 여부를 판단한다.
-9. (조건부) 빌드 및 테스트 가이드를 작성한다.
+## 3. Common order of execution
+0. (For a multi-feature prepared-requirement) Perform Phase 0 — Roadmapping first (`ctx-aidlc-roadmap`). Produce feature decomposition, resource matrix, dependency graph, and division-of-work recommendation, and after passing GATE-0, enter the per-feature flow.
+1. Explore the current project structure and related domains.
+1-A. (For a raw-request) Clarify the request via Discovery questions. If the answer is multi-feature and there is no `_roadmap.md`, hand off to Phase 0.
+1-B. Determine the Depth Level (`common/depth-levels.md`). minimal / standard / comprehensive.
+1-C. (For a prepared-requirement) Perform input document validation (`core/input-validation.md`).
+1.5. (For brownfield with no existing RE artifacts) Perform Reverse Engineering (`core/reverse-engineering.md`).
+2. Decompose the requirements into functional/policy/operational perspectives.
+3. Convert blanks that require assumptions into questions. Question governance follows `common/question-governance.md`.
+4. Do not finalize design decisions before questions are answered. Contradictions in answers are verified via `common/content-validation.md`.
+5. After the answers, fix the requirements document.
+5.5. (Conditional) Define user stories.
+5.7. (Conditional) Design the system structure.
+6. Proceed with unit decomposition and design.
+6.5. (Conditional) Proceed with technical design.
+6.7. (Conditional) Proceed with infrastructure design.
+7. Before implementation, check for missing tests/operations/NFR.
+8. Compute the Readiness Score and judge whether implementation is possible.
+9. (Conditional) Write the build and test guides.
 
-## 4. 질문을 반드시 생성해야 하는 경우
-- 여러 설계가 모두 가능한 경우
-- 결제/환불/정산/권한/보안/운영 영향이 있는 경우
-- 사용자 화면 흐름이 정해지지 않은 경우
-- 외부 시스템 연동 방식이 확정되지 않은 경우
-- 데이터 모델 확장이 필요한 경우
+## 4. Cases where a question MUST be generated
+- When multiple designs are all possible
+- When there is payment/refund/settlement/authorization/security/operational impact
+- When the user screen flow is not decided
+- When the external system integration method is not finalized
+- When data model extension is required
 
-## 5. 질문 없이 진행 가능한 경우
-- 기존 프로젝트 규칙과 동일 패턴으로 처리 가능한 단순 변경
-- 도메인/상태/정책 결정이 이미 `ctx/`, `AGENTS.md`에 명시된 경우
+## 5. Cases where you can proceed without questions
+- A simple change that can be handled with the same pattern as existing project rules
+- When the domain/state/policy decision is already specified in `ctx/`, `AGENTS.md`
 
-## 6. 승인 게이트
-주요 산출물 작성 후에는 `common/stage-gate-rules.md`에 따라 사용자 승인을 받는다.
-- GATE-0: roadmap 리뷰 (multi-feature prepared-requirement인 경우)
-- GATE-1: planning-draft 리뷰 (raw-request인 경우)
-- GATE-2: requirements + questions 리뷰
-- GATE-2.5: user-stories 리뷰 (User Scenarios >= 3 또는 신규 사용자 유형 시, 조건부)
-- GATE-2.7: application-design 리뷰 (UOW >= 3 예상 또는 신규 컴포넌트 생성 시, 조건부)
-- GATE-3: unit-of-work 리뷰
-- GATE-3.5: technical-design 리뷰 (M/L 규모 단위가 있을 때)
-- GATE-4: infrastructure-design 리뷰 (인프라 변경이 필요할 때, 조건부)
-- GATE-5: build/test-instructions 리뷰 (M/L 규모 단위가 있을 때, 조건부)
-게이트를 통과하지 않으면 다음 단계로 진행하지 않는다.
+## 6. Approval gates
+After writing major artifacts, obtain user approval according to `common/stage-gate-rules.md`.
+- GATE-0: roadmap review (for a multi-feature prepared-requirement)
+- GATE-1: planning-draft review (for a raw-request)
+- GATE-2: requirements + questions review
+- GATE-2.5: user-stories review (when User Scenarios >= 3 or a new user type, conditional)
+- GATE-2.7: application-design review (when UOW >= 3 expected or a new component is created, conditional)
+- GATE-3: unit-of-work review
+- GATE-3.5: technical-design review (when there are M/L sized units)
+- GATE-4: infrastructure-design review (when an infrastructure change is required, conditional)
+- GATE-5: build/test-instructions review (when there are M/L sized units, conditional)
+If a gate is not passed, do not proceed to the next step.
 
-## 7. 다이어그램
-산출물에 상태 전이, 의존성, 플로우 등 시각 자료가 필요하면 `common/diagram-standards.md`를 따른다.
-- 단순 플로우: ASCII
-- 복잡한 관계: Mermaid (텍스트 대안 필수)
+## 7. Diagrams
+If artifacts require visuals such as state transitions, dependencies, or flows, follow `common/diagram-standards.md`.
+- Simple flow: ASCII
+- Complex relationships: Mermaid (text alternative required)
 
-## 8. 산출물
+## 8. Artifacts
 
-### 프로젝트 레벨 산출물 (brownfield only)
+### Project-level artifacts (brownfield only)
 - `aidlc-docs/reverse-engineering/business-overview.md` (STEP 1.5)
 - `aidlc-docs/reverse-engineering/architecture-overview.md` (STEP 1.5)
 - `aidlc-docs/reverse-engineering/component-inventory.md` (STEP 1.5)
 
-### 프로젝트 레벨 산출물 (multi-feature prepared-requirement only)
+### Project-level artifacts (multi-feature prepared-requirement only)
 - `aidlc-docs/_roadmap.md` (Phase 0 / GATE-0, producer: `ctx-aidlc-roadmap`)
 
-### 필수 산출물
+### Mandatory artifacts
 - `aidlc-docs/aidlc-state.md`
 - `aidlc-docs/audit.md`
 - `aidlc-docs/features/<feature-slug>/status.md`
@@ -79,69 +79,69 @@
 - `aidlc-docs/features/<feature-slug>/requirement-verification-questions.md`
 - `aidlc-docs/features/<feature-slug>/unit-of-work.md`
 
-### 조건부 산출물 — INCEPTION 확장
-- `aidlc-docs/features/<feature-slug>/user-stories/personas.md` (User Scenarios >= 3 또는 신규 사용자 유형)
-- `aidlc-docs/features/<feature-slug>/user-stories/stories.md` (위와 동일 조건)
-- `aidlc-docs/features/<feature-slug>/application-design/components.md` (UOW >= 3 예상 또는 신규 컴포넌트)
-- `aidlc-docs/features/<feature-slug>/application-design/services.md` (위와 동일 조건)
-- `aidlc-docs/features/<feature-slug>/application-design/component-dependency.md` (위와 동일 조건)
+### Conditional artifacts — INCEPTION extension
+- `aidlc-docs/features/<feature-slug>/user-stories/personas.md` (User Scenarios >= 3 or a new user type)
+- `aidlc-docs/features/<feature-slug>/user-stories/stories.md` (same condition as above)
+- `aidlc-docs/features/<feature-slug>/application-design/components.md` (UOW >= 3 expected or a new component)
+- `aidlc-docs/features/<feature-slug>/application-design/services.md` (same condition as above)
+- `aidlc-docs/features/<feature-slug>/application-design/component-dependency.md` (same condition as above)
 
-### 조건부 산출물 — CONSTRUCTION
-- `aidlc-docs/features/<feature-slug>/technical-design.md` (M/L 규모 단위가 있을 때)
-- `aidlc-docs/features/<feature-slug>/infrastructure-design.md` (인프라 변경 필요 시)
-- `aidlc-docs/features/<feature-slug>/deployment-architecture.md` (인프라 변경 필요 시)
-- `aidlc-docs/features/<feature-slug>/build-instructions.md` (M/L 규모 단위가 있을 때)
-- `aidlc-docs/features/<feature-slug>/test-instructions.md` (M/L 규모 단위가 있을 때)
+### Conditional artifacts — CONSTRUCTION
+- `aidlc-docs/features/<feature-slug>/technical-design.md` (when there are M/L sized units)
+- `aidlc-docs/features/<feature-slug>/infrastructure-design.md` (when an infrastructure change is required)
+- `aidlc-docs/features/<feature-slug>/deployment-architecture.md` (when an infrastructure change is required)
+- `aidlc-docs/features/<feature-slug>/build-instructions.md` (when there are M/L sized units)
+- `aidlc-docs/features/<feature-slug>/test-instructions.md` (when there are M/L sized units)
 
-### 조건부 산출물 — Extension
-- `aidlc-docs/features/<feature-slug>/extensions/security-baseline.md` (사용자 opt-in 시)
+### Conditional artifacts — Extension
+- `aidlc-docs/features/<feature-slug>/extensions/security-baseline.md` (when the user opts in)
 
-## 9. 커밋 플랜 확정 후 문서 갱신 (필수)
-커밋 플랜이 확정되면 반드시 아래 문서를 갱신한다.
-- `aidlc-docs/features/<feature-slug>/status.md`: 현재 상태 반영
-- `aidlc-docs/audit.md`: 커밋 플랜 확정 이벤트 append
+## 9. Document update after finalizing the commit plan (mandatory)
+Once the commit plan is finalized, the documents below must be updated.
+- `aidlc-docs/features/<feature-slug>/status.md`: reflect the current state
+- `aidlc-docs/audit.md`: append the commit-plan-finalized event
 
-## 10. audit.md / aidlc-state.md 실시간 갱신 규칙
+## 10. Real-time update rules for audit.md / aidlc-state.md
 
 ### audit.md (append-only)
-아래 이벤트 발생 시 **즉시** `aidlc-docs/audit.md`에 append 한다.
-- **STEP 시작/완료**: 매 STEP 진입 시와 완료 시 기록. 조건부 STEP 스킵 시에도 스킵 사유 기록.
-- **GATE 통과**: 사용자 승인/변경 요청/스킵 시 기록.
-- **사용자 입력**: BLOCK/ASSUME 질문 답변, Discovery 라운드 응답 시 기록.
-- **상태 변경**: feature status가 변경될 때 기록.
-포맷은 `templates/audit.md`의 로깅 트리거 섹션을 따른다.
+When the events below occur, **immediately** append to `aidlc-docs/audit.md`.
+- **STEP start/complete**: record on every STEP entry and completion. Record the skip reason even when a conditional STEP is skipped.
+- **GATE pass**: record on user approval/change request/skip.
+- **User input**: record on BLOCK/ASSUME question answers and Discovery round responses.
+- **State change**: record when the feature status changes.
+The format follows the logging trigger section of `templates/audit.md`.
 
 ### aidlc-state.md
-아래 이벤트 발생 시 **즉시** `aidlc-docs/aidlc-state.md`를 갱신한다.
-- **STEP 완료/스킵**: 해당 체크박스를 `[x]` 또는 `[-]`로 갱신.
-- **GATE 통과**: 해당 체크박스를 `[x]`로 갱신.
-- **Current Stage**: 항상 현재 진행 중인 STEP으로 갱신.
-- **Feature Status**: 상태 변경 시 최신 값으로 갱신.
-- **Readiness Score**: 산출/변경 시 갱신.
-- **Last Updated**: 모든 갱신 시 타임스탬프 갱신.
+When the events below occur, **immediately** update `aidlc-docs/aidlc-state.md`.
+- **STEP complete/skip**: update the corresponding checkbox to `[x]` or `[-]`.
+- **GATE pass**: update the corresponding checkbox to `[x]`.
+- **Current Stage**: always update to the STEP currently in progress.
+- **Feature Status**: update to the latest value on state change.
+- **Readiness Score**: update on computation/change.
+- **Last Updated**: update the timestamp on every update.
 
-## 11. 과신 방지
-AI 주도 단계(STEP 6, 6.5, 6.7)와 Readiness Score 산출(STEP 7)에서는 `common/overconfidence-prevention.md` 규칙을 적용한다.
-- 불확실한 판단에 `⚠️ UNCERTAIN` 마커를 붙인다.
-- 산출물 작성 후, 게이트 제시 전에 자체 검증(Self-Verification)을 수행한다.
-- STEP 3 완료 시 질문 누락 감지를 수행한다.
+## 11. Overconfidence prevention
+In AI-led steps (STEP 6, 6.5, 6.7) and Readiness Score computation (STEP 7), apply the `common/overconfidence-prevention.md` rules.
+- Attach a `⚠️ UNCERTAIN` marker to uncertain judgments.
+- After writing an artifact, perform Self-Verification before presenting the gate.
+- Perform missing-question detection on STEP 3 completion.
 
-## 12. 오류 복구
-워크플로우 실행 중 오류, 세션 중단, 산출물 손상이 발생하면 `common/error-recovery.md` 절차를 따른다.
-- 세션 재개 시 aidlc-state.md와 실제 산출물의 일치 여부를 검증한다.
-- 불일치 발견 시 복구 절차를 수행하고 audit.md에 기록한다.
-- 백업 없이 산출물을 재생성하지 않는다.
+## 12. Error recovery
+If an error, session interruption, or artifact corruption occurs during workflow execution, follow the `common/error-recovery.md` procedure.
+- On session resume, verify consistency between aidlc-state.md and the actual artifacts.
+- On finding an inconsistency, perform the recovery procedure and record it in audit.md.
+- Do not regenerate artifacts without a backup.
 
-## 13. 금지 사항
-- 비즈니스 정책을 AI가 임의 결정하지 않는다.
-- 기존 프로젝트 구조를 이해하지 않고 새 구조를 강요하지 않는다.
-- 질문이 필요한 항목을 구현 단계로 넘기지 않는다.
-- 승인 게이트를 건너뛰거나 사용자 응답 없이 다음 단계로 진행하지 않는다.
-- audit.md를 덮어쓰지 않는다. 항상 append 한다.
-- STEP 완료 후 audit.md와 aidlc-state.md 갱신을 빠뜨리지 않는다.
+## 13. Prohibitions
+- The AI does not arbitrarily decide business policy.
+- Do not force a new structure without understanding the existing project structure.
+- Do not defer items that require a question to the implementation step.
+- Do not skip approval gates or proceed to the next step without a user response.
+- Do not overwrite audit.md. Always append.
+- Do not omit updating audit.md and aidlc-state.md after completing a STEP.
 
-## 14. 프로젝트 로컬 컨텍스트 우선순위
+## 14. Project-local context priority
 1. `AGENTS.md`
-2. `ctx/INDEX.md` 또는 `ctx/project-profile.ctx.md`
-3. 필요한 개별 `ctx/*.md`
-4. 선택적 `.aidlc/project-profile.md` (ctx가 약한 프로젝트에서 대체 사용)
+2. `ctx/INDEX.md` or `ctx/project-profile.ctx.md`
+3. Individual `ctx/*.md` as needed
+4. Optional `.aidlc/project-profile.md` (used as a fallback in projects where ctx is weak)

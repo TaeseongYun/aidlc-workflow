@@ -1,8 +1,8 @@
-# ctx-refiner 사용 예시
+# ctx-refiner Usage Examples
 
-## 정상 호출 예시 (성공)
+## Normal Invocation Example (success)
 
-### 입력
+### Input
 
 ```markdown
 ## 정제 대상 CTX
@@ -16,7 +16,7 @@
 - Global CTX
 ```
 
-### 출력
+### Output
 
 ```markdown
 ## 삭제된 규칙
@@ -66,9 +66,9 @@
 
 ---
 
-## 정상 호출 예시 (실패)
+## Normal Invocation Example (failure)
 
-### 입력
+### Input
 
 ```markdown
 ## 정제 대상 CTX
@@ -82,7 +82,7 @@
 - Local CTX
 ```
 
-### 출력
+### Output
 
 ```markdown
 ## 정제 실패
@@ -98,9 +98,9 @@
 
 ---
 
-## 잘못된 호출 예시 (중단됨)
+## Incorrect Invocation Example (stopped)
 
-### 입력
+### Input
 
 ```markdown
 ## 정제 대상
@@ -110,7 +110,7 @@
 - 정리
 ```
 
-### 출력
+### Output
 
 ```markdown
 ## 정제 중단

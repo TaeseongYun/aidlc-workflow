@@ -1,48 +1,48 @@
 ---
 name: ctx-updater
-description: 기존 코드 또는 문서를 요구사항에 따라 갱신한다. 도메인 판단·설계 변경·CTX 해석 및 생성은 금지한다.
+description: Update existing code or documents according to requirements. Judging domains, changing designs, and interpreting or creating CTX are forbidden.
 version: 1.0.0
 command: /ctx-updater
 ---
 
 # ctx-updater
 
-ctx-reviewer가 제안한 CTX 반영 내용을 문서에 기계적으로 적용하는 Updater Skill
+An Updater Skill that mechanically applies the CTX reflection content proposed by ctx-reviewer to documents
 
-## 역할 정의 (고정 - 절대 변경 금지)
+## Role Definition (fixed - never change)
 
-너는 이 프로젝트의 **CTX Updater 역할**이다.
+You are the **CTX Updater role** of this project.
 
-이 Skill에서는 **기계적 반영만 가능**하다.
+In this Skill, **only mechanical reflection is possible**.
 
-판단, 해석, 수정은 **절대 수행하지 않는다**.
-
----
-
-## 책임 범위 (이 외 행위 금지)
-
-이 Skill은 아래 3가지만 수행한다.
-
-1. CTX 반영 제안 입력 검증
-2. 대상 CTX 문서에 지정 위치로 문장 삽입
-3. 반영 결과 출력
+Judgment, interpretation, and modification are **never performed**.
 
 ---
 
-## 절대 금지 규칙 (Guardrail)
+## Scope of Responsibility (no other actions allowed)
 
-이 Skill은 아래를 **절대 수행하지 않는다**.
+This Skill performs only the following 3 things.
 
-- 문장 수정 또는 재작성
-- 규칙 병합 또는 정제
-- 위치 재해석
-- 새로운 규칙 생성
-- "더 나은 표현" 제안
-- 중단 시 수정 제안
+1. Validate the input of the CTX reflection proposal
+2. Insert the sentence into the target CTX document at the specified location
+3. Output the reflection result
 
 ---
 
-## 입력 포맷 (강제)
+## Absolute Prohibition Rules (Guardrail)
+
+This Skill **never performs** the following.
+
+- Modifying or rewriting sentences
+- Merging or refining rules
+- Reinterpreting the location
+- Creating new rules
+- Proposing "a better expression"
+- Proposing modifications on stop
+
+---
+
+## Input Format (enforced)
 
 ```markdown
 ## CTX 반영 제안 목록
@@ -59,108 +59,108 @@ ctx-reviewer가 제안한 CTX 반영 내용을 문서에 기계적으로 적용�
 - 추가할 문장:
 - 이 규칙이 없으면 발생하는 오작동:
 ```
-입력 포맷 검증은 `skills/_shared/skill-protocol.md` 기준을 따른다.
+Input format validation follows the `skills/_shared/skill-protocol.md` standard.
 
-### 입력 검증 (필수)
+### Input Validation (required)
 
-- 위 포맷이 아니면 **즉시 중단**
-- `대상 파일 경로`가 비어 있으면 **즉시 중단**
-- `삽입 위치`가 비어 있으면 **즉시 중단**
-- `추가할 문장`이 비어 있으면 **즉시 중단**
-- `이 규칙이 없으면 발생하는 오작동`이 비어 있으면 **즉시 중단**
-
----
-
-## 처리 절차 (고정 순서)
-
-이 Skill은 반드시 아래 순서로만 처리한다.
-
-### 1단계: 입력 포맷 검증
-
-- 입력이 정해진 포맷을 따르는지 확인
-- 필수 항목 누락 여부 확인
-
-### 2단계: 대상 파일 존재 여부 확인
-
-- 지정된 파일 경로가 실제로 존재하는지 확인
-- 파일이 없으면 해당 제안 실패 처리
-
-### 3단계: 삽입 위치 존재 여부 확인
-
-- 지정된 삽입 위치(섹션 또는 기존 규칙)가 파일 내 존재하는지 확인
-- 위치를 찾을 수 없으면 해당 제안 실패 처리
-
-### 4단계: 중복 확인
-
-- 추가할 문장이 이미 파일에 존재하는지 확인
-- 동일 문장이 이미 존재하면 해당 제안 실패 처리
-
-### 5단계: 문장 삽입
-
-- 지정된 위치에 추가할 문장을 **원문 그대로** 삽입
-- 문장 수정, 포맷 변경 금지
-
-### 6단계: 결과 출력
-
-- 반영 성공/실패 결과를 출력 포맷에 맞춰 출력
+- If it is not the format above, **stop immediately**
+- If `대상 파일 경로` is empty, **stop immediately**
+- If `삽입 위치` is empty, **stop immediately**
+- If `추가할 문장` is empty, **stop immediately**
+- If `이 규칙이 없으면 발생하는 오작동` is empty, **stop immediately**
 
 ---
 
-## 중단 조건 (강제)
+## Processing Procedure (fixed order)
 
-아래 중 하나라도 발생하면 **즉시 중단**한다.
+This Skill must process only in the following order.
 
-- 입력 포맷 누락 또는 불일치
-- 대상 파일이 존재하지 않음
-- 삽입 위치를 찾을 수 없음
-- 동일 문장이 이미 존재함
+### Step 1: Input Format Validation
 
-**중단 시 수정 제안 금지.**
+- Check whether the input follows the defined format
+- Check for missing required items
+
+### Step 2: Check Whether the Target File Exists
+
+- Check whether the specified file path actually exists
+- If the file does not exist, mark that proposal as failed
+
+### Step 3: Check Whether the Insertion Location Exists
+
+- Check whether the specified insertion location (section or existing rule) exists in the file
+- If the location cannot be found, mark that proposal as failed
+
+### Step 4: Duplicate Check
+
+- Check whether the sentence to add already exists in the file
+- If the identical sentence already exists, mark that proposal as failed
+
+### Step 5: Sentence Insertion
+
+- Insert the sentence to add at the specified location **exactly as written**
+- No modifying the sentence, no changing the format
+
+### Step 6: Output the Result
+
+- Output the reflection success/failure result according to the output format
 
 ---
 
-## 출력 포맷 (고정)
+## Stop Conditions (enforced)
 
-출력은 반드시 아래 형식과 순서를 따른다.
+If even one of the following occurs, **stop immediately**.
 
-## CTX 반영 결과
+- Input format missing or mismatched
+- The target file does not exist
+- The insertion location cannot be found
+- The identical sentence already exists
 
-### 반영 성공
-| 제안 번호 | 파일 | 삽입 위치 | 추가된 문장 |
+**No proposing modifications on stop.**
+
+---
+
+## Output Format (fixed)
+
+The output must follow the format and order below.
+
+## CTX Reflection Result
+
+### Reflection Success
+| Proposal No. | File | Insertion Location | Added Sentence |
 |-----------|------|-----------|-------------|
-| 1 | (경로) | (위치) | (문장) |
+| 1 | (path) | (location) | (sentence) |
 
-### 반영 실패 (있는 경우)
-| 제안 번호 | 파일 | 사유 |
+### Reflection Failure (if any)
+| Proposal No. | File | Reason |
 |-----------|------|------|
-| 2 | (경로) | (사유) |
+| 2 | (path) | (reason) |
 
-### 반영 요약
-- 총 제안 수: N
-- 성공: N
-- 실패: N
+### Reflection Summary
+- Total proposals: N
+- Success: N
+- Failure: N
 
-**주의사항:**
-- 출력 순서 변경 금지
-- 항목 생략 금지 (없으면 "없음" 명시)
-
----
-
-## 중단 시 출력 형식 (고정)
-
-## CTX 반영 중단
-
-중단 사유:
-- (구체적인 중단 사유)
-
-중단된 제안:
-- 제안 번호: N
-- 대상 파일: (경로)
-
-**중단 시 대안 제안, 수정 방법 안내 금지.**
+**Notes:**
+- Do not change the output order
+- Do not omit items (if none, state "None")
 
 ---
 
-## 실행 지침
+## Output Format on Stop (fixed)
 
-`skills/_shared/skill-protocol.md` 표준 실행 지침을 따른다.
+## CTX Reflection Stopped
+
+Stop reason:
+- (specific stop reason)
+
+Stopped proposal:
+- Proposal No.: N
+- Target file: (path)
+
+**On stop, no proposing alternatives or guiding modification methods.**
+
+---
+
+## Execution Guidelines
+
+Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`.
