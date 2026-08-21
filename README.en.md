@@ -109,6 +109,13 @@ Learn more in [docs/concepts.md](docs/concepts.md).
 | `/ctx-refiner` | Optimize CTX docs |
 | `/ctx-commit-planner` | Design commit structure |
 | `/ctx-score-loop` | Post-implementation dependency + 4-axis auto-scoring loop (done at >85) |
+| `/ctx-hallucination-audit` | Hallucination Guard audit loop: verify dev facts via codegraph, quarantine refuted claims, repeat until score ≥ 87 |
+
+> **Hallucination Guard (always on).** Verifies every dev fact (paths, symbols, APIs, config keys,
+> versions) against a code graph so the AI's guesses can't leak in as facts. `codegraph` + `graphify`
+> are **mandatory setup preconditions**; if either is missing, `/team-ai-workflow-start` blocks and
+> asks — via a dialog — whether to install them. Rules: `extensions/hallucination-guard/`,
+> guide: `docs/hallucination-guard.md`.
 
 ---
 

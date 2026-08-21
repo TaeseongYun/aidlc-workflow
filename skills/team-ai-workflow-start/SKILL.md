@@ -1,7 +1,7 @@
 ---
 description: Entry point for team-ai-workflow on any account/repo. Detects state, sets up if needed, and routes to ctx-aidlc-roadmap / ctx-aidlc-run / ctx-run. Also bridges to oh-my-claudecode and Ouroboros workflows.
 model: sonnet
-allowed-tools: Read, Write, Edit, Bash, Skill
+allowed-tools: Read, Write, Edit, Bash, Skill, AskUserQuestion
 ---
 
 ROLE: WORKFLOW_DISPATCHER
@@ -70,6 +70,11 @@ E. 외부 오케스트레이션 감지 (선택)
    - `.omc/` 디렉토리 존재 → OMC 사용 가능성
    - `.ouroboros/` 또는 ouroboros 관련 파일 존재 → Ouroboros 사용 가능성
 
+F. 코드 그래프 전제조건 (Hallucination Guard — 필수)
+   - `bash <본체경로>/scripts/check-codegraph.sh .` 를 실행하고 종료코드를 읽는다.
+   - 0 = 충족(codegraph + graphify + `.codegraph` 인덱스), 2 = 도구 누락, 3 = 인덱스 미생성.
+   - 이 검사는 **초기 세팅/구현 라우팅보다 먼저** 평가한다 (CASE 0 참조).
+
 ────────────────────────────────────
 REPORT FORMAT
 ────────────────────────────────────
@@ -82,6 +87,7 @@ REPORT FORMAT
 ### 환경
 - 본체 위치: <경로 또는 "미설치">
 - 글로벌 스킬: <설치됨 / 미설치>
+- 코드 그래프 전제조건: <충족 / 도구 누락(codegraph·graphify) / 인덱스 미생성>
 - 외부 연동: <OMC 감지 / Ouroboros 감지 / 없음>
 
 ### 현재 프로젝트 (<cwd>)
@@ -100,6 +106,22 @@ ROUTING DECISION TREE
 ────────────────────────────────────
 
 진단 결과에 따라 사용자에게 다음 중 하나를 추천한다.
+
+CASE 0: 코드 그래프 전제조건 미충족 (다른 모든 CASE보다 먼저 평가 — HARD GATE)
+- 조건: 진단 F에서 `check-codegraph.sh`가 codegraph 또는 graphify 중 **하나라도 누락**(종료코드 2)이면
+  적용한다. (인덱스만 없으면(코드 3) 도구는 있으므로 `codegraph init`로 생성하고 통과시킨다.)
+- **금지**: 이 상태에서 초기 세팅/요구사항/구현 등 어떤 후속 CASE로도 라우팅하지 않는다.
+  "그냥 진행"·"무시하고 계속" 같은 자유 텍스트 프롬프트를 받지 않는다.
+- 응답: 먼저 "초기 세팅 불가 — codegraph/graphify 전제조건 미충족"을 명확히 알린다.
+  이어서 **자유 텍스트가 아니라 AskUserQuestion 대화 상자**로 다음을 묻는다:
+    (1) 누락 도구 설치 실행  (2) 수동 설치 안내만  (3) 취소
+  - `check-codegraph.sh` 출력의 `MISSING:` 줄에서 각 도구의 install 명령을 그대로 읽어 제시한다
+    (codegraph: `npm i -g @colbymchenry/codegraph`; graphify: 레지스트리에 지정된 명령).
+  - 사용자가 (1)을 **명시적으로 승인**하면 Bash로 install 명령 + `codegraph init` 을 실행한다.
+    승인 없이는 자동 실행 금지 (skill-protocol Execution Boundary).
+  - 설치 후 `check-codegraph.sh`를 재실행해 통과(코드 0)를 확인한 뒤에야 다음 CASE로 진행한다.
+- 근거: 가드의 VERIFY는 코드 그래프를 1차 소스로 쓴다. 그래프 없이는 전제가 성립하지 않으므로
+  세팅을 진행하는 것이 불가능하다(가능한 척하지 않는다).
 
 CASE 1: 본체 미설치
 - 안내: "team-ai-workflow 본체를 먼저 클론해야 합니다."
@@ -243,8 +265,14 @@ EXECUTION FLOW
 ────────────────────────────────────
 
 STEP 1. 진단 수행
-- Bash로 위 DIAGNOSIS CHECKLIST를 한 번에 실행한다.
+- Bash로 위 DIAGNOSIS CHECKLIST를 한 번에 실행한다 (진단 F의 `check-codegraph.sh` 포함).
 - 결과를 REPORT FORMAT으로 출력한다.
+
+STEP 1.5. 코드 그래프 HARD GATE (CASE 0)
+- 진단 F가 도구 누락(종료코드 2)이면 **여기서 멈춘다**. STEP 2/3의 의도 확인·라우팅으로
+  넘어가지 않는다. CASE 0 절차대로 AskUserQuestion 대화 상자로 설치를 처리하고,
+  통과(종료코드 0)를 확인한 뒤에만 STEP 2로 진행한다.
+- 인덱스만 없으면(코드 3) `codegraph init` 실행 후 진행한다.
 
 STEP 2. 의도 확인
 - 사용자가 명시적으로 무엇을 하려는지 한 줄로 묻는다. 예:
@@ -267,6 +295,8 @@ WHEN TO STOP
 ────────────────────────────────────
 
 다음 상황에서는 진행하지 말고 사용자 입력을 기다린다.
+- 코드 그래프 전제조건 미충족(codegraph/graphify 누락): 후속 라우팅 금지. CASE 0의
+  AskUserQuestion 대화 상자로만 처리하고, 자유 텍스트 "계속" 프롬프트는 받지 않는다.
 - 본체 클론, 글로벌 설치, 프로젝트 초기화는 사용자 명시 승인 전 자동 실행 금지.
 - 진행 중 feature가 2개 이상인데 사용자가 어느 것을 이어갈지 명시하지 않음.
 - 외부 오케스트레이션 자동 실행 요청. 본 스킬은 라우팅만 하고, 실제 호출은

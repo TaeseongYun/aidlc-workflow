@@ -30,6 +30,10 @@
   - CTX 정제
 - `ctx-commit-planner`
   - 커밋 분리 계획
+- `ctx-hallucination-audit`
+  - Hallucination Guard(바이브 블로커) 감사 루프. dev fact를 codegraph로 검증하고
+    refuted 항목을 ledger에 격리, Hallucination-Free Score ≥ 87까지 반복, 교훈을 Linear로 푸시.
+  - 규칙 원문: `extensions/hallucination-guard/hallucination-guard.md`. 전제조건: codegraph + graphify.
 
 ## 설치
 
