@@ -69,8 +69,10 @@ graph LR
     B --> C{"Multi-feature?"}
     C -->|Yes| D["/ctx-aidlc-roadmap<br/>(Phase 0: roadmap)"]
     C -->|No| E["/ctx-aidlc-run<br/>(Phase A-C: analysis/design)"]
-    D --> F["GATE-0<br/>(human approval)"]
-    E --> F
+    D --> F0["GATE-0<br/>(human approval)"]
+    F0 --> W["/ctx-worktree<br/>(optional isolation)"]
+    W --> E
+    E --> F["GATE-1~5<br/>(human approval)"]
     F --> G["/ctx-run<br/>or OMC/Ouroboros"]
     G --> H["Implementation Done"]
 ```
@@ -97,6 +99,7 @@ Learn more in [docs/concepts.md](docs/concepts.md).
 |-------|---------|
 | `/team-ai-workflow-start` | Entry point. Diagnose + route to next step |
 | `/ctx-aidlc-roadmap` | Phase 0: Multi-feature roadmap decomposition |
+| `/ctx-worktree` | Allocate approved parallel-safe features to isolated git worktrees |
 | `/ctx-aidlc-run` | Phase A-C: Requirements analysis, design, artifacts |
 | `/ctx-run` | Implementation: Write code based on approved requirements |
 | `/ctx-architect-judge` | Determine domain scope and CTX references |
