@@ -6,6 +6,12 @@ In projects with a weak `ctx/`, it can be substituted with `.aidlc/project-profi
 ## Project Type
 - Brownfield / Greenfield:
 
+## Platform
+<!-- One line per platform: android | ios | backend | frontend | flutter | rn -->
+<!-- Guidance path or URL; default: {{TEAM_AI_WORKFLOW_DIR}}/platforms/<platform>/guidance.md -->
+- Platform:
+- Guidance:
+
 ## Main Stack
 - Language:
 - Framework:

@@ -424,6 +424,11 @@ STEP 6.5 Inputs:
 - `unit-of-work.md` — decomposed units with responsibilities and locations
 - Project `ctx/` — existing code patterns, domain rules, API conventions
 - `nfr-checklist.md` — non-functional requirements to address in design
+- `{{TEAM_AI_WORKFLOW_DIR}}/platforms/<platform>/guidance.md` — platform
+  architecture baseline. Resolve the platform from `ctx/project-profile.ctx.md`
+  (`## Platform`) or infer per `{{TEAM_AI_WORKFLOW_DIR}}/platforms/README.md`.
+  Precedence: project `ctx/` > platform guidance. Flag conflicts, do not
+  silently pick one.
 
 STEP 6.5 Rules:
 - Every design choice between multiple valid options MUST be recorded as an ADR entry in Section 2.
