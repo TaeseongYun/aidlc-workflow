@@ -107,6 +107,10 @@ Each feature's requirements, questions, Units of Work, and technical design are 
 
 Decompose requirements into work units of S/M/L size. Each UOW specifies Acceptance Criteria and a verification method.
 
+### Platform Guidance: Per-Platform Architecture Baseline
+
+`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn) captures the architecture baseline the agent must load before designing (`/ctx-aidlc-run` STEP 6.5) or implementing (`/ctx-run` ROLE 1) on that platform. Declare the platform in `ctx/project-profile.ctx.md`; precedence is project `ctx/` > platform guidance > general knowledge. The documents are self-contained markdown, so external repos can consume them via the installed path or raw GitHub URL — see [platforms/README.md](platforms/README.md).
+
 For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts.md).
 
 ---
@@ -198,6 +202,7 @@ aidlc-workflow/
 ├── extensions/                 # Rule packs
 │   ├── performance|security|api-contract/   # Optional (opt-in)
 │   └── hallucination-guard/    # Always on: guard rules + Linear routing
+├── platforms/                  # Per-platform architecture guidance (android, ios, backend, frontend, flutter, rn)
 ├── skills/                     # Skill sources (deployed by install-skills.sh)
 │   ├── team-ai-workflow-start/
 │   ├── ctx-aidlc-roadmap/

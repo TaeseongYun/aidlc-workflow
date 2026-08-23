@@ -82,6 +82,7 @@ if [[ ! -f "${PROJECT_ROOT}/ctx/project-profile.ctx.md" ]]; then
 
 - name: ${PROJECT_NAME}
 - type: (TODO)
+- platform: (TODO: android | ios | backend | frontend | flutter | rn)
 - language: (TODO)
 - test-strategy: test-after
 EOF

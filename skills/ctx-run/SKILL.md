@@ -207,6 +207,16 @@ SCOPE:
 - Production code only
   (API, Service, Repository, Batch, DTO)
 
+PLATFORM GUIDANCE (load before implementing):
+- Resolve the platform from `ctx/project-profile.ctx.md` (`## Platform`).
+  If absent, infer from repository layout per
+  `{{TEAM_AI_WORKFLOW_DIR}}/platforms/README.md` and state the inference.
+- Read `{{TEAM_AI_WORKFLOW_DIR}}/platforms/<platform>/guidance.md`
+  (or the Guidance path/URL declared in the profile) for each declared platform.
+- Precedence: project ctx/ > platform guidance > general knowledge.
+  On conflict, project CTX wins — flag the conflict in output.
+- Pass the loaded guidance path(s) to ctx-domain-exec as additional context.
+
 RULES:
 - This role MUST use the ctx-domain-exec skill
 - Do NOT perform manual implementation
