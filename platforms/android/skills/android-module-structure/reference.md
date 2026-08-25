@@ -1,13 +1,14 @@
-# Android 모듈 구조 — 상세 참조 (reference)
+# Android Module Structure — detailed reference (reference)
 
-`SKILL.md`의 심화 자료. 규칙의 근거와 손에 잡히는 예시를 담는다. 규칙 자체는
-`SKILL.md`가 정본이다.
+Deeper material for `SKILL.md`. Holds the rationale for the rules and hands-on
+examples. The rules themselves are canonical in `SKILL.md`.
 
-## 1. 전체 의존 매트릭스
+## 1. Full dependency matrix
 
-행이 열에 의존할 수 있는지. `O` 허용, `–` 금지(역류/순환), 공란 무관.
+Whether a row may depend on a column. `O` allowed, `–` forbidden (reverse/cycle),
+blank means N/A.
 
-| 의존 →<br>모듈 ↓ | app | feature/* | core:domain | core:data | core:model | core:designsystem |
+| depends →<br>module ↓ | app | feature/* | core:domain | core:data | core:model | core:designsystem |
 |---|---|---|---|---|---|---|
 | **app** | – | O | O | O | O | O |
 | **feature/\<n>** | – | –¹ | O | O | O | O |
@@ -18,26 +19,27 @@
 | **core:model** | – | – | – | – | – | – |
 | **core:designsystem** | – | – | – | – | | – |
 
-¹ feature는 다른 feature를 직접 참조하지 않는다. 필요하면 그 feature의
-`api`(인터페이스·모델만) 또는 공유 `core:data`를 경유하고, app이 `impl`을 배선/주입한다.
+¹ A feature does not reference another feature directly. If needed, go through that
+feature's `api` (interfaces/models only) or shared `core:data`, and app wires/injects the `impl`.
 
-핵심 불변식:
-- 의존은 **위에서 아래로만** 흐른다: `app → feature → core:domain → core:data → core:model`.
-- `core:model`은 잎(leaf) — 아무것에도 의존하지 않고 Android 의존이 없다.
-- app만이 feature와 impl을 아는 유일한 모듈이다(중재자/조립자 역할).
+Core invariants:
+- Dependencies flow **top to bottom only**: `app → feature → core:domain → core:data → core:model`.
+- `core:model` is a leaf — depends on nothing and has no Android deps.
+- app is the only module that knows features and impls (mediator/assembler role).
 
-## 2. api|impl 분리와 의존성 역전
+## 2. api|impl split and dependency inversion
 
-`SKILL.md` 결정 테이블의 배경.
+Background for the `SKILL.md` decision table.
 
-- **언제**: (a) 두 번째 feature가 이 feature의 무언가에 의존, (b) 빌드 변형/
-  플랫폼별로 구현을 갈아끼워야 함, (c) 독립 팀이 계약만 보고 병렬 개발.
-- **`api` 모듈**: 인터페이스·모델(계약)만. Android 의존 최소.
-- **`impl` 모듈**: 구체 구현. `api`에 의존.
-- **app**: 빌드 변형별로 구현을 DI로 주입.
+- **When**: (a) a second feature depends on something in this feature, (b)
+  implementation must be swapped per build variant/platform, (c) an independent team
+  develops in parallel against the contract alone.
+- **`api` module**: interfaces/models (the contract) only. Minimal Android deps.
+- **`impl` module**: the concrete implementation. Depends on `api`.
+- **app**: injects the implementation per build variant via DI.
 
 ```kotlin
-// app/build.gradle.kts — 변형별 구현 주입
+// app/build.gradle.kts — inject implementation per variant
 dependencies {
     implementation(project(":feature:checkout:api"))
     releaseImplementation(project(":database:impl:firestore"))
@@ -46,14 +48,15 @@ dependencies {
 }
 ```
 
-소비자(feature)는 `api`에만 의존하고 구체 구현을 모른다.
+The consumer (feature) depends only on `api` and doesn't know the concrete
+implementation.
 
 ## 3. Convention plugin (build-logic)
 
-per-module 빌드 구성 중복을 없앤다. Now in Android과 동일한 패턴.
+Removes per-module build config duplication. The same pattern as Now in Android.
 
-`build-logic/`은 별도 included build로 두고, 재사용 구성을 plugin으로 뽑아
-각 모듈이 `plugins { }`에서 id로 적용한다.
+Keep `build-logic/` as a separate included build, extract reusable config into
+plugins, and have each module apply them by id in `plugins { }`.
 
 ```kotlin
 // build-logic/convention/build.gradle.kts
@@ -78,7 +81,7 @@ gradlePlugin {
 ```
 
 ```kotlin
-// build-logic/.../AndroidFeatureConventionPlugin.kt (요지)
+// build-logic/.../AndroidFeatureConventionPlugin.kt (gist)
 class AndroidFeatureConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("myapp.android.library")
@@ -87,26 +90,27 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             "implementation"(project(":core:designsystem"))
             "implementation"(project(":core:data"))
             "implementation"(project(":core:model"))
-            // Compose, ViewModel, Navigation 등 feature 공통 의존
+            // Compose, ViewModel, Navigation, etc. — common feature deps
         }
     }
 }
 ```
 
 ```kotlin
-// feature/<name>/build.gradle.kts — 소비 측은 이만큼만
+// feature/<name>/build.gradle.kts — the consumer side is just this much
 plugins {
     alias(libs.plugins.myapp.android.feature)
 }
 ```
 
-규칙: 새 모듈은 알맞은 convention plugin을 적용만 한다. plugin이 이미 덮는
-구성(compileSdk, Compose 설정, Hilt 배선, 공통 의존)을 모듈에서 다시 쓰지 않는다.
+Rule: a new module just applies the appropriate convention plugin. Don't rewrite in
+the module the config the plugin already covers (compileSdk, Compose setup, Hilt
+wiring, common deps).
 
-## 4. 버전 카탈로그 (gradle/libs.versions.toml)
+## 4. Version catalog (gradle/libs.versions.toml)
 
-버전·좌표·플러그인의 단일 진실 원천. Gradle 기본 위치는
-루트의 `gradle/libs.versions.toml`.
+The single source of truth for versions/coordinates/plugins. Gradle's default
+location is `gradle/libs.versions.toml` at the root.
 
 ```toml
 [versions]
@@ -121,7 +125,7 @@ hilt-android      = { group = "com.google.dagger", name = "hilt-android", versio
 hilt-compiler     = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 
 [bundles]
-# 자주 함께 쓰는 의존을 묶음으로
+# group dependencies that are often used together
 compose = ["androidx-core-ktx"]
 
 [plugins]
@@ -130,7 +134,7 @@ android-library     = { id = "com.android.library", version.ref = "androidGradle
 hilt                = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ```
 
-모듈 빌드에서의 참조(하드코딩 대신):
+Reference from a module build (instead of hardcoding):
 
 ```kotlin
 plugins {
@@ -144,32 +148,32 @@ dependencies {
 }
 ```
 
-kebab-case 키(`androidx-core-ktx`)는 타입세이프 접근자에서 점 표기
-(`libs.androidx.core.ktx`)로 노출된다. 마이그레이션은 점진적으로: 카탈로그에
-항목 추가 → 싱크 → 문자열 선언을 접근자로 교체.
+kebab-case keys (`androidx-core-ktx`) are exposed as dot notation
+(`libs.androidx.core.ktx`) in the type-safe accessors. Migrate incrementally: add an
+entry to the catalog → sync → replace the string declaration with the accessor.
 
-## 5. 모듈 타입 선택
+## 5. Module type selection
 
-- **Kotlin/Java 모듈**: Android 리소스·매니페스트 불필요할 때(예: `core:model`,
-  순수 도메인/유틸). 오버헤드가 가장 낮다 — 우선 고려.
-- **Android 라이브러리 모듈(AAR)**: 리소스·매니페스트가 필요한 재사용 모듈
+- **Kotlin/Java module**: when Android resources/manifest aren't needed (e.g.
+  `core:model`, pure domain/util). Lowest overhead — consider first.
+- **Android library module (AAR)**: reusable module that needs resources/manifest
   (`core:designsystem`, feature).
-- **Android 앱 모듈(APK/AAB)**: 진입점. 플랫폼별(Auto/Wear/TV)로 나눠 플랫폼
-  의존을 격리.
+- **Android app module (APK/AAB)**: the entry point. Split per platform (Auto/Wear/TV)
+  to isolate platform deps.
 
-## 6. 근거 요약 (Android 공식)
+## 6. Rationale summary (Android official)
 
-- 고응집·저결합: 두 모듈이 서로의 내부를 자주 알아야 하면 한 시스템이다.
-  한 모듈 안에서 서로 거의 상호작용 안 하면 나눈다.
-- 너무 잘게 쪼개면(fine-grained) 빌드 복잡도·보일러플레이트 과다, 너무 크면
-  (coarse-grained) 다시 모놀리스. 소형 프로젝트엔 모듈화가 과할 수 있다.
-- feature 간 통신은 공유 data 모듈을 매개로, 네비게이션엔 객체가 아니라 원시
-  ID를 넘긴다.
-- 구성 일관성은 버전 카탈로그 + convention plugin으로 강제한다.
+- High cohesion, low coupling: if two modules must often know each other's
+  internals, they're one system. If parts within one module barely interact, split them.
+- Too fine-grained produces excessive build complexity/boilerplate; too
+  coarse-grained is a monolith again. Modularization can be overkill for a small project.
+- Inter-feature communication goes through a shared data module; navigation passes a
+  raw ID, not an object.
+- Config consistency is enforced with a version catalog + convention plugins.
 
-출처:
+Sources:
 - https://developer.android.com/topic/modularization
 - https://developer.android.com/topic/modularization/patterns
 - https://developer.android.com/build/migrate-to-catalogs
 - https://github.com/android/nowinandroid
-- 팀 베이스라인: [../../guidance.md](../../guidance.md)
+- Team baseline: [../../guidance.md](../../guidance.md)

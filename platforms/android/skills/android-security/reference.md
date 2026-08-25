@@ -1,14 +1,14 @@
 # Android Security — Reference
 
-`SKILL.md`의 심화 자료. 코드 샘플·매니페스트/XML 예시·상세 체크리스트.
-규칙 요약과 판단 기준은 `SKILL.md`를 본다.
+Deep-dive material for `SKILL.md`: code samples, manifest/XML examples,
+detailed checklist. For the rule summary and decision criteria, see `SKILL.md`.
 
-## 1. Exported 컴포넌트 & Intent/extras 검증
+## 1. Exported components & Intent/extras validation
 
-### 매니페스트: export 명시
+### Manifest: declare export explicitly
 
 ```xml
-<!-- feature 진입점: contract 이면 명시적으로 exported="true" -->
+<!-- feature entry point: if it is a contract, explicitly exported="true" -->
 <activity
     android:name=".DetailActivity"
     android:exported="true">
@@ -18,66 +18,69 @@
     </intent-filter>
 </activity>
 
-<!-- 내부 전용: intent-filter 없어도 명시 -->
+<!-- internal only: declare even without an intent-filter -->
 <activity android:name=".InternalActivity" android:exported="false" />
 
-<!-- Provider 는 기본 false, 필요한 접근만 권한으로 -->
+<!-- Provider defaults to false, grant only the access needed via permissions -->
 <provider
     android:name=".MyProvider"
     android:authorities="com.example.provider"
     android:exported="false" />
 ```
 
-- targetSdk 31+ (Android 12): intent-filter가 있는 activity/service/receiver는
-  `android:exported`를 **반드시** 선언해야 한다. 없으면 설치/빌드 실패.
-- intent-filter 없으면 기본 `false`. 있으면 다른 앱이 시작하려면 `true`를 명시해야 한다.
+- targetSdk 31+ (Android 12): an activity/service/receiver with an intent-filter
+  **must** declare `android:exported`. Otherwise install/build fails.
+- Without an intent-filter, defaults to `false`. With one, you must declare
+  `true` for another app to start it.
 
-### extras 검증 — 신뢰 경계 패턴
+### extras validation — trust-boundary pattern
 
-들어온 값을 신뢰하지 않는다. 없거나·타입이 틀리거나·악의적이면 **정의된 fallback**으로.
+Do not trust incoming values. Missing, wrong-typed, or malicious → a **defined
+fallback**.
 
 ```kotlin
-// Activity.onCreate: exported 진입점
+// Activity.onCreate: exported entry point
 private data class DetailArgs(val itemId: Long, val source: Source)
 
 private fun parseArgs(intent: Intent): DetailArgs? {
     val id = intent.getLongExtra(EXTRA_ITEM_ID, -1L)
-    if (id <= 0L) return null                       // 없음/잘못된 타입 기본값 → 거부
+    if (id <= 0L) return null                       // missing / wrong-type default → reject
     val raw = intent.getStringExtra(EXTRA_SOURCE)
     val source = Source.entries.firstOrNull { it.key == raw }
-        ?: return null                              // 화이트리스트 밖 → 거부
+        ?: return null                              // outside whitelist → reject
     return DetailArgs(id, source)
 }
 
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     val args = parseArgs(intent) ?: run {
-        routeToFallback()                            // 크래시 금지, 조용한 권한 상승 금지
+        routeToFallback()                            // no crash, no silent privilege escalation
         finish()
         return
     }
-    // args 는 이제 검증됨 → route 계약으로
+    // args is now validated → to the route contract
 }
 ```
 
-### 딥링크 검증 순서
+### Deep-link validation order
 
-Activity가 Intent 수신 → host/scheme 검증 → extras 검증 → feature route 계약 →
-back stack 구성 → Compose 진입. 검증 안 된 URI를 라우트에 바로 넣지 않는다.
+Activity receives Intent → validate host/scheme → validate extras → feature route
+contract → back stack construction → Compose entry. Do not put an unvalidated URI
+straight into a route.
 
 ```kotlin
 private val ALLOWED_HOSTS = setOf("example.com", "app.example.com")
 
 private fun routeFromDeepLink(uri: Uri): Route? {
-    if (uri.scheme != "https") return null           // scheme 검증
-    if (uri.host !in ALLOWED_HOSTS) return null       // host 화이트리스트
+    if (uri.scheme != "https") return null           // scheme validation
+    if (uri.host !in ALLOWED_HOSTS) return null       // host whitelist
     val id = uri.getQueryParameter("id")?.toLongOrNull()
-        ?: return null                                // extras 검증
-    return Route.Detail(id)                           // 검증된 값만 route 계약으로
+        ?: return null                                // extras validation
+    return Route.Detail(id)                           // only validated values to the route contract
 }
 ```
 
-### 자체 앱 간 IPC — signature 권한 + 호출자 확인
+### Own-app IPC — signature permission + caller check
 
 ```xml
 <permission
@@ -90,29 +93,31 @@ private fun routeFromDeepLink(uri: Uri): Route? {
 ```
 
 ```kotlin
-// Binder/Messenger 내부: 민감 작업 전 호출자 권한 확인
+// Inside Binder/Messenger: check caller permission before a sensitive operation
 if (checkCallingPermission("com.example.permission.PRIVATE_IPC")
     != PackageManager.PERMISSION_GRANTED) {
     throw SecurityException("caller lacks permission")
 }
 ```
 
-## 2. 데이터 저장 (data at rest)
+## 2. Data at rest
 
-### Jetpack Security 는 deprecated
+### Jetpack Security is deprecated
 
 `androidx.security:security-crypto` (EncryptedSharedPreferences, EncryptedFile,
-MasterKey)는 deprecated다. 신규 코드에서 사용하지 않는다.
+MasterKey) is deprecated. Do not use it in new code.
 
-권장 대안:
+Recommended alternatives:
 
-- 대부분의 민감 데이터: 내부 저장소(`MODE_PRIVATE`)만으로 앱 샌드박스 격리가 충분.
-- 추가 암호화가 필요하면: **Android Keystore**로 키를 관리하고 **Tink**로 데이터 암호화.
-- 설정/키-값: **DataStore** (SharedPreferences 대체).
-- 비밀번호 대신 수명이 짧은 토큰. 키는 앱 메모리로 꺼내지 않는다.
+- Most sensitive data: internal storage (`MODE_PRIVATE`) alone gives sufficient
+  app-sandbox isolation.
+- If extra encryption is needed: manage keys with the **Android Keystore** and
+  encrypt data with **Tink**.
+- Settings/key-value: **DataStore** (SharedPreferences replacement).
+- Short-lived tokens instead of passwords. Do not pull keys out into app memory.
 
 ```kotlin
-// Keystore 키로 직접 AES-GCM (Tink 미사용 시 최소 예시)
+// Direct AES-GCM with a Keystore key (minimal example without Tink)
 val keyGen = KeyGenerator.getInstance(
     KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore"
 )
@@ -126,10 +131,10 @@ keyGen.init(
         .setKeySize(256)
         .build()
 )
-val key = keyGen.generateKey()   // 키는 Keystore 에 머무름
+val key = keyGen.generateKey()   // the key stays in the Keystore
 ```
 
-## 3. 네트워크 보안 구성
+## 3. Network security config
 
 ```xml
 <!-- res/xml/network_security_config.xml -->
@@ -144,12 +149,12 @@ val key = keyGen.generateKey()   // 키는 Keystore 에 머무름
         <domain includeSubdomains="true">api.example.com</domain>
         <pin-set expiration="2026-12-31">
             <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
-            <!-- 백업 핀 필수 -->
+            <!-- backup pin required -->
             <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
         </pin-set>
     </domain-config>
 
-    <!-- debug 빌드에서만 신뢰, 릴리즈에는 포함되지 않음 -->
+    <!-- trusted in debug builds only, not included in release -->
     <debug-overrides>
         <trust-anchors>
             <certificates src="@raw/debug_cas" />
@@ -162,21 +167,22 @@ val key = keyGen.generateKey()   // 키는 Keystore 에 머무름
 <application android:networkSecurityConfig="@xml/network_security_config" ... />
 ```
 
-- cleartext는 Android 9+(API 28+) 기본 차단. 프로덕션 도메인에 다시 켜지 않는다.
-- 핀은 백업 핀과 `expiration`이 없으면 키 로테이션 시 접속 불능이 된다.
-- 커스텀 `TrustManager`/`HostnameVerifier`로 검증을 우회하지 않는다.
+- Cleartext is blocked by default on Android 9+ (API 28+). Do not re-enable it for
+  production domains.
+- Without a backup pin and `expiration`, pins lock you out on key rotation.
+- Do not bypass validation with a custom `TrustManager`/`HostnameVerifier`.
 
 ## 4. Android Keystore
 
 ```kotlin
-// 서명 키 생성 + 사용자 인증 바인딩
+// Signing-key generation + user-authentication binding
 val spec = KeyGenParameterSpec.Builder(
     "signing_key",
     KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
 )
     .setDigests(KeyProperties.DIGEST_SHA256)
-    .setUserAuthenticationParameters(          // 구 setUserAuthenticationRequired 대체
-        0,                                     // 0 = 작업마다 인증
+    .setUserAuthenticationParameters(          // replaces the old setUserAuthenticationRequired
+        0,                                     // 0 = authenticate per operation
         KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL
     )
     .apply {
@@ -191,17 +197,19 @@ KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore")
     .generateKeyPair()
 ```
 
-- 인증이 걸린 키를 쓸 때는 `BiometricPrompt.authenticate(cryptoObject, ...)`.
-- purpose/digest/padding 등 authorization은 생성 시 정해지고 이후 불변 — 넓게 열지 않는다.
-- 하드웨어 보증이 필요하면 `setAttestationChallenge(...)`로 key attestation.
+- When using an auth-bound key, use `BiometricPrompt.authenticate(cryptoObject, ...)`.
+- Authorizations such as purpose/digest/padding are fixed at creation and
+  immutable afterward — do not open them up broadly.
+- For hardware attestation, use key attestation via `setAttestationChallenge(...)`.
 
 ## 5. Play Integrity
 
-- 무결성 토큰은 **서버에서만 검증**한다. 클라이언트 판정 금지.
-- 신규 통합은 Standard 요청(`StandardIntegrityManager` + `StandardIntegrityTokenRequest`).
-  Classic(`IntegrityManager`)은 레거시.
-- 재생 공격 방지 nonce를 요청에 포함하고 서버에서 요청과 일치하는지 검증.
-- 로그인·결제 등 민감 시점에 호출.
+- Verify integrity tokens **on the server only**. No client-side verdict.
+- New integrations use Standard requests (`StandardIntegrityManager` +
+  `StandardIntegrityTokenRequest`). Classic (`IntegrityManager`) is legacy.
+- Include a replay-prevention nonce in the request and verify on the server that
+  it matches the request.
+- Call at sensitive moments such as login and payment.
 
 ```
 Client (requestToken) → Play Integrity API → token → Backend (verify + nonce) → verdict
@@ -210,27 +218,28 @@ Client (requestToken) → Play Integrity API → token → Backend (verify + non
 ## 6. WebView
 
 ```kotlin
-webView.settings.javaScriptEnabled = false   // 필요 없으면 끈다(기본값)
-// addJavascriptInterface 는 APK 내 신뢰 콘텐츠에만. 웹 콘텐츠에는 금지.
+webView.settings.javaScriptEnabled = false   // turn off unless needed (default)
+// addJavascriptInterface is only for trusted content in the APK. Forbidden for web content.
 ```
 
-- HTTPS만 로드, URL allowlist. Android 6.0+는 `createWebMessageChannel()`로 안전 통신.
+- HTTPS only, URL allowlist. On Android 6.0+ use `createWebMessageChannel()` for
+  safe communication.
 
-## 전체 리뷰 체크리스트
+## Full review checklist
 
-- [ ] 모든 activity/service/receiver/provider에 `android:exported` 명시.
-- [ ] exported 진입점이 extras를 검증하고 없음/오타입/악성값을 fallback으로 처리(크래시 없음).
-- [ ] 딥링크가 host/scheme + extras를 검증한 뒤 route 계약을 거친다.
-- [ ] 자체 앱 IPC는 signature 권한 + `checkCallingPermission()`.
-- [ ] 민감 데이터는 내부 저장소, SharedPreferences는 `MODE_PRIVATE`.
-- [ ] `androidx.security.crypto`(EncryptedSharedPreferences 등) 미사용 — Keystore+Tink/DataStore.
-- [ ] 키는 Android Keystore, `SecureRandom`/AES-256, 자체 암호 구현 없음.
-- [ ] 하드코딩 비밀/키 없음, VCS 커밋 없음, `file://` 공유 없음.
-- [ ] `network_security_config.xml` 존재, cleartext 차단, 핀에 백업+expiration.
-- [ ] 커스텀 TrustManager/HostnameVerifier로 검증 무력화 없음.
-- [ ] Play Integrity 토큰 서버 검증, nonce 포함.
-- [ ] WebView: 불필요 JS off, JS interface는 신뢰 콘텐츠만, HTTPS.
-- [ ] 각 exported 진입점의 계약(action·extras·result)이 설계 문서에 기록.
+- [ ] `android:exported` declared on every activity/service/receiver/provider.
+- [ ] Exported entry points validate extras and handle missing/wrong-type/malicious values via fallback (no crash).
+- [ ] Deep links validate host/scheme + extras before going through the route contract.
+- [ ] Own-app IPC uses a signature permission + `checkCallingPermission()`.
+- [ ] Sensitive data in internal storage, SharedPreferences with `MODE_PRIVATE`.
+- [ ] No `androidx.security.crypto` (EncryptedSharedPreferences, etc.) — Keystore+Tink/DataStore.
+- [ ] Keys in the Android Keystore, `SecureRandom`/AES-256, no custom crypto implementation.
+- [ ] No hardcoded secrets/keys, no VCS commits, no `file://` sharing.
+- [ ] `network_security_config.xml` present, cleartext blocked, pins with backup + expiration.
+- [ ] No custom TrustManager/HostnameVerifier neutralizing validation.
+- [ ] Play Integrity token verified on the server, nonce included.
+- [ ] WebView: unnecessary JS off, JS interface only for trusted content, HTTPS.
+- [ ] The contract (action, extras, result) of each exported entry point recorded in the design document.
 
 ## Official references
 
@@ -241,4 +250,4 @@ webView.settings.javaScriptEnabled = false   // 필요 없으면 끈다(기본�
 - Android Keystore: https://developer.android.com/training/articles/keystore
 - Play Integrity API: https://developer.android.com/google/play/integrity
 - `android:exported`: https://developer.android.com/guide/topics/manifest/activity-element#exported
-- 팀 기준: [../../guidance.md](../../guidance.md)
+- Team baseline: [../../guidance.md](../../guidance.md)

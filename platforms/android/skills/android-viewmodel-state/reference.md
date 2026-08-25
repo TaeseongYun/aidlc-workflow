@@ -1,24 +1,25 @@
 # android-viewmodel-state — reference
 
-`SKILL.md`의 심화 자료. 코드 샘플·비교표·SavedStateHandle 패턴. 규칙 자체는
-`SKILL.md`, 팀 기준선은 [`../../guidance.md`](../../guidance.md).
+Deeper material for `SKILL.md`. Code samples, comparison tables, SavedStateHandle
+patterns. The rules themselves are in `SKILL.md`; the team baseline is
+[`../../guidance.md`](../../guidance.md).
 
-## UiState 모델링
+## UiState modeling
 
-### data class (필드가 서로 독립일 때)
+### data class (when fields are mutually independent)
 
 ```kotlin
 data class NewsUiState(
     val isLoading: Boolean = false,
     val items: List<NewsItemUiState> = emptyList(),
-    val userMessage: String? = null,   // 소비 후 ack 로 null
+    val userMessage: String? = null,   // null after consumption ack
 )
 ```
 
-### sealed 계층 (loading/content/error 가 배타적일 때)
+### sealed hierarchy (when loading/content/error are exclusive)
 
-불법 상태를 표현 불가능하게. `isLoading=true`인데 `error!=null` 같은 조합이
-컴파일 단에서 불가능해진다.
+Make illegal states unrepresentable. A combination like `isLoading=true` with
+`error!=null` becomes impossible at compile time.
 
 ```kotlin
 sealed interface DetailUiState {
@@ -28,11 +29,12 @@ sealed interface DetailUiState {
 }
 ```
 
-nullable 다발(`data? + error? + isLoading`)은 냄새. sealed 또는 명시적 모델로.
+A nullable bundle (`data? + error? + isLoading`) is a smell. Use sealed or an
+explicit model.
 
-## StateFlow 노출
+## StateFlow exposure
 
-private mutable, public 읽기 전용:
+private mutable, public read-only:
 
 ```kotlin
 @HiltViewModel
@@ -53,7 +55,7 @@ class DetailViewModel @Inject constructor(
 }
 ```
 
-cold flow를 상태로 접을 때는 `stateIn`:
+When folding a cold flow into state, use `stateIn`:
 
 ```kotlin
 val uiState: StateFlow<DetailUiState> = repo.stream(id)
@@ -69,19 +71,19 @@ val uiState: StateFlow<DetailUiState> = repo.stream(id)
 
 | | StateFlow | SharedFlow |
 |---|---|---|
-| 값 보유 | 항상 있음(`.value`), 초기값 필수 | 없음 |
-| 성격 | conflated hot, 최신만 | replay·buffer 설정형 hot |
-| 신규 구독자 | 현재 값 즉시 수신 | replay 개수만 수신(0이면 없음) |
-| 쓰임 | 화면 상태(UiState) | 일회성 effect/이벤트 |
-| 만드는 법 | `MutableStateFlow(init)` / `stateIn` | `MutableSharedFlow(replay=0, extraBufferCapacity=1)` / `shareIn` |
-| 공개 변환 | `asStateFlow()` | `asSharedFlow()` |
+| Holds a value | Always (`.value`), initial value required | No |
+| Nature | conflated hot, latest only | hot with configurable replay/buffer |
+| New subscriber | receives current value immediately | receives only the replay count (none if 0) |
+| Use | screen state (UiState) | one-shot effect/event |
+| How to create | `MutableStateFlow(init)` / `stateIn` | `MutableSharedFlow(replay=0, extraBufferCapacity=1)` / `shareIn` |
+| Public conversion | `asStateFlow()` | `asSharedFlow()` |
 
-effect는 `replay = 0`으로. 재구독 시 과거 이벤트를 다시 흘리지 않게 한다.
-버퍼 넘침은 `extraBufferCapacity`와 `onBufferOverflow`로 조절.
+Use `replay = 0` for effects. Keeps past events from re-emitting on resubscription.
+Control buffer overflow with `extraBufferCapacity` and `onBufferOverflow`.
 
-## Effect 스트림 (진짜 일회성)
+## Effect stream (truly one-shot)
 
-상태로 못 푸는 것만. 네비게이션 트리거, 1회 토스트 등.
+Only for what can't be expressed as state. Navigation triggers, one-time toasts, etc.
 
 ```kotlin
 sealed interface DetailEffect {
@@ -102,16 +104,18 @@ fun onSaved() {
 }
 ```
 
-`Channel(Channel.BUFFERED).receiveAsFlow()`도 단일 구독 effect에 적합.
+`Channel(Channel.BUFFERED).receiveAsFlow()` is also suitable for a single-subscriber
+effect.
 
-주의: 공식 문서는 producer(ViewModel)가 consumer(UI)보다 오래 살 때
-Channel/Flow 이벤트가 전달을 보장하지 못한다고 경고한다. 상태로 표현 가능한
-신호는 UiState 플래그 + UI 소비 후 ack로 처리하고, effect는 최후 수단.
+Note: the official docs warn that when the producer (ViewModel) outlives the
+consumer (UI), Channel/Flow events can't guarantee delivery. Handle a signal
+expressible as state with a UiState flag + UI ack after consumption, and use effects
+as a last resort.
 ([events](https://developer.android.com/topic/architecture/ui-layer/events))
 
-## 이벤트를 상태로 (권장 경로)
+## Event as state (recommended path)
 
-로그인 성공 → 네비게이션을 effect 대신 상태로:
+Login success → navigation as state instead of an effect:
 
 ```kotlin
 data class LoginUiState(
@@ -120,15 +124,15 @@ data class LoginUiState(
     val isUserLoggedIn: Boolean = false,
 )
 
-// UI: 상태를 관찰해 1회 처리, ack 로 되돌림
+// UI: observes state, handles once, reverts via ack
 LaunchedEffect(uiState.isUserLoggedIn) {
     if (uiState.isUserLoggedIn) onLoggedIn()
 }
 ```
 
-## UI 수집 (lifecycle-aware)
+## UI collection (lifecycle-aware)
 
-Compose 권장:
+Compose recommended:
 
 ```kotlin
 @Composable
@@ -138,7 +142,7 @@ fun DetailRoute(viewModel: DetailViewModel = viewModel()) {
 }
 ```
 
-effect 수집:
+Effect collection:
 
 ```kotlin
 val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -152,13 +156,13 @@ LaunchedEffect(viewModel, lifecycle) {
 }
 ```
 
-View 시스템이면 `repeatOnLifecycle(Lifecycle.State.STARTED)` 안에서 수집.
-`launchIn`만 쓰는 비-lifecycle 수집은 금지.
+In the View system, collect inside `repeatOnLifecycle(Lifecycle.State.STARTED)`.
+Non-lifecycle collection using only `launchIn` is forbidden.
 
 ## SavedStateHandle
 
-프로세스 사망을 넘겨야 하는 가볍고 전이적인 상태만(입력값, 선택, 인자).
-큰/복잡한 데이터는 로컬 영속화.
+Only light, transient state that must survive process death (input values,
+selections, args). Persist large/complex data locally.
 
 ```kotlin
 @HiltViewModel
@@ -175,23 +179,24 @@ class SearchViewModel @Inject constructor(
 }
 ```
 
-주요 API: `get`/`set`/`contains`/`remove`/`keys`,
-`getStateFlow(key, initial)`(읽기 전용 StateFlow). Hilt에서는
-`@HiltViewModel` 생성자에 `SavedStateHandle`을 그냥 주입하면 된다.
+Key APIs: `get`/`set`/`contains`/`remove`/`keys`,
+`getStateFlow(key, initial)` (read-only StateFlow). With Hilt, just inject
+`SavedStateHandle` into the `@HiltViewModel` constructor.
 
-저장 타입: `Bundle`에 담기는 것 — 프리미티브/배열, `String`,
-`Parcelable`, `Serializable` 등. 비-Parcelable은 kotlinx serialization
-delegate(`saved { ... }`)나 `saveable`로.
+Storable types: whatever fits in a `Bundle` — primitives/arrays, `String`,
+`Parcelable`, `Serializable`, etc. For non-Parcelable, use a kotlinx serialization
+delegate (`saved { ... }`) or `saveable`.
 
-생존/비생존: 시스템 주도 프로세스 사망·백그라운드는 생존. 강제 종료·recents
-제거·재부팅은 비생존.
+Survives/doesn't: system-initiated process death and backgrounding survive. Force
+stop, recents removal, and reboot do not.
 
-테스트: `SavedStateHandle(mapOf("id" to testId))`로 주입해 초기값 검증.
+Testing: inject with `SavedStateHandle(mapOf("id" to testId))` to verify initial
+values.
 
-## 테스트 메모
+## Testing notes
 
-ViewModel 상태 전이 테스트는 main-dispatcher 룰 + fake repository로.
-value형 타입에 모킹 프레임워크를 쓰지 않는다(`guidance.md`).
+Test ViewModel state transitions with a main-dispatcher rule + a fake repository.
+Don't use a mocking framework for value-like types (`guidance.md`).
 
 ## References
 
@@ -202,4 +207,4 @@ value형 타입에 모킹 프레임워크를 쓰지 않는다(`guidance.md`).
 - [UI events](https://developer.android.com/topic/architecture/ui-layer/events)
 - [StateFlow and SharedFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow)
 - [State in Compose](https://developer.android.com/jetpack/compose/state)
-- 팀 기준선: [`../../guidance.md`](../../guidance.md)
+- Team baseline: [`../../guidance.md`](../../guidance.md)

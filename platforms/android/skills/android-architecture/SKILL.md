@@ -1,106 +1,114 @@
 ---
 name: android-architecture
-description: 안드로이드 아키텍처 · 앱 아키텍처 가이드 · UI/도메인/데이터 레이어 · 단방향 데이터 흐름(UDF) · MVVM/MVI · 권장 아키텍처(Android app architecture)의 뼈대 참조. 의존 흐름(Screen/Composable → Action → ViewModel → UseCase(선택) → Repository → DataSource/Platform Adapter, 역방향 금지), 레이어 책임, 작은 능력 인터페이스 우선(ISP/DIP), 리포지토리는 도메인 모델 반환, 플랫폼 SDK는 어댑터 뒤로, Feature Slice 결정 표를 다룬다. 안드로이드 아키텍처를 설계·리뷰·리팩터할 때, 또는 어떤 슬라이스(Composable만/MVVM/UseCase/MVI)로 갈지 판단할 때 사용. 다른 다섯 개 안드로이드 스킬을 묶는 우산 스킬.
-when_to_use: 안드로이드 앱 아키텍처 설계, 레이어 경계 판단, ViewModel/Repository 배치, UDF/MVVM/MVI 선택, 아키텍처 리팩터·리뷰, "어떤 feature slice를 쓸까" 결정 시. Android architecture / app architecture / clean architecture / layered architecture 요청에도.
+description: Android architecture · app architecture guidance · UI/domain/data layer · unidirectional data flow (UDF) · MVVM/MVI · skeleton reference for recommended Android app architecture. Covers dependency flow (Screen/Composable → Action → ViewModel → UseCase (optional) → Repository → DataSource/Platform Adapter, reverse direction forbidden), layer responsibilities, small capability interfaces first (ISP/DIP), repositories return domain models, platform SDKs behind adapters, and the Feature Slice decision table. Use when designing, reviewing, or refactoring Android architecture, or deciding which slice to take (Composable-only/MVVM/UseCase/MVI). Umbrella skill grouping the other five Android skills.
+when_to_use: Designing Android app architecture, judging layer boundaries, placing ViewModel/Repository, choosing UDF/MVVM/MVI, refactoring/reviewing architecture, deciding "which feature slice to use". Also for Android architecture / app architecture / clean architecture / layered architecture requests.
 user-invocable: true
 allowed-tools: Read, Grep, Glob
 ---
 
-# android-architecture — 앱 아키텍처 뼈대
+# android-architecture — app architecture skeleton
 
-안드로이드 아키텍처의 척추: 의존 흐름과 레이어 책임을 항상 참조하는 규칙으로
-고정한다. 프로젝트 `ctx/`가 이 스킬을 덮고, 이 스킬이 에이전트 일반 지식을 덮는다.
-심화 자료(레이어 책임 상세 표, MVI/reducer 샘플, MAD 구성요소, 공식 권장 우선순위
-표)는 [reference.md](./reference.md)에.
+The spine of Android architecture: pins the dependency flow and layer
+responsibilities as always-referenced rules. Project `ctx/` overrides this skill,
+and this skill overrides the agent's general knowledge. Deeper material (detailed
+layer-responsibility table, MVI/reducer sample, MAD components, official
+recommendation priority table) lives in [reference.md](./reference.md).
 
 ## Scope
 
-- 대상: 새 안드로이드 기능/앱의 레이어 배치, 의존 방향, 슬라이스 선택, 리팩터
-  판단. Kotlin · Compose · ViewModel · Coroutines/Flow · Hilt 기준.
-- 비대상: ViewModel 상태/이펙트 모델링 세부, 모듈 분리 규칙, 생명주기/메모리,
-  백그라운드 작업, 보안 — 각각 아래 Related skills로 위임.
+- In scope: layer placement, dependency direction, slice selection, and refactor
+  judgment for new Android features/apps. Based on Kotlin · Compose · ViewModel ·
+  Coroutines/Flow · Hilt.
+- Out of scope: ViewModel state/effect modeling details, module split rules,
+  lifecycle/memory, background work, security — each delegated to the Related
+  skills below.
 
-## Core rules — 의존 흐름과 레이어 책임
+## Core rules — dependency flow and layer responsibilities
 
-공식 권장 아키텍처: 최소 2개 레이어(UI, 데이터) + 선택적 도메인. 의존은 위→아래
-단방향, **절대 역방향 금지**.
+Official recommended architecture: at least 2 layers (UI, data) + an optional
+domain layer. Dependencies flow top → bottom, one-directional; **reverse
+direction is strictly forbidden**.
 
 ```
-Screen/Composable → Action → ViewModel → UseCase(선택) → Repository → DataSource / Platform Adapter
+Screen/Composable → Action → ViewModel → UseCase(optional) → Repository → DataSource / Platform Adapter
 ```
 
 ### Do
 
-- **Composable**: `UiState`를 렌더하고 액션을 방출한다. `StateFlow`는
-  `collectAsStateWithLifecycle()`로 생명주기 인지 수집.
-- **ViewModel**: 화면 상태를 하나의 `UiState`(data class 또는 sealed)로 소유하고
-  `StateFlow`로 노출. 1회성 이벤트는 상태가 아니라 `SharedFlow`/`Channel` 이펙트
-  스트림으로. UDF를 따른다(상태는 아래로, 이벤트는 위로).
-- **작은 능력 인터페이스**를 delegate로 조합(예: `NoticeSink`, `RouteEventSink`).
-  넓은 베이스 ViewModel 상속 트리보다 ISP/DIP.
-- **UseCase(선택)**: 복잡한 로직 또는 여러 ViewModel이 재사용하는 규칙일 때만.
-  `현재형동사+명사+UseCase`, `operator invoke`, 가변 상태 없음, main-safe.
-- **Repository**: 도메인 모델을 반환한다. DTO/API/안드로이드 타입 금지. 매핑은
-  데이터 레이어 경계에서. 리포지토리가 데이터 레이어의 유일한 진입점.
-- **Platform Adapter**: 플랫폼 SDK 호출(카메라, 위치, 결제, 알림)은 프로젝트 소유
-  어댑터 인터페이스 뒤에 두고, 필요한 레이어에 주입.
-- I/O는 주입된 디스패처(`@IoDispatcher`)로. 하드코딩 `Dispatchers.IO` 금지.
+- **Composable**: renders `UiState` and emits actions. Collect `StateFlow`
+  lifecycle-aware with `collectAsStateWithLifecycle()`.
+- **ViewModel**: owns screen state as a single `UiState` (data class or sealed)
+  and exposes it via `StateFlow`. One-shot events go through a
+  `SharedFlow`/`Channel` effect stream, not through state. Follow UDF (state
+  flows down, events flow up).
+- **Small capability interfaces** composed via delegates (e.g. `NoticeSink`,
+  `RouteEventSink`). ISP/DIP over a broad base ViewModel inheritance tree.
+- **UseCase(optional)**: only for complex logic or rules reused by multiple
+  ViewModels. `PresentTenseVerb+Noun+UseCase`, `operator invoke`, no mutable
+  state, main-safe.
+- **Repository**: returns domain models. No DTO/API/Android types. Mapping happens
+  at the data layer boundary. The repository is the data layer's only entry point.
+- **Platform Adapter**: platform SDK calls (camera, location, billing,
+  notifications) sit behind a project-owned adapter interface, injected into the
+  layer that needs it.
+- I/O on injected dispatchers (`@IoDispatcher`). No hardcoded `Dispatchers.IO`.
 
 ### Don't
 
-- Composable이 Repository/SDK를 직접 호출 → 금지.
-- ViewModel이 `View`/`Activity`/`Fragment`/Compose 타입 참조 → 금지
-  (`Application`/`SavedStateHandle`는 허용). `AndroidViewModel`도 피한다.
-- Repository가 DTO나 안드로이드 타입을 그대로 노출 → 금지.
-- `UiState`를 nullable 필드 뭉치로 → 금지. 불가능 상태를 표현 불가로 만든다
-  (sealed loading/content/error).
-- 하위 레이어가 상위 레이어를 의존 → 금지(역방향 의존).
+- Composable calling Repository/SDK directly → forbidden.
+- ViewModel referencing `View`/`Activity`/`Fragment`/Compose types → forbidden
+  (`Application`/`SavedStateHandle` allowed). Also avoid `AndroidViewModel`.
+- Repository exposing DTOs or Android types as-is → forbidden.
+- `UiState` as a bag of nullable fields → forbidden. Make illegal states
+  unrepresentable (sealed loading/content/error).
+- A lower layer depending on a higher layer → forbidden (reverse dependency).
 
 ## Feature Slice Decision Table
 
-맞는 가장 **작은** 슬라이스에서 시작. 추측이 아니라 **실제 신호**가 있을 때만 위로
-올린다.
+Start at the smallest slice that fits. Move up only on a **real signal**, not
+speculation.
 
-| 상황 | 슬라이스 | 올리는 신호 |
+| Situation | Slice | Signal to move up |
 |------|----------|-------------|
-| 무상태 UI 또는 로컬 `remember`만 | Composable만, ViewModel 없음 | 화면 상태 or 비동기 데이터가 생김 |
-| 화면 상태 + 비동기 데이터 | MVVM: Route → ViewModel → Screen | 다중 소스 조합 or 규칙 재사용 발생 |
-| 다중 소스 조합 또는 재사용되는 비즈니스 규칙 | + UseCase → Repository → DataSource | 낙관적 업데이트 or 복잡한 동시성 |
-| 낙관적 업데이트, 복잡한 동시성 | MVVM 위에 Reducer/MVI | — (최상단) |
+| Stateless UI or local `remember` only | Composable only, no ViewModel | Screen state or async data appears |
+| Screen state + async data | MVVM: Route → ViewModel → Screen | Multi-source orchestration or rule reuse appears |
+| Multi-source orchestration or reused business rules | + UseCase → Repository → DataSource | Optimistic updates or complex concurrency |
+| Optimistic updates, complex concurrency | Reducer/MVI on top of MVVM | — (top) |
 
-- 시작은 최소 슬라이스. **먼저 만들지 말 것**: 두 번째 소비자나 플랫폼 의존이
-  강제하기 전엔 `UseCase`·도메인 레이어를 넣지 않는다.
-- 단순 데이터 위임만 하는 UseCase는 만들지 않는다(과설계).
-- MVI/reducer 샘플은 [reference.md](./reference.md) §2.
+- Start at the minimal slice. **Do not build ahead**: do not add `UseCase`/domain
+  layers until a second consumer or platform dependency forces it.
+- Don't create a UseCase that only delegates data (over-engineering).
+- MVI/reducer sample in [reference.md](./reference.md) §2.
 
 ## Refactor / red-flag signals
 
-- Composable이 Repository나 SDK를 직접 호출.
-- ViewModel이 `android.view`/Compose 타입을 import, 또는 Activity가 Intent
-  파싱/검증을 넘어 비즈니스 로직 보유.
-- `UiState`가 모델링된 상태 대신 독립 nullable 다수.
-- 하위 레이어가 상위를 의존하거나, 한 기능이 다른 기능의 `impl`을 파고듦.
-- Repository가 DTO/안드로이드 타입을 노출.
-- Hilt가 이미 제공하는 것을 Activity에서 수동 생성.
-- 단순 위임만 하는 UseCase, 또는 존재 이유 없는 넓은 베이스 ViewModel.
+- Composable calling a Repository or SDK directly.
+- ViewModel importing `android.view`/Compose types, or an Activity holding
+  business logic beyond Intent parsing/validation.
+- `UiState` with many independent nullables instead of modeled states.
+- A lower layer depending on a higher one, or a feature reaching into another
+  feature's `impl`.
+- Repository exposing DTO/Android types.
+- Manual construction in an Activity of something Hilt already provides.
+- A UseCase that only delegates, or a broad base ViewModel with no reason to exist.
 
 ## Related skills
 
-우산 스킬. 각 레이어/관심사 세부는 아래로 드릴다운:
+Umbrella skill. Drill down into per-layer/concern detail below:
 
-- [android-viewmodel-state](../android-viewmodel-state/SKILL.md) — UiState/이펙트/StateFlow 모델링.
-- [android-module-structure](../android-module-structure/SKILL.md) — 모듈 경계, `api`/`impl` 분리, Hilt/DI 배치.
-- [android-lifecycle-memory](../android-lifecycle-memory/SKILL.md) — 생명주기 인지 수집, 누수·메모리.
-- [android-background-rules](../android-background-rules/SKILL.md) — WorkManager vs 코루틴, 디스패처.
-- [android-security](../android-security/SKILL.md) — exported 컴포넌트 신뢰 경계, extras 검증.
+- [android-viewmodel-state](../android-viewmodel-state/SKILL.md) — UiState/effect/StateFlow modeling.
+- [android-module-structure](../android-module-structure/SKILL.md) — module boundaries, `api`/`impl` split, Hilt/DI placement.
+- [android-lifecycle-memory](../android-lifecycle-memory/SKILL.md) — lifecycle-aware collection, leaks/memory.
+- [android-background-rules](../android-background-rules/SKILL.md) — WorkManager vs coroutines, dispatchers.
+- [android-security](../android-security/SKILL.md) — exported component trust boundary, extras validation.
 
 ## References
 
-- 팀 가이드라인(상위 문서): [../../guidance.md](../../guidance.md)
-- 심화 자료: [reference.md](./reference.md)
-- 앱 아키텍처: https://developer.android.com/topic/architecture
-- UI 레이어: https://developer.android.com/topic/architecture/ui-layer
-- 도메인 레이어: https://developer.android.com/topic/architecture/domain-layer
-- 데이터 레이어: https://developer.android.com/topic/architecture/data-layer
-- 아키텍처 권장사항: https://developer.android.com/topic/architecture/recommendations
+- Team guidelines (parent doc): [../../guidance.md](../../guidance.md)
+- Deeper material: [reference.md](./reference.md)
+- App architecture: https://developer.android.com/topic/architecture
+- UI layer: https://developer.android.com/topic/architecture/ui-layer
+- Domain layer: https://developer.android.com/topic/architecture/domain-layer
+- Data layer: https://developer.android.com/topic/architecture/data-layer
+- Architecture recommendations: https://developer.android.com/topic/architecture/recommendations
 - Modern Android Development: https://developer.android.com/modern-android-development

@@ -1,7 +1,7 @@
 ---
 name: android-security
-description: 안드로이드 보안(Android security) 규칙 — exported 컴포넌트/Intent·extras 검증(exported component & Intent/extras validation), 권한(permissions), 데이터 암호화·저장(data-at-rest encryption), 네트워크 보안 구성(network security config), Android Keystore, Play Integrity를 다룬다. AndroidManifest.xml·network_security_config.xml·*.kt를 작성·리뷰하거나, exported 컴포넌트/딥링크(deep link)의 신뢰 경계(trust boundary)를 설계·검증할 때, 또는 키·비밀·자격증명(key/secret/credential) 저장 방식을 정할 때 사용한다.
-when_to_use: exported 컴포넌트를 추가·수정할 때, intent-filter/딥링크 라우팅을 만들 때, extras를 읽는 Activity/Service/Receiver/Provider를 손댈 때, HTTP/cleartext·인증서 핀닝(certificate pinning)을 다룰 때, EncryptedSharedPreferences/Keystore/암호화 코드를 볼 때
+description: Android security rules — exported component & Intent/extras validation, permissions, data-at-rest encryption, network security config, Android Keystore, and Play Integrity. Use when writing or reviewing AndroidManifest.xml, network_security_config.xml, or *.kt, when designing or verifying the trust boundary of an exported component or deep link, or when deciding how to store a key/secret/credential.
+when_to_use: When adding or modifying an exported component, building intent-filter/deep-link routing, touching an Activity/Service/Receiver/Provider that reads extras, dealing with HTTP/cleartext or certificate pinning, or looking at EncryptedSharedPreferences/Keystore/encryption code
 paths: **/AndroidManifest.xml, **/network_security_config.xml, **/*.kt
 user-invocable: true
 allowed-tools: Read, Grep, Glob
@@ -9,108 +9,135 @@ allowed-tools: Read, Grep, Glob
 
 # Android Security
 
-팀 Android 앱의 보안 기준. `../../guidance.md`의 "Intent-first external surface"를 보안 관점에서
-확장한 것이다. 여기 규칙은 **안전 규칙(safety rule)** 이며 축소·완화하지 않는다.
+The security baseline for the team's Android app. This expands `../../guidance.md`'s
+"Intent-first external surface" from a security angle. The rules here are
+**safety rules** and must not be weakened or relaxed.
 
 ## Scope
 
-- 대상: `AndroidManifest.xml`, `network_security_config.xml`, Kotlin 소스.
-- 다루는 것: exported 컴포넌트 · Intent/extras 검증, 딥링크, 권한, 데이터 저장 암호화,
-  네트워크 보안 구성, Android Keystore, Play Integrity, WebView.
-- guidance.md가 상위 기준. 프로젝트 `ctx/`가 이 문서를 override 한다.
+- Applies to: `AndroidManifest.xml`, `network_security_config.xml`, Kotlin sources.
+- Covers: exported components & Intent/extras validation, deep links, permissions,
+  data-at-rest encryption, network security config, Android Keystore, Play
+  Integrity, WebView.
+- guidance.md is the higher baseline. A project's `ctx/` overrides this document.
 
 ## Core Rules
 
-### 신뢰 경계 (exported = trust boundary) — 절대 완화 금지
+### Trust boundary (exported = trust boundary) — never relax
 
-- **모든 exported 컴포넌트는 신뢰 경계다.** 들어오는 모든 extras와 호출자(caller) 데이터를
-  사용 전에 검증한다. 없는 extra · 잘못된 타입 · 악의적 값은 **정의된 fallback**으로 떨어지고,
-  절대 크래시나 조용한 권한 상승(silent privilege)으로 이어지지 않는다.
-- Activity/Service/Receiver/Provider 모두 `android:exported`를 **명시적으로** 선언한다
-  (targetSdk 31+에서 intent-filter가 있으면 필수). intent-filter가 있다고 자동으로
-  export 되지 않는다 — export 여부는 설계 시점에 정하고 기술 설계 문서에 기록한다.
-- intent-filter는 라우팅 힌트일 뿐 **보안 장치가 아니다.** 필터가 걸렀다고 가정하지 말고
-  코드에서 다시 검증한다.
-- 딥링크: Activity가 Intent 수신 → host/scheme 검증 → extras 검증 → feature route 계약 →
-  back stack 구성 → Compose 진입. 검증 안 된 URI를 라우트에 바로 주입하지 않는다.
-- 다른 앱과 공유할 필요가 없으면 `android:exported="false"`. Provider도 기본 false로 두고
-  필요한 접근만 허용한다. "나중에 하드닝하려고" false를 임의로 붙이는 것과는 다르다 —
-  contract 진입점은 설계 시점에 surface를 명시한다.
+- **Every exported component is a trust boundary.** Validate all incoming extras
+  and caller data before use. A missing extra, wrong type, or malicious value
+  must land on a **defined fallback** and must never lead to a crash or a silent
+  privilege escalation.
+- Declare `android:exported` **explicitly** for every Activity/Service/Receiver/Provider
+  (required on targetSdk 31+ when an intent-filter is present). Having an
+  intent-filter does not automatically export a component — decide whether to
+  export at design time and record it in the technical design document.
+- An intent-filter is only a routing hint, **not a security control.** Do not
+  assume the filter screened the input; re-validate in code.
+- Deep links: Activity receives Intent → validate host/scheme → validate extras →
+  feature route contract → back stack construction → Compose entry. Do not inject
+  an unvalidated URI straight into a route.
+- Use `android:exported="false"` if there is no need to share with other apps.
+  Keep Providers false by default too, granting only the access needed. This is
+  different from arbitrarily adding false "to harden later" — a contract entry
+  point makes its surface explicit at design time.
 
-### 자체 앱 간 IPC / 권한
+### Own-app IPC / permissions
 
-- 자체 앱끼리의 IPC는 `android:protectionLevel="signature"` 커스텀 권한으로 보호한다.
-- Binder/Messenger는 민감 작업 전에 코드에서 `checkCallingPermission()`으로 호출자 권한을
-  확인한다. 외부 프로세스 호출을 대신 수행할 때만 `clearCallingIdentity()`/`restoreCallingIdentity()`.
-- 권한은 최소로 요청한다. 가능하면 권한 대신 다른 앱에 인텐트로 위임한다
-  (연락처 추가는 `READ_CONTACTS` 대신 `Intent.ACTION_INSERT`).
-- 민감 IPC에 localhost/네트워크 소켓 사용 금지, `INADDR_ANY` 바인딩 금지.
+- Protect IPC between your own apps with an `android:protectionLevel="signature"`
+  custom permission.
+- In Binder/Messenger, verify caller permission in code with
+  `checkCallingPermission()` before a sensitive operation. Use
+  `clearCallingIdentity()`/`restoreCallingIdentity()` only when performing an
+  external-process call on the caller's behalf.
+- Request permissions minimally. Where possible, delegate to another app via an
+  intent instead of a permission (adding a contact via `Intent.ACTION_INSERT`
+  instead of `READ_CONTACTS`).
+- No localhost/network sockets for sensitive IPC, no `INADDR_ANY` binding.
 
-### 데이터 저장 (data at rest)
+### Data at rest
 
-- 민감 데이터는 내부 저장소(`Context.getFilesDir()`, `MODE_PRIVATE`)에만 둔다. 외부 저장소는
-  전역 읽기/쓰기 가능하므로 비민감 데이터만. SharedPreferences는 항상 `MODE_PRIVATE`.
-- 암호화 키는 **Android Keystore**에 둔다. 키를 앱 메모리로 꺼내지 않는다.
-- **EncryptedSharedPreferences / EncryptedFile (Jetpack Security `androidx.security:security-crypto`)는
-  deprecated다.** 신규 코드에서 쓰지 말 것. 대체: 내부 저장소 + Android Keystore로 관리하는
-  키로 직접 암호화(권장 도구 **Tink**), 설정값은 **DataStore**. 기존 사용처는 마이그레이션 대상.
-- 비밀번호/사용자 ID를 기기에 저장하지 않는다 — 수명이 짧은 인증 토큰을 쓴다.
-- API 키/비밀을 소스·VCS에 커밋하지 않는다. 자체 암호 알고리즘 구현 금지 — `Cipher`/`KeyGenerator`
-  프레임워크 사용, `SecureRandom`으로 초기화, AES 256-bit.
-- 파일 공유는 `file://` 금지, `FileProvider`의 `content://` + URI 권한 플래그로.
+- Keep sensitive data only in internal storage (`Context.getFilesDir()`,
+  `MODE_PRIVATE`). External storage is globally readable/writable, so use it only
+  for non-sensitive data. SharedPreferences always with `MODE_PRIVATE`.
+- Keep encryption keys in the **Android Keystore**. Do not pull keys out into app
+  memory.
+- **EncryptedSharedPreferences / EncryptedFile (Jetpack Security
+  `androidx.security:security-crypto`) are deprecated.** Do not use them in new
+  code. Alternatives: encrypt directly in internal storage with a key managed by
+  the Android Keystore (recommended tool **Tink**), and use **DataStore** for
+  settings. Existing usages are migration targets.
+- Do not store passwords/user IDs on the device — use short-lived auth tokens.
+- Do not commit API keys/secrets to source or VCS. Do not implement your own
+  crypto algorithms — use the `Cipher`/`KeyGenerator` framework, seed with
+  `SecureRandom`, AES 256-bit.
+- No `file://` for file sharing — use a `FileProvider`'s `content://` + URI
+  permission flags.
 
-### 네트워크 보안 구성
+### Network security config
 
-- `res/xml/network_security_config.xml`을 두고 매니페스트에 `android:networkSecurityConfig`로 연결.
-- cleartext(HTTP)는 기본 차단. 프로덕션 도메인에 `cleartextTrafficPermitted="true"` 금지.
-  base-config에 전역으로 켜지 않는다.
-- 인증서 핀닝은 `<pin-set>` + SHA-256. **백업 핀 필수**, `expiration` 필수.
-- 커스텀 CA는 `<debug-overrides>`에서 debug 빌드만. 릴리즈 빌드에 debug CA·`android:debuggable="true"` 금지.
-- 커스텀 `TrustManager`/`HostnameVerifier`로 검증을 무력화하지 않는다.
+- Add `res/xml/network_security_config.xml` and link it in the manifest via
+  `android:networkSecurityConfig`.
+- Block cleartext (HTTP) by default. No `cleartextTrafficPermitted="true"` for
+  production domains. Do not enable it globally in base-config.
+- Certificate pinning with `<pin-set>` + SHA-256. **Backup pin required**,
+  `expiration` required.
+- Custom CAs in `<debug-overrides>` for debug builds only. No debug CA or
+  `android:debuggable="true"` in release builds.
+- Do not neutralize validation with a custom `TrustManager`/`HostnameVerifier`.
 
 ### Android Keystore / Play Integrity
 
-- 키 생성은 `AndroidKeyStore` provider + `KeyGenParameterSpec`. purpose·digest·padding을 명시해
-  용도를 제한한다(생성 후 불변).
-- 민감 작업 키는 사용자 인증 바인딩: `setUserAuthenticationParameters(timeout, types)`
-  (구 `setUserAuthenticationRequired(true)`는 deprecated). 사용 시 `BiometricPrompt`.
-- 가능하면 StrongBox(`FEATURE_STRONGBOX_KEYSTORE` 확인 후 `setIsStrongBoxBacked(true)`),
-  하드웨어 보증이 필요하면 key attestation(`setAttestationChallenge`).
-- Play Integrity: 무결성 토큰은 **반드시 서버에서 검증**한다(클라이언트 검증 금지). 신규는
-  Standard 요청(`StandardIntegrityManager`), 재생 공격 방지 nonce를 요청·서버에서 검증.
+- Generate keys with the `AndroidKeyStore` provider + `KeyGenParameterSpec`.
+  Constrain the use by specifying purpose/digest/padding (immutable after creation).
+- Bind sensitive-operation keys to user authentication:
+  `setUserAuthenticationParameters(timeout, types)` (the old
+  `setUserAuthenticationRequired(true)` is deprecated). Use `BiometricPrompt` when
+  using them.
+- Use StrongBox where possible (after checking `FEATURE_STRONGBOX_KEYSTORE`, call
+  `setIsStrongBoxBacked(true)`), and key attestation (`setAttestationChallenge`)
+  when hardware attestation is needed.
+- Play Integrity: integrity tokens **must be verified on the server** (no
+  client-side verification). For new integrations use Standard requests
+  (`StandardIntegrityManager`), and request/verify a replay-prevention nonce on
+  the server.
 
 ### WebView
 
-- 필요 없으면 JavaScript 비활성(기본값 유지). `addJavascriptInterface()`는 APK 내 신뢰 콘텐츠에만.
-- 신뢰 URL만 로드(allowlist), HTTPS만. Android 6.0+는 `createWebMessageChannel()`로 통신.
+- Disable JavaScript unless needed (keep the default). `addJavascriptInterface()`
+  only for trusted content bundled in the APK.
+- Load only trusted URLs (allowlist), HTTPS only. On Android 6.0+ communicate via
+  `createWebMessageChannel()`.
 
-## Exported-component 검증 체크리스트
+## Exported-component validation checklist
 
-exported Activity/Service/Receiver/Provider(또는 딥링크)를 손댈 때 순서대로:
+When touching an exported Activity/Service/Receiver/Provider (or a deep link),
+in order:
 
-| # | 확인 | 실패 시 |
+| # | Check | On failure |
 |---|------|---------|
-| 1 | `android:exported`가 명시적으로 선언됐는가 | 명시. intent-filter 있으면 export 여부 결정 |
-| 2 | 이 컴포넌트가 정말 외부 공개 대상인가 | 아니면 `exported="false"` |
-| 3 | 필수 extra가 존재·타입 일치하는가 | 정의된 fallback (크래시 금지) |
-| 4 | extra 값이 유효 범위·화이트리스트에 드는가 | 정의된 fallback |
-| 5 | 딥링크면 host/scheme를 검증했는가 | 거부 후 fallback |
-| 6 | URI/route를 검증 없이 back stack에 넣지 않는가 | 검증 후 route 계약 경유 |
-| 7 | 민감 IPC면 호출자 권한을 확인했는가 | `checkCallingPermission()` |
-| 8 | 계약(action·extras·result)이 설계 문서에 기록됐는가 | 기록 |
+| 1 | Is `android:exported` declared explicitly | Declare it. If an intent-filter is present, decide whether to export |
+| 2 | Is this component really meant to be exposed externally | If not, `exported="false"` |
+| 3 | Does the required extra exist and match its type | Defined fallback (no crash) |
+| 4 | Is the extra value within a valid range / whitelist | Defined fallback |
+| 5 | For a deep link, is host/scheme validated | Reject, then fallback |
+| 6 | Is a URI/route not put on the back stack without validation | Validate, then go through the route contract |
+| 7 | For sensitive IPC, is caller permission checked | `checkCallingPermission()` |
+| 8 | Is the contract (action, extras, result) recorded in the design document | Record it |
 
-## Refactor / Red-flag 신호
+## Refactor / Red-flag signals
 
-- exported Activity가 extras를 검증 없이 사용 → 신뢰 경계 위반.
-- intent-filter가 있는데 `android:exported`가 미선언.
-- 검증 안 된 딥링크 URI를 라우트/back stack에 직접 주입.
+- An exported Activity using extras without validation → trust-boundary violation.
+- An intent-filter present but `android:exported` undeclared.
+- Injecting an unvalidated deep-link URI directly into a route / back stack.
 - `EncryptedSharedPreferences`/`EncryptedFile`/`androidx.security.crypto` import (deprecated).
-- 하드코딩된 키·비밀·`file://` 공유, 외부 저장소의 민감 데이터.
-- `network_security_config.xml` 부재, cleartext 전역 허용, 백업/expiration 없는 핀.
-- 커스텀 `TrustManager`/`HostnameVerifier`가 검증을 무력화.
-- Play Integrity 토큰을 클라이언트에서 검증.
+- Hardcoded keys/secrets, `file://` sharing, sensitive data in external storage.
+- Missing `network_security_config.xml`, cleartext allowed globally, pins without backup/expiration.
+- A custom `TrustManager`/`HostnameVerifier` neutralizing validation.
+- Play Integrity token verified on the client.
 
 ## References
 
-- [../../guidance.md](../../guidance.md) — 팀 Android 기준 (Intent-first external surface)
-- [reference.md](reference.md) — 코드 샘플 · 매니페스트/XML 예시 · 상세 체크리스트
+- [../../guidance.md](../../guidance.md) — team Android baseline (Intent-first external surface)
+- [reference.md](reference.md) — code samples, manifest/XML examples, detailed checklist
