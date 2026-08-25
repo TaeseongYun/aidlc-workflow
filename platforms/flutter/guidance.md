@@ -96,3 +96,18 @@ Split into packages (melos) only when a second app or plugin consumer exists.
 - `Platform.isAndroid/isIOS` branches inside feature widgets instead of an
   adapter.
 - Controllers holding `BuildContext` or Flutter UI types.
+
+## Detailed Skills
+
+This baseline is expanded into six topic skills under
+[`skills/`](skills/README.md). Each is a reference-knowledge skill
+(`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
+also callable as `/flutter-*`. Stack: feature-first Flutter/Dart, Riverpod or
+Bloc (whichever the project already uses — never both).
+
+- [flutter-architecture](skills/flutter-architecture/SKILL.md) — dependency flow, layer responsibilities, state home, platform-channel boundary, Feature Slice decision (umbrella)
+- [flutter-state-management](skills/flutter-state-management/SKILL.md) — sealed/immutable state, effects vs state, UDF, async-gap (`mounted`) safety, Riverpod/Bloc (never both)
+- [flutter-module-structure](skills/flutter-module-structure/SKILL.md) — feature-first `lib/` layout, DI/provider scoping, single-package vs melos split timing
+- [flutter-widget-performance](skills/flutter-widget-performance/SKILL.md) — `const`, rebuild scope (`select`/`buildWhen`), `mounted` after await, theme/localization (no literals), optimize on evidence
+- [flutter-navigation-platform](skills/flutter-navigation-platform/SKILL.md) — go_router/Navigator 2.0, deep-link parameter validation, platform-channel adapters, `Platform.isX` in adapters
+- [flutter-security](skills/flutter-security/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (embedded secrets, insecure storage, TLS bypass, deep-link/channel input, WebView, sqflite injection, log leakage, weak crypto, insecure manifests, hallucinated deps)

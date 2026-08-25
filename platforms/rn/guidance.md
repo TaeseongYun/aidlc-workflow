@@ -104,3 +104,20 @@ ios/ android/            # native projects — touched only via modules/config
 - Secrets or tokens in AsyncStorage.
 - Missing permission-denied/offline handling on a capability path.
 - A second styling or state library alongside the existing one.
+
+## Detailed Skills
+
+This baseline is expanded into six topic skills under
+[`skills/`](skills/README.md). Each is a reference-knowledge skill
+(`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
+also callable as `/rn-*`. RN shares the web frontend's React boundaries
+([`../frontend/guidance.md`](../frontend/guidance.md)); these skills are the
+mobile delta on top. Stack: TypeScript + React Navigation / Expo Router +
+Turbo Modules / Fabric.
+
+- [rn-architecture](skills/rn-architecture/SKILL.md) — Screen → Container → Presentational, server-vs-client state, one API boundary, native-module boundary, Feature Slice decision (umbrella)
+- [rn-state-data](skills/rn-state-data/SKILL.md) — server vs client state, four fetch states, persisted state via a storage adapter, secure storage for secrets (never AsyncStorage)
+- [rn-native-modules](skills/rn-native-modules/SKILL.md) — native adapter interface over Turbo Modules/Fabric, `Platform.OS` boundary, native-dependency justification, permission-denied state
+- [rn-navigation-lifecycle](skills/rn-navigation-lifecycle/SKILL.md) — typed route params, deep-link validation, AppState background/foreground, offline/network, permission paths
+- [rn-performance-ux](skills/rn-performance-ux/SKILL.md) — `FlatList`/`FlashList` + stable keys, Reanimated worklets, one styling system, **accessibility safety guard** (roles/labels, ≥44pt)
+- [rn-security](skills/rn-security/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (bundle secrets, insecure storage, TLS bypass, deep-link input, WebView, log leakage, weak crypto, insecure manifests, hallucinated deps)

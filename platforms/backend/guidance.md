@@ -123,3 +123,18 @@ split.
 - A webhook/consumer handler that breaks when delivered twice.
 - Response shape changed silently in a refactor (RESPONSE SHAPE LOCK
   violation).
+
+## Detailed Skills
+
+This baseline is expanded into six topic skills under
+[`skills/`](skills/README.md). Each is a reference-knowledge skill
+(`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
+also callable as `/backend-*`. Stack: Kotlin/Java + Spring Boot + JPA primary,
+Node/TypeScript shown alongside on the key rules.
+
+- [backend-architecture](skills/backend-architecture/SKILL.md) — dependency flow, layer responsibilities, transaction boundary, Feature Slice decision (umbrella)
+- [backend-api-contract](skills/backend-api-contract/SKILL.md) — RESPONSE SHAPE LOCK, error envelope (no stack traces), versioning, input validation, CORS, pagination
+- [backend-data-transactions](skills/backend-data-transactions/SKILL.md) — transaction boundary, N+1, idempotency, PII/excessive exposure, money/time, migrations
+- [backend-security-guard](skills/backend-security-guard/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (secrets, SQLi/injection, SSRF, deserialization, BOLA/BFLA, weak crypto, disabled security, hallucinated deps)
+- [backend-auth](skills/backend-auth/SKILL.md) — authN/authZ, BOLA/BFLA, JWT verification, sessions, password hashing, least privilege
+- [backend-reliability](skills/backend-reliability/SKILL.md) — logging hygiene (no secrets/PII), resilience (timeout/retry/circuit-breaker), rate limiting, dependency & supply-chain (SCA, slopsquatting, SBOM)
