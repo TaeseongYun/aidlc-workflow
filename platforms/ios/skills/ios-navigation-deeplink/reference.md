@@ -21,16 +21,15 @@ enum Route: Hashable { case orderDetail(Order.ID), profile(handle: String), home
 enum DeepLinkParser {
     static func route(for url: URL) -> Route {
         guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return .home }
-        switch (comps.host, comps.path) {
-        case ("order", let p) where p.hasPrefix("/"):
-            guard let id = UUID(uuidString: String(p.dropFirst())) else { return .home } // validate → fallback
-            return .orderDetail(id)
-        case ("u", let p):
-            let handle = String(p.dropFirst())
-            guard handle.range(of: "^[a-z0-9_]{1,30}$", options: .regularExpression) != nil else { return .home }
+        let seg = comps.path.split(separator: "/").map(String.init)   // path segments
+        switch comps.scheme {
+        case "https":                                                 // Universal Link: /u/{handle}
+            guard comps.host == "app.example.com", seg.first == "u", let handle = seg.dropFirst().first,
+                  handle.range(of: "^[a-z0-9_]{1,30}$", options: .regularExpression) != nil else { return .home }
             return .profile(handle: handle)
-        default:
-            return .home    // undefined input → defined fallback, never a crash
+        default:                                                      // custom scheme: order/{id}
+            guard comps.host == "order", let raw = seg.first, let id = UUID(uuidString: raw) else { return .home }
+            return .orderDetail(id)                                    // validate → fallback, never a crash
         }
     }
 }

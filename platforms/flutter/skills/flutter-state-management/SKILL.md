@@ -60,7 +60,7 @@ State vs effect — where each type lives:
 | Nature of data | Where | Mechanism |
 |---|---|---|
 | Persistent state the screen renders (list, form, loading/error) | Controller state | sealed type / `AsyncValue` / freezed |
-| Widget-local, ephemeral (scroll pos, dialog open, field focus) | UI local | `StatefulWidget`/`setState`, `remember`-style holders |
+| Widget-local, ephemeral (scroll pos, dialog open, field focus) | UI local | `StatefulWidget`/`setState` |
 | A signal expressible as state (login success → show CTA) | state flag, widget reacts | flag in state + `ref.listen`/`BlocListener` |
 | A truly one-shot effect not expressible as state (navigate once, one snackbar) | effect stream | `ref.listen` signal / Bloc listener |
 | Shared/business state across screens | Provider/Bloc scoped at feature/app | scoped provider / `BlocProvider` |

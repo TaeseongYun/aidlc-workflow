@@ -50,7 +50,7 @@ Screen (route) → Container (data + state wiring) → Presentational Components
 - **Server state ≠ client state.** Remote data lives in TanStack Query with
   caching + invalidation; client state is UI/session only → [rn-state-data].
 - **One API client module** for all backend calls. Typed responses, no `any` at
-  the boundary (see the frontend `frontend-api-contract` rules).
+  the boundary (see [frontend-api-contract](../../../frontend/skills/frontend-api-contract/SKILL.md)).
 - **Native capability behind a project-owned adapter interface** wrapping the
   native module. JS feature code never imports a third-party native module
   directly outside the adapter → [rn-native-modules].

@@ -23,7 +23,7 @@ Stack: TypeScript + React (Next.js App Router when present); the same boundaries
 
 Frontend has **two** floors that are never lowered for speed:
 
-- `frontend-accessibility` — a11y is a safety guard, not a nice-to-have (semantic HTML, focus, labels/alt, keyboard).
+- `frontend-accessibility` — a11y is a safety guard, not a nice-to-have (semantic HTML, focus, labels/alt, keyboard). It uses a Do/Don't structure (a quality floor), distinct from the security guard's numbered failure-mode format.
 - `frontend-security` — AI-generated web code is fast but frequently vulnerable, and the client bundle is public.
   This guard auto-loads when you touch web source · config · env · middleware · route handlers and catches the most
   common vulnerable patterns.

@@ -89,7 +89,8 @@ func webView(_ w: WKWebView, decidePolicyFor nav: WKNavigationAction,
 ```swift
 // ❌ print("token=\(jwt)"); os_log("resp \(body)"); UIPasteboard.general.string = secret
 // ✅ redact; mark sensitive os_log values private; don't put secrets on the general pasteboard
-Logger().info("login ok userID=\(user.id, privacy: .public) token=\(jwt, privacy: .private)")
+static let log = Logger(subsystem: "com.example.app", category: "auth")   // reuse, not per-call
+log.info("login ok userID=\(user.id, privacy: .public) token=\(jwt, privacy: .private)")
 ```
 
 ## 7. Crypto — CryptoKit, secure RNG

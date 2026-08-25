@@ -60,7 +60,7 @@ Don't:
 | Shared within a screen/feature | lift up / context for stable values | props / context |
 | Remote data | TanStack Query — **never** a global store | `useQuery` |
 | Cross-cutting client state (session, theme) | the project's existing store | Zustand/Redux (one only) |
-| Persisted client state | storage adapter (MMKV/AsyncStorage) behind the store | adapter |
+| Persisted client state | storage adapter (MMKV/AsyncStorage — cleartext, non-secrets only) behind the store | adapter |
 | Secrets / tokens | secure-storage module → Keychain/Keystore | `SecureStore`/Keychain |
 
 ## Refactor / red-flag signals

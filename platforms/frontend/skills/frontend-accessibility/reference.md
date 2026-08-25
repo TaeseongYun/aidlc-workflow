@@ -36,12 +36,12 @@ role-based testing. Decision criteria live in `SKILL.md`.
 ```tsx
 // Native <dialog> handles most of this; if hand-rolling, move → trap → restore focus.
 function Modal({ open, onClose, children }: ModalProps) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);     // container needs tabIndex={-1} to be focusable
   const prevFocus = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (!open) return;
     prevFocus.current = document.activeElement as HTMLElement;
-    ref.current?.focus();                       // move focus in
+    ref.current?.focus();                       // move focus in (container has tabIndex={-1})
     return () => prevFocus.current?.focus();     // restore on close
   }, [open]);
   // trap Tab within the dialog; Esc closes → onClose

@@ -2,8 +2,8 @@
 
 Deeper material for `SKILL.md`. Layer responsibilities · container/presentational
 · native boundary · module baseline. See `SKILL.md` for the rule summary and
-decision criteria. RN shares the web React boundaries — [frontend-architecture]
-in `../../../frontend/skills/` is the web sibling.
+decision criteria. RN shares the web React boundaries —
+[frontend-architecture](../../../frontend/skills/frontend-architecture/SKILL.md) is the web sibling.
 
 ## 1. Detailed layer responsibilities
 
@@ -25,7 +25,7 @@ function OrderListScreen() {
   const { data, isLoading, isError, refetch } = useOrders(); // server state → rn-state-data
   if (isLoading) return <Spinner />;
   if (isError) return <ErrorState onRetry={refetch} />;
-  if (data.length === 0) return <EmptyState />;
+  if (!data || data.length === 0) return <EmptyState />; // data is TData | undefined in Query v5
   return <OrderList orders={data} onSelect={/* nav */} />;
 }
 

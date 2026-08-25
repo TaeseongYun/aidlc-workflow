@@ -80,4 +80,3 @@ When adding/changing an API call, in order:
 - Umbrella: [frontend-architecture](../frontend-architecture/SKILL.md)
 - zod (runtime validation): https://zod.dev/
 - TypeScript `fetch` typing / OpenAPI codegen: https://openapi-ts.dev/
-- Team baseline: [../../guidance.md](../../guidance.md)

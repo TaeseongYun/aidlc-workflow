@@ -47,6 +47,7 @@ class OrderRepository {
   final OrderApi _api;
   OrderRepository(this._api);
 
+  // Result/Ok/Err: a project-defined sealed type (or dartz's Either)
   Future<Result<Order, OrderFailure>> fetch(OrderId id) async {
     try {
       final dto = await _api.getOrder(id.value);

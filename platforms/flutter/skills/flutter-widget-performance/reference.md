@@ -83,7 +83,7 @@ Padding(padding: EdgeInsets.all(16));
 
 // ✅ theme tokens + generated l10n
 Text(AppLocalizations.of(context)!.checkout, style: Theme.of(context).textTheme.titleMedium);
-Padding(padding: EdgeInsets.all(context.spacing.md));  // spacing from a theme extension
+Padding(padding: EdgeInsets.all(context.spacing.md));  // context.spacing = a ThemeExtension you define
 ```
 
 ## 5. Optimize on evidence (DevTools)

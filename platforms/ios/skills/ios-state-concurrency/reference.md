@@ -43,6 +43,7 @@ final class HomeViewModel {
 
 ```swift
 // View maps route data to navigation; the ViewModel never pushes imperatively.
+@Bindable var model: ItemListViewModel               // @Observable → @Bindable enables the $ binding
 NavigationStack(path: $model.route) { /* ... */ }
 ```
 

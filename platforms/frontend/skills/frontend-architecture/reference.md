@@ -23,7 +23,7 @@ function OrderListContainer() {
   const { data, isLoading, isError } = useOrders();          // server state → frontend-state-data
   if (isLoading) return <Spinner />;
   if (isError) return <ErrorState onRetry={/* ... */} />;
-  if (data.length === 0) return <EmptyState />;
+  if (!data || data.length === 0) return <EmptyState />; // data is TData | undefined in Query v5
   return <OrderList orders={data} onSelect={/* ... */} />;   // presentational
 }
 

@@ -8,7 +8,11 @@ each skill's `reference.md`.
 
 Consistency: these skills are a detailed expansion of `../guidance.md` and
 reference it by relative path. If a project's `ctx/` conflicts, the project CTX
-takes precedence (following the guidance precedence as-is).
+takes precedence (following the guidance precedence as-is). However, **the
+security floor (safety rules) is never lowered.** `android-security` is organized
+by Android's exported-surface trust boundary rather than the numbered
+failure-mode format the other platforms' security guards adopt — the enforced
+floor is the same.
 
 | Skill | Purpose | Auto-load (paths) |
 |------|------|-----------------|
@@ -17,4 +21,11 @@ takes precedence (following the guidance precedence as-is).
 | [android-module-structure](android-module-structure/SKILL.md) | app/core/feature split, api\|impl split timing, convention plugins, version catalogs | `**/build.gradle.kts`, `**/settings.gradle.kts`, `**/libs.versions.toml`, `**/*.gradle` |
 | [android-lifecycle-memory](android-lifecycle-memory/SKILL.md) | Lifecycle-aware collection, scope cancellation, onTrimMemory, leak prevention | `**/*Activity.kt`, `**/*Fragment.kt`, `**/ui/**/*.kt` |
 | [android-background-rules](android-background-rules/SKILL.md) | Background execution limits, WorkManager, foreground services, Doze, background location | `**/*Worker.kt`, `**/*Service.kt`, `**/AndroidManifest.xml` |
-| [android-security](android-security/SKILL.md) | Exported trust boundary, Intent/extras validation, data encryption, network security, Keystore, Play Integrity | `**/AndroidManifest.xml`, `**/network_security_config.xml`, `**/*.kt` |
+| [android-security](android-security/SKILL.md) | **Security guard** — exported trust boundary, Intent/extras validation, data encryption, network security, Keystore, Play Integrity | `**/AndroidManifest.xml`, `**/network_security_config.xml`, `**/*.kt` |
+
+## Security floor
+
+`android-security` is the platform's safety guard: it auto-loads when you touch the manifest ·
+network-security config · Kotlin source and blocks vulnerable patterns on Android's exported
+trust boundary (Intent/extras validation, data encryption, Keystore, network security, Play
+Integrity). The other 5 skills are the architecture/quality rules it references.

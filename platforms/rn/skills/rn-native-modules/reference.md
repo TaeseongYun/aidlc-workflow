@@ -25,6 +25,11 @@ export class LocationServiceAdapter implements LocationService {
 // ❌ a screen importing 'expo-location' directly — native churn leaks everywhere
 ```
 
+Under the New Architecture a native module is a **Turbo Module**: its API is typed by
+**codegen** from a JS spec, resolved through `TurboModuleRegistry`, and called over **JSI**.
+The adapter wraps that generated surface so feature code never touches
+`TurboModuleRegistry`/JSI directly and New-Arch churn stays in one file.
+
 ## 2. Platform divergence at the boundary, not scattered
 
 ```tsx

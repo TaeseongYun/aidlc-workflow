@@ -14,6 +14,7 @@ protocol LocationProviding: Sendable {
 // Adapter: the ONLY place CoreLocation is imported. Injected into callers.
 import CoreLocation
 final class CoreLocationAdapter: NSObject, LocationProviding {
+    private let manager = CLLocationManager()
     func current() async throws -> Coordinate {
         switch manager.authorizationStatus {
         case .denied, .restricted: throw LocationError.permissionDenied   // typed, designed
@@ -21,7 +22,7 @@ final class CoreLocationAdapter: NSObject, LocationProviding {
             break
         default: break
         }
-        let loc = try await requestOnce()
+        let loc = try await requestOnce()   // one-shot delegate→continuation bridge (omitted)
         return Coordinate(lat: loc.coordinate.latitude, lng: loc.coordinate.longitude) // → domain
     }
 }

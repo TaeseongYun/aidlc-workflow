@@ -25,6 +25,8 @@ document, but the security floor is never lowered.
   failure mode below.
 - Delegate: response typing/validation → [frontend-api-contract], redirect/route
   handling detail → [frontend-architecture].
+- Scope note: these are the **client-side** failure modes — at-rest encryption
+  and server-side info-disclosure live in the backend security guard.
 - Reality: **the client bundle is public** — any secret, key, or "hidden" logic
   shipped to the browser is readable. Secrets and trust decisions belong on the server.
 

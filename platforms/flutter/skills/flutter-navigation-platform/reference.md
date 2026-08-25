@@ -14,7 +14,7 @@ final router = GoRouter(
       path: '/order/:id',
       builder: (context, state) {
         final id = _parseOrderId(state.pathParameters['id']); // validate → below
-        return OrderScreen(id: id);
+        return id == null ? const NotFoundScreen() : OrderScreen(id: id); // invalid → defined fallback
       },
     ),
   ],
@@ -28,9 +28,9 @@ final router = GoRouter(
 
 ```dart
 // External links are untrusted. Parse, type-check, reject — never pass raw to a repo.
-OrderId _parseOrderId(String? raw) {
+OrderId? _parseOrderId(String? raw) {
   final n = int.tryParse(raw ?? '');
-  if (n == null || n <= 0) throw const InvalidDeepLink('order id'); // reject bad input
+  if (n == null || n <= 0) return null;   // reject bad input → caller renders NotFound (don't throw in a builder)
   return OrderId(n);
 }
 

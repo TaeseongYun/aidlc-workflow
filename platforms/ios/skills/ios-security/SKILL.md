@@ -32,7 +32,7 @@ but the security floor is never lowered.
 
 Each item: **rule → the failure AI commonly produces → red-flag**. Code examples in [reference.md](./reference.md).
 
-### 1. Secrets in UserDefaults / plist / source (CWE-312/798 · MASVS-STORAGE)
+### 1. Secrets in UserDefaults / plist / source (CWE-312/798 · OWASP Mobile M9 · MASVS-STORAGE)
 
 - **Rule**: tokens · credentials · keys go in the **Keychain** (with an
   appropriate accessibility class). Never `UserDefaults`, never a plist, never
@@ -41,16 +41,16 @@ Each item: **rule → the failure AI commonly produces → red-flag**. Code exam
   in a `.plist`, `let apiKey = "sk-..."`.
 - **red-flag**: token/secret in `UserDefaults`/plist, string-literal keys in `.swift`.
 
-### 2. Secrets compiled into the binary (CWE-798 · MASVS-STORAGE)
+### 2. Secrets compiled into the binary (CWE-798 · OWASP Mobile M7 · MASVS-RESILIENCE)
 
 - **Rule**: no privileged secret is safe client-side — the binary is extractable.
   Proxy privileged third-party calls through **your backend**; the app holds no
   third-party secret. Don't commit `.env`.
-- **Common AI failure**: calling a private API with an embedded key straight from
+- **Common AI failure**: calling a privileged/third-party API with an embedded key straight from
   the app, committing `.env`/config with secrets.
-- **red-flag**: a private API called directly with an embedded key, a tracked `.env`.
+- **red-flag**: a privileged/third-party API called directly with an embedded key, a tracked `.env`.
 
-### 3. Insecure networking / ATS bypass (CWE-295/319 · MASVS-NETWORK)
+### 3. Insecure networking / ATS bypass (CWE-295/319 · OWASP Mobile M5 · MASVS-NETWORK)
 
 - **Rule**: **HTTPS only.** Don't set `NSAllowsArbitraryLoads` in ATS. Never
   return `.useCredential` / disable validation in
@@ -59,7 +59,7 @@ Each item: **rule → the failure AI commonly produces → red-flag**. Code exam
   `URLSessionDelegate` that trusts all certs, `http://` endpoints.
 - **red-flag**: `NSAllowsArbitraryLoads` true, a trust-all auth challenge handler, `http://` base URL.
 
-### 4. Unvalidated URL / activity input · trust-boundary force-unwraps (CWE-20/601)
+### 4. Unvalidated URL / activity input · trust-boundary force-unwraps (CWE-20/601 · OWASP Mobile M4)
 
 - **Rule**: URL-scheme / Universal Link / `NSUserActivity` / extension input is
   **untrusted** — validate before mapping to a route or a query; **no
@@ -68,7 +68,7 @@ Each item: **rule → the failure AI commonly produces → red-flag**. Code exam
   mapping an unvalidated URL onto navigation state.
 - **red-flag**: force-unwrapped deep-link params, an unvalidated URL driving navigation.
 
-### 5. WKWebView misconfiguration (CWE-79/749 · MASVS-PLATFORM)
+### 5. WKWebView misconfiguration (CWE-79/749 · OWASP Mobile M8 · MASVS-PLATFORM)
 
 - **Rule**: don't load untrusted content with script bridges; a
   `WKScriptMessageHandler` / `injectedJavaScript` bridge is **native capability
@@ -77,7 +77,7 @@ Each item: **rule → the failure AI commonly produces → red-flag**. Code exam
   remote URL, loading user-provided URLs with full script access.
 - **red-flag**: `WKScriptMessageHandler` reachable by untrusted content, remote/user URL in a bridged WebView.
 
-### 6. Sensitive data in logs / pasteboard (CWE-532/200 · MASVS-STORAGE)
+### 6. Sensitive data in logs / pasteboard (CWE-532/200 · OWASP Mobile M6 · MASVS-STORAGE)
 
 - **Rule**: never `print`/`os_log` **tokens · passwords · full PII**; mark
   sensitive `os_log` interpolation `.private`. Don't copy secrets to the general
@@ -86,7 +86,7 @@ Each item: **rule → the failure AI commonly produces → red-flag**. Code exam
   `UIPasteboard.general.string = secret`.
 - **red-flag**: tokens/PII in logs, secrets on the general pasteboard.
 
-### 7. Weak crypto / randomness (CWE-327/338 · MASVS-CRYPTO)
+### 7. Weak crypto / randomness (CWE-327/338 · OWASP Mobile M10 · MASVS-CRYPTO)
 
 - **Rule**: use **CryptoKit** (AES-GCM, SHA-256+, HKDF). Security tokens use
   `SystemRandomNumberGenerator` / `SecRandomCopyBytes`. No MD5/SHA1 for security,
@@ -95,17 +95,17 @@ Each item: **rule → the failure AI commonly produces → red-flag**. Code exam
   seeded generator for a token, inventing an XOR cipher.
 - **red-flag**: MD5/SHA1 for security, ECB/fixed IV, non-secure RNG for secrets.
 
-### 8. Insecure at-rest storage / Data Protection (CWE-311 · MASVS-STORAGE)
+### 8. Insecure at-rest storage / Data Protection (CWE-311 · OWASP Mobile M9 · MASVS-STORAGE)
 
 - **Rule**: sensitive files use a **Data Protection** class
-  (`.completeUnlessOpen`/`.complete`); Keychain items use an appropriate
+  (`.completeFileProtectionUnlessOpen`/`.completeFileProtection`); Keychain items use an appropriate
   accessibility (`...ThisDeviceOnly` for non-synced secrets). Don't disable file
   protection.
 - **Common AI failure**: writing sensitive data with `.none` protection, syncing
   device-only secrets, storing PII in an unprotected DB/file.
 - **red-flag**: `NSFileProtectionNone` on sensitive data, over-permissive Keychain accessibility.
 
-### 9. Vulnerable / hallucinated Swift Package deps — slopsquatting (OWASP A06 · LLM supply chain)
+### 9. Vulnerable / hallucinated Swift Package deps — slopsquatting (OWASP Mobile M2 · LLM supply chain)
 
 - **Rule**: verify an AI-suggested Swift Package **actually exists and is the
   legitimate, maintained package** (hallucination/slopsquatting). Pin exact

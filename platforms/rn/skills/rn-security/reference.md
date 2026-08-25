@@ -95,10 +95,10 @@ if (__DEV__) console.log('login ok', user.id); // id only, dev only
 const token = Math.random().toString(36).slice(2);
 
 // ✅ CSPRNG
-import 'react-native-get-random-values';
+import 'react-native-get-random-values';   // polyfills global crypto.getRandomValues
 const bytes = new Uint8Array(32);
 crypto.getRandomValues(bytes);
-const token = Buffer.from(bytes).toString('base64url');
+const token = [...bytes].map(b => b.toString(16).padStart(2, '0')).join(''); // hex — no Node Buffer global
 // hashing/encryption: a vetted native crypto module (AES-GCM), not hand-rolled
 ```
 

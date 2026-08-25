@@ -20,7 +20,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     credentials: 'include', // httpOnly cookie strategy → frontend-security
   });
   if (!res.ok) throw await normalizeError(res);        // one error shape
-  return (await res.json()) as T;
+  return (await res.json()) as T;   // transport is unchecked here; feature api.ts zod-parses the body → §3
 }
 
 // Feature api.ts wraps the client — not raw fetch

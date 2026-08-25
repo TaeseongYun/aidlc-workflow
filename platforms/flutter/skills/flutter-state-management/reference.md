@@ -37,15 +37,23 @@ class HomeController extends AsyncNotifier<List<Item>> {
   }
 }
 
-// One-shot effect: expose a signal, the widget reacts with ref.listen (not stored in state)
-final homeEffectProvider = StreamProvider<HomeEffect>((ref) => /* ... */);
+// One-shot effect: a CONSUMABLE field on a small Notifier — Riverpod has no event bus, and a
+// StreamProvider would replay its last value to new listeners, re-firing a stale effect.
+class HomeEffects extends Notifier<HomeEffect?> {
+  @override HomeEffect? build() => null;
+  void emit(HomeEffect e) => state = e;
+  void consume() => state = null;                 // clear so it fires exactly once
+}
+final homeEffectsProvider = NotifierProvider<HomeEffects, HomeEffect?>(HomeEffects.new);
 
-// In the widget:
-ref.listen(homeEffectProvider, (_, next) {
-  next.whenData((e) => switch (e) {
-    ShowSnack(:final msg) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg))),
-    GoDetail(:final id)   => context.go('/detail/$id'),
-  });
+// In the widget: react, then clear (switch statement, not a side-effecting expression).
+ref.listen(homeEffectsProvider, (_, effect) {
+  switch (effect) {
+    case ShowSnack(:final msg): ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    case GoDetail(:final id):   context.go('/detail/$id');
+    case null:                  return;
+  }
+  ref.read(homeEffectsProvider.notifier).consume();
 });
 ```
 

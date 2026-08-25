@@ -2,7 +2,7 @@
 name: rn-navigation-lifecycle
 description: React Native navigation, deep-link, and mobile-lifecycle rules. Navigation uses typed route params (ParamList types); deep links follow incoming URL → linking config → param validation → screen, and deep-link params are never trusted without validation (external URLs are a trust boundary); the mobile lifecycle is handled — app background/foreground via AppState, offline/poor network via query retry + a user-visible state, and permission-denied as a designed state for any capability that asks. Use when defining navigators/routes, wiring linking config, validating deep-link params, or handling AppState/offline/permission paths.
 when_to_use: When adding a route/navigator, typing route params, wiring deep links/linking config, validating deep-link input, or handling app background/foreground, offline/poor-network, or permission-denied paths. Also for React Navigation/Expo Router param typing and deep-link trust-boundary validation.
-paths: **/navigation/**, **/app/**, **/*Navigator.tsx, **/*Screen.tsx, **/linking.ts, **/linking.config.ts, **/*route*.ts
+paths: **/navigation/**, **/app/**, **/*Navigator.tsx, **/*Screen.tsx, **/linking*.ts, **/*route*.ts
 user-invocable: true
 allowed-tools: Read, Grep, Glob
 ---

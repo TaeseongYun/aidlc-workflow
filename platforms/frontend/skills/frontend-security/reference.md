@@ -104,7 +104,8 @@ const r = await fetch(searchParams.get('url')!);
 // ✅ host allowlist + block private/metadata ranges
 const u = new URL(input);
 if (u.protocol !== 'https:' || !ALLOWED_HOSTS.has(u.host)) return bad();
-// (resolve DNS + reject private/169.254.169.254 for full protection)
+const { address } = await dns.promises.lookup(u.hostname);              // resolve, then check the real IP
+if (isPrivate(address) || address === '169.254.169.254') return bad();  // block private/link-local/metadata (DNS-rebinding)
 
 // ❌ string-built SQL in a server action  →  ✅ parameterized query / ORM binding
 // ✅ server actions authorize the caller before mutating
@@ -118,8 +119,11 @@ deepMerge(target, JSON.parse(req.body));
 // ❌ eval(userInput) / new Function(userInput)
 
 // ✅ guard dangerous keys, or use a vetted merge; validate the parsed shape
-for (const k of Object.keys(src)) if (['__proto__','constructor','prototype'].includes(k)) continue;
-const data = OrderSchema.parse(JSON.parse(body)); // zod → frontend-api-contract
+for (const k of Object.keys(src)) {
+  if (['__proto__', 'constructor', 'prototype'].includes(k)) continue; // skip pollutant keys
+  target[k] = src[k];
+}
+const data = OrderSchema.parse(JSON.parse(body)); // or validate the parsed shape → frontend-api-contract
 ```
 
 ## 9. Vulnerable / hallucinated dependencies (slopsquatting)

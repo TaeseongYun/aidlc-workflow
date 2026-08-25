@@ -149,4 +149,4 @@ also callable as `/android-*`:
 - [android-module-structure](skills/android-module-structure/SKILL.md) — module split, api|impl timing, convention plugins, version catalogs
 - [android-lifecycle-memory](skills/android-lifecycle-memory/SKILL.md) — lifecycle-aware collection, scope cancellation, onTrimMemory, leaks
 - [android-background-rules](skills/android-background-rules/SKILL.md) — background execution limits, WorkManager, foreground services, Doze
-- [android-security](skills/android-security/SKILL.md) — exported trust boundary, Intent/extras validation, encryption, network config, Keystore
+- [android-security](skills/android-security/SKILL.md) — **security guard**: exported trust boundary, Intent/extras validation, encryption, network config, Keystore
