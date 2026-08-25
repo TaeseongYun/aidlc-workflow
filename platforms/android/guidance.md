@@ -136,3 +136,17 @@ For a non-trivial feature, produce in order:
 - Manual construction in an Activity of anything Hilt already provides.
 - A screen with no preview, or a merged god-module where `feature/<name>`
   boundaries used to be.
+
+## Detailed Skills
+
+This baseline is expanded into six topic skills under
+[`skills/`](skills/README.md). Each is a reference-knowledge skill
+(`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
+also callable as `/android-*`:
+
+- [android-architecture](skills/android-architecture/SKILL.md) — dependency flow, layer responsibilities, Feature Slice decision (umbrella)
+- [android-viewmodel-state](skills/android-viewmodel-state/SKILL.md) — UiState/StateFlow, events/effects, SavedStateHandle, UDF
+- [android-module-structure](skills/android-module-structure/SKILL.md) — module split, api|impl timing, convention plugins, version catalogs
+- [android-lifecycle-memory](skills/android-lifecycle-memory/SKILL.md) — lifecycle-aware collection, scope cancellation, onTrimMemory, leaks
+- [android-background-rules](skills/android-background-rules/SKILL.md) — background execution limits, WorkManager, foreground services, Doze
+- [android-security](skills/android-security/SKILL.md) — exported trust boundary, Intent/extras validation, encryption, network config, Keystore
