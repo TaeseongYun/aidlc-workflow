@@ -92,3 +92,18 @@ styles/ or tokens        # design tokens, global styles
 - Div-with-onClick interactive elements; unlabeled form fields.
 - A second styling system or state library appearing next to the existing one.
 - Raw `fetch` calls bypassing the API client module.
+
+## Detailed Skills
+
+This baseline is expanded into six topic skills under
+[`skills/`](skills/README.md). Each is a reference-knowledge skill
+(`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
+also callable as `/frontend-*`. Stack: TypeScript + React (Next.js App Router
+when present); the same boundaries apply to Vue/Svelte with names swapped.
+
+- [frontend-architecture](skills/frontend-architecture/SKILL.md) — component boundaries (Route/Page → Container → Presentational), server-vs-client state, one API boundary, Feature Slice decision (umbrella)
+- [frontend-state-data](skills/frontend-state-data/SKILL.md) — server vs client state, state decision table, four fetch states, TanStack Query/RSC, no remote-in-store, derive-don't-store
+- [frontend-module-structure](skills/frontend-module-structure/SKILL.md) — app/components/features/lib layout, one styling system, one state library, route-level code-splitting & lazy boundaries
+- [frontend-api-contract](skills/frontend-api-contract/SKILL.md) — one API client module, typed boundary (no `any`), error normalization, runtime response validation
+- [frontend-accessibility](skills/frontend-accessibility/SKILL.md) — **a11y safety guard**: semantic controls (no div-onClick), labels/alt, focus management, keyboard, platform-over-library
+- [frontend-security](skills/frontend-security/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (XSS, bundle secrets, token storage, CSRF, open redirect, postMessage, SSRF/injection in server code, prototype pollution, hallucinated deps)
