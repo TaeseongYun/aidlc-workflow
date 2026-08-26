@@ -107,7 +107,7 @@ ios/ android/            # native projects — touched only via modules/config
 
 ## Detailed Skills
 
-This baseline is expanded into six topic skills under
+This baseline is expanded into seven topic skills under
 [`skills/`](skills/README.md). Each is a reference-knowledge skill
 (`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
 also callable as `/rn-*`. RN shares the web frontend's React boundaries
@@ -121,3 +121,4 @@ Turbo Modules / Fabric.
 - [rn-navigation-lifecycle](skills/rn-navigation-lifecycle/SKILL.md) — typed route params, deep-link validation, AppState background/foreground, offline/network, permission paths
 - [rn-performance-ux](skills/rn-performance-ux/SKILL.md) — `FlatList`/`FlashList` + stable keys, Reanimated worklets, one styling system, **accessibility safety guard** (roles/labels, ≥44pt)
 - [rn-security](skills/rn-security/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (bundle secrets, insecure storage, TLS bypass, deep-link input, WebView, log leakage, weak crypto, insecure manifests, hallucinated deps)
+- [rn-figma-to-code](skills/rn-figma-to-code/SKILL.md) — Figma → React Native via the shared `scripts/figma` manifest + DTCG tokens (node→View/Text, token→theme); the mobile delta on `frontend-figma-to-code`; generated code must still pass the a11y + security floors

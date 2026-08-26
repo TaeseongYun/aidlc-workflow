@@ -139,7 +139,7 @@ For a non-trivial feature, produce in order:
 
 ## Detailed Skills
 
-This baseline is expanded into six topic skills under
+This baseline is expanded into seven topic skills under
 [`skills/`](skills/README.md). Each is a reference-knowledge skill
 (`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
 also callable as `/android-*`:
@@ -150,3 +150,4 @@ also callable as `/android-*`:
 - [android-lifecycle-memory](skills/android-lifecycle-memory/SKILL.md) — lifecycle-aware collection, scope cancellation, onTrimMemory, leaks
 - [android-background-rules](skills/android-background-rules/SKILL.md) — background execution limits, WorkManager, foreground services, Doze
 - [android-security](skills/android-security/SKILL.md) — **security guard**: exported trust boundary, Intent/extras validation, encryption, network config, Keystore
+- [android-figma-to-code](skills/android-figma-to-code/SKILL.md) — Figma → Jetpack Compose via the shared `scripts/figma` manifest + DTCG tokens (node→composable, token→ColorScheme/Typography/designsystem); generated code references tokens/resources, not literals, and must still pass android-security

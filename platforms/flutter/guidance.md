@@ -99,7 +99,7 @@ Split into packages (melos) only when a second app or plugin consumer exists.
 
 ## Detailed Skills
 
-This baseline is expanded into six topic skills under
+This baseline is expanded into seven topic skills under
 [`skills/`](skills/README.md). Each is a reference-knowledge skill
 (`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
 also callable as `/flutter-*`. Stack: feature-first Flutter/Dart, Riverpod or
@@ -111,3 +111,4 @@ Bloc (whichever the project already uses — never both).
 - [flutter-widget-performance](skills/flutter-widget-performance/SKILL.md) — `const`, rebuild scope (`select`/`buildWhen`), `mounted` after await, theme/localization (no literals), optimize on evidence
 - [flutter-navigation-platform](skills/flutter-navigation-platform/SKILL.md) — go_router/Navigator 2.0, deep-link parameter validation, platform-channel adapters, `Platform.isX` in adapters
 - [flutter-security](skills/flutter-security/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (embedded secrets, insecure storage, TLS bypass, deep-link/channel input, WebView, sqflite injection, log leakage, weak crypto, insecure manifests, hallucinated deps)
+- [flutter-figma-to-code](skills/flutter-figma-to-code/SKILL.md) — Figma → Flutter widgets via the shared `scripts/figma` manifest + DTCG tokens (node→widget, token→ThemeExtension/textTheme, `const`); generated code must still pass flutter-security
