@@ -48,24 +48,36 @@ PER-STEP LOADING (read only when entering the corresponding STEP):
 | Timing | Files to read |
 |------|----------|
 | STEP 1-C entry | `core/input-validation.md` |
-| STEP 1.5 entry | `core/reverse-engineering.md`, `templates/reverse-engineering/*` |
+| STEP 1.5 entry | `core/reverse-engineering.md`, `templates/reverse-engineering/*`, `common/graph-grounding.md` |
 | STEP 1.5 Extension Scan | `common/extension-rules.md`, `extensions/*.opt-in.md` |
 | After STEP 3 completion | `common/overconfidence-prevention.md` (perform question-omission detection) |
-| STEP 3 entry | `templates/planning-draft.md` (raw-request only), `common/diagram-standards.md` |
+| STEP 3 entry | `templates/planning-draft.md` (raw-request only), `common/diagram-standards.md`, `common/graph-grounding.md`, `templates/graph-evidence.md` |
 | Reaching the first GATE | `common/stage-gate-rules.md` (reused for all subsequent GATEs) |
-| STEP 4 entry | `common/question-rules.md`, `common/question-governance.md` |
+| STEP 4 entry | `common/question-rules.md`, `common/question-governance.md`, `common/graph-grounding.md` |
 | STEP 5 entry | `core/requirements-analysis.md` |
 | STEP 5-V entry | `common/content-validation.md` |
 | STEP 5.5 entry | `templates/personas.md`, `templates/stories.md` |
 | STEP 5.7 entry | `templates/components.md`, `templates/services.md`, `templates/component-dependency.md` |
-| STEP 6 entry | `core/units-generation.md`, `core/unit-sizing.md`, `common/overconfidence-prevention.md` (perform self-verification) |
-| STEP 6.5 entry | `templates/technical-design.md`, `core/nfr-checklist.md`, `common/overconfidence-prevention.md` (perform self-verification) |
+| STEP 6 entry | `core/units-generation.md`, `core/unit-sizing.md`, `common/graph-grounding.md`, `common/overconfidence-prevention.md` (perform self-verification) |
+| STEP 6.5 entry | `templates/technical-design.md`, `templates/graph-evidence.md`, `core/nfr-checklist.md`, `common/graph-grounding.md`, `common/overconfidence-prevention.md` (perform self-verification) |
 | STEP 6.7 entry | `templates/infrastructure-design.md`, `templates/deployment-architecture.md`, `common/overconfidence-prevention.md` (perform self-verification) |
 | STEP 7 entry | `core/readiness-score.md` |
 | STEP 9 entry | `templates/build-instructions.md`, `templates/test-instructions.md` |
 
 If a conditional STEP is skipped, its files are not read.
 Additional Project `ctx/*` files are read selectively, only those related to the feature.
+
+GRAPH GROUNDING (graphify) — per-step usage (protocol: `common/graph-grounding.md`):
+
+| STEP | Graphify usage |
+|------|----------------|
+| 1 / 1.5 | graph stats · god-nodes · communities → grasp brownfield structure |
+| 3 | query requirement keywords → related modules & call paths |
+| 4 | turn `INFERRED`/`AMBIGUOUS` graph results into requirement (BLOCK) questions |
+| 6 | decompose UOW using connected communities & paths |
+| 6.5 | `graphify path`/`explain` → design impact & reuse; fill technical-design §6 Graph-backed Impact Analysis + snapshot `graph-evidence.md` |
+
+Skip when no graph is available (greenfield before first implementation); VERIFY falls back to grep/Read.
 
 ────────────────────────────────────
 CORE RULES
