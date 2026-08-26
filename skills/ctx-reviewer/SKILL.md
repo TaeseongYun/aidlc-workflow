@@ -81,6 +81,18 @@ This Skill must judge only in the following order.
   - State only in which code the violation occurred
   - **Never propose** modification methods, alternatives, or improvement directions
 
+### Step 0.5: Judge design-impact conformance (graph-backed, when a graph exists)
+
+- Compare the actual code's graph impact (affected nodes/communities/god nodes via `graphify prs <n>`
+  / `--conflicts`, per `common/graph-grounding.md`) against the approved design's
+  `## 6. Graph-backed Impact Analysis` (and the ROLE 0 `graph-evidence.md` snapshot).
+- If the actual impact **diverges** (touches communities/god nodes not declared, or blast radius
+  exceeds the design):
+  - Quote the declared design-impact line verbatim
+  - State only where the actual impact diverged (which nodes/communities)
+  - **Never propose** how to fix it — this is a conformance judgment, not advice
+- If no graph or no declared `## 6`, record "not applicable" and continue.
+
 ### Step 1: Judge rule recurrence
 
 Identify it as a rule **only if it satisfies all** of the following conditions.
@@ -118,6 +130,11 @@ The output must follow the format and order below.
 - No violation | Violation exists
 - (If violation) violated rule: "..."
 - (If violation) code where violation occurred: ...
+
+## 1b. Graph Impact Conformance
+- Not applicable | Conforms | Diverges
+- (If diverges) declared design-impact (§6): "..."
+- (If diverges) actual divergence (nodes/communities/god nodes): ...
 
 ## 2. List of Identified Rules
 - Rule A: ...
