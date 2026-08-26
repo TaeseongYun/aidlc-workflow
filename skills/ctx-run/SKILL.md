@@ -42,8 +42,9 @@ PROJECT CONTEXT (AUTO-INJECTED)
 
 HALLUCINATION GUARD (Rule 0 — always on):
 - Before stating ANY dev fact (path, symbol/type/method name, API signature, config key, DB
-  field, version, CLI flag), verify it against a concrete source — prefer codegraph
-  (`codegraph explore "<symbols>"` / `codegraph node <name>`) over memory; grep/Read as fallback.
+  field, version, CLI flag), verify it against a concrete source — prefer graphify
+  (`graphify query "<q>"` / `graphify explain "<entity>"` / `graphify path "<a>" "<b>"`, or the MCP
+  tools) over memory; codegraph/grep/Read as fallback.
 - Never guess contracts/fields/calculations, and never verify a guess with another guess.
 - If unverifiable, mark `⚠️ UNCERTAIN: … — {why}` instead of asserting it.
 - Full rules: `{{TEAM_AI_WORKFLOW_DIR}}/extensions/hallucination-guard/hallucination-guard.md`
@@ -119,6 +120,13 @@ PARALLEL EXPLORATION (brownfield optimization):
   - Agent C: Test pattern exploration (existing test conventions, fixtures)
 - Merge exploration results and pass to ctx-architect-judge as additional context.
 - If the project is greenfield or the codebase is small, skip parallel exploration.
+
+GRAPH IMPACT SNAPSHOT (pre-implementation, per `common/graph-grounding.md`):
+- If a graph is available (`graphify-out/graph.json`), query the expected blast radius BEFORE
+  implementing: affected nodes/communities, god nodes touched, reusable components. Record it (with
+  code SHA + graph build timestamp) to `aidlc-docs/features/<feature-slug>/graph-evidence.md` as the
+  EXPECTED impact. ROLE 3 compares the ACTUAL impact against this.
+- Skip on greenfield with no graph yet.
 
 AIDLC-DOCS RE-READ:
 - Before invoking ctx-architect-judge, re-read the following if they exist:
@@ -333,6 +341,13 @@ RULES:
 - Do NOT perform manual review
 - Do NOT modify code, CTX, or documentation
 - The skill will validate against FEATURE, CTX, and design constraints
+
+GRAPH IMPACT COMPARE (per `common/graph-grounding.md`):
+- Before invoking ctx-reviewer, refresh the graph: `graphify . --update` (skip if no graph).
+- Compare the ACTUAL changed scope (affected nodes/communities/god nodes) against the EXPECTED
+  snapshot in `aidlc-docs/features/<feature-slug>/graph-evidence.md` (written at ROLE 0).
+- Pass any divergence (unexpected communities/god nodes touched, blast radius beyond the design's
+  §6 Graph-backed Impact Analysis) to ctx-reviewer as a finding to judge.
 
 OVER-ENGINEERING CHECK (lazy implementation, see core/lazy-implementation.md):
 - In addition to CTX violations, flag over-engineering:

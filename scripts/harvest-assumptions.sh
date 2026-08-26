@@ -17,7 +17,7 @@ fi
 PATTERN='UNCERTAIN|RISK:|TODO:|확신: 추정|확신: AI추천|ASSUME|추정|가정|probably|likely|should be|I think|by convention|typically'
 
 echo "# Harvested assumptions (scope: $SCOPE)"
-echo "# Each line 'file:line: text' is a claim to VERIFY against codegraph/code/ctx/docs."
+echo "# Each line 'file:line: text' is a claim to VERIFY against graphify/code/ctx/docs."
 echo
 
 if command -v rg >/dev/null 2>&1; then

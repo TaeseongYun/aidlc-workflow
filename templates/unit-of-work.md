@@ -9,6 +9,8 @@ Related state file:
 Decomposition criteria:
 - Follows `core/units-generation.md`.
 - Payment/refund/settlement are always reviewed as separate units.
+- Consult the code graph (graphify) per `common/graph-grounding.md` — use connected communities and
+  call paths to draw unit boundaries. Evidence reference: `aidlc-docs/features/<feature-slug>/graph-evidence.md`.
 
 ## Summary
 

@@ -9,9 +9,10 @@ is wired into initial project setup and referenced from every project's `CLAUDE.
 all `ctx-*` skill runs automatically. See `README.md` for how it is wired.
 
 **Grounding substrate:** verification quality is only as good as the source you check against. The
-highest-quality source is a **code graph** — `codegraph explore <symbols>` / `codegraph node <name>`
-return verbatim, line-numbered symbol source plus call paths in one shot. That is why `codegraph` +
-`graphify` + a built `.codegraph/` index are enforced as setup preconditions (`scripts/check-codegraph.sh`).
+highest-quality source is a **code graph** — `graphify query "<q>"` / `graphify explain "<entity>"` /
+`graphify path "<a>" "<b>"` (or the MCP tools) return nodes, call paths, and verbatim `file:line`
+locations. That is why `graphify` + a built `graphify-out/graph.json` are enforced as setup
+preconditions (`scripts/check-graphify.sh`); codegraph, if present, is only a fallback source.
 Without the graph, VERIFY degrades to grep/memory — the exact failure mode that produces hallucination.
 
 ---
@@ -27,14 +28,17 @@ behavior, build/deploy steps, and security-relevant behavior.
 
 For each such claim, before presenting it:
 1. Verify against a **concrete source**, in this order of preference:
-   - **codegraph** — `codegraph explore "<symbols or question>"` or `codegraph node <name>` for the
-     verbatim source + callers/callees (`file:line`). This is the primary source.
+   - **graphify** — `graphify query "<question>"` / `graphify explain "<entity>"` / `graphify path
+     "<a>" "<b>"` (or MCP `query_graph`/`get_node`) for nodes, call paths, and verbatim `file:line`.
+     This is the primary source. Weigh edge provenance: `EXTRACTED` is usable evidence; `INFERRED`
+     must be re-checked against real source before it is treated as fact; `AMBIGUOUS` → mark UNCERTAIN.
+   - **codegraph** — `codegraph explore`/`codegraph node`, if installed, as a fallback graph source.
    - **grep/Read** of the actual code when the graph doesn't cover it (e.g. non-indexed config).
    - project `ctx/` docs, or official upstream docs (`WebFetch`/`WebSearch`).
 2. If it cannot be verified, **do not state it as fact**. Mark it `⚠️ UNCERTAIN: … — {why}` and treat
    it as an audit target (Rule 4).
 3. **Never verify a guess with another guess.** If the only "source" is your own memory, it is
-   unverified. Prefer reading the code (via codegraph) over recalling it.
+   unverified. Prefer reading the code (via graphify) over recalling it.
 
 ## Rule 1 — Load the ledger first
 
@@ -62,7 +66,7 @@ confirmation or a verified source.
 
 Run `/ctx-hallucination-audit` to find "where the AI guessed wrong." The loop:
 1. **HARVEST** unverified assumptions (`scripts/harvest-assumptions.sh` + session claims).
-2. **VERIFY** each against codegraph / code / `ctx/` / docs (Rule 0 order).
+2. **VERIFY** each against graphify / code / `ctx/` / docs (Rule 0 order).
 3. **SCORE** a Hallucination-Free Score (0–100, rubric below).
 4. **RECORD** every refuted claim in the ledger with **Cause / What / Fix**.
 5. **QUARANTINE** — remove/correct the claim in the artifacts.

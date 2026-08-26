@@ -1,5 +1,5 @@
 ---
-description: Hallucination audit loop — find where the AI guessed wrong (dev facts), record & quarantine each, repeat until Hallucination-Free Score >= 87. Verifies via codegraph first; pushes lessons to Linear.
+description: Hallucination audit loop — find where the AI guessed wrong (dev facts), record & quarantine each, repeat until Hallucination-Free Score >= 87. Verifies via graphify first (codegraph fallback); pushes lessons to Linear.
 model: opus
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Skill
 ---
@@ -31,8 +31,8 @@ PRE-FLIGHT (once)
 ────────────────────────────────────
 1. Read `aidlc-docs/hallucination-ledger.md` and `aidlc-docs/knowledge-log.md`.
 2. Note existing Quarantine entries — a **breach** is any of them reappearing as fact.
-3. 코드 그래프 확인: `.codegraph/` 인덱스가 있는지 `codegraph status` 로 확인한다. 없으면
-   `codegraph init` 후 진행(전제조건). 인덱스 없이 VERIFY하지 않는다.
+3. 코드 그래프 확인: `graphify-out/graph.json` 가 있는지 확인한다. 없으면 `graphify .` 로 빌드한
+   뒤 진행(전제조건). 그래프 없이 VERIFY하지 않는다. (codegraph는 선택적 fallback.)
 
 ────────────────────────────────────
 ONE ROUND (repeat until STOP)
@@ -43,12 +43,15 @@ STEP 1 — HARVEST
 - Add dev-fact claims the AI asserted this session that the script can't see.
 - Result: a list of candidate claims, each with a source location.
 
-STEP 2 — VERIFY (per claim) — codegraph first
+STEP 2 — VERIFY (per claim) — graphify first
 - Find a **concrete source**, in this order:
-  1. **codegraph** — `codegraph explore "<symbols/question>"` 또는 `codegraph node <name>` 로
-     verbatim source + caller/callee (`file:line`)를 확인한다. (1차 소스)
-  2. **grep/Read** — 그래프가 못 덮는 경우(비인덱스 설정 등) 실제 파일 확인.
-  3. `ctx/` 또는 공식 문서 (`WebFetch`/`WebSearch`).
+  1. **graphify** — `graphify query "<question>"` / `graphify explain "<entity>"` / `graphify path
+     "<a>" "<b>"` (또는 MCP `query_graph`/`get_node`) 로 노드·경로 + `file:line`을 확인한다. (1차 소스)
+     엣지 provenance를 판정에 반영한다: `EXTRACTED`(원문 명시)는 근거로 사용 가능, `INFERRED`는
+     실제 소스를 재확인한 뒤에만 CONFIRMED, `AMBIGUOUS`는 UNRESOLVED/BLOCK 로 처리한다.
+  2. **codegraph fallback** — graphify가 없거나 못 덮으면 `codegraph explore`/`codegraph node`.
+  3. **grep/Read** — 그래도 못 덮는 경우 실제 파일 확인.
+  4. `ctx/` 또는 공식 문서 (`WebFetch`/`WebSearch`).
 - Never verify a guess with another guess. Assign a verdict:
   - **CONFIRMED** — matches a real source. Drop from findings.
   - **REFUTED** — contradicted by a real source. Record it.

@@ -99,14 +99,27 @@ Specify the modules to be changed and their responsibilities.
 |------------|------|----------|---------|
 | | | | |
 
-## 6. Interaction Flow
+## 6. Graph-backed Impact Analysis
+
+Derived from the code graph (graphify) per `common/graph-grounding.md`. Snapshot the evidence (with
+code SHA + graph timestamp) into the referenced file. If no graph is available yet, mark "deferred".
+
+- Existing path:
+- Affected nodes:
+- Affected communities:
+- God nodes touched:
+- Reusable components:
+- Required regression tests:
+- Evidence reference: (→ aidlc-docs/features/<feature-slug>/graph-evidence.md)
+
+## 7. Interaction Flow
 
 Interaction flow of the key use cases. Follows `diagram-standards.md`.
 Use ASCII for simple flows, Mermaid + text alternative for complex relationships.
 
 If the flow is self-evident, mark as "Not applicable".
 
-## 7. Non-functional Design
+## 8. Non-functional Design
 
 Based on `nfr-checklist.md`, describe only the items that apply to this feature.
 
@@ -117,7 +130,7 @@ Based on `nfr-checklist.md`, describe only the items that apply to this feature.
 
 Omit non-applicable items.
 
-## 8. Testing Approach
+## 9. Testing Approach
 
 Make the verification method of the unit-of-work concrete.
 
@@ -125,7 +138,7 @@ Make the verification method of the unit-of-work concrete.
 |---------|-----------|----------|
 | | | |
 
-## 9. Open Items
+## 10. Open Items
 
 Undetermined items at the time of technical design. List items that need confirmation before implementation.
 If none, mark as "none".
