@@ -34,11 +34,11 @@ This directory is the source repository for the team's shared Codex skills.
 - `ctx-commit-planner`
   - Commit separation planning
 - `ctx-hallucination-audit`
-  - Hallucination Guard audit loop. Verifies dev facts with codegraph, isolates
-    refuted items in the ledger, repeats until the Hallucination-Free Score is
-    at least 87, and pushes lessons learned to Linear.
+  - Hallucination Guard audit loop. Verifies dev facts with graphify (codegraph
+    fallback), isolates refuted items in the ledger, repeats until the
+    Hallucination-Free Score is at least 87, and pushes lessons learned to Linear.
   - Rule source: `extensions/hallucination-guard/hallucination-guard.md`.
-    Prerequisites: codegraph + graphify.
+    Prerequisite: graphify (codegraph is an optional fallback).
 
 ## Installation
 

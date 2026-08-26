@@ -131,14 +131,14 @@ For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts
 | `/ctx-refiner` | Optimize CTX documents |
 | `/ctx-commit-planner` | Design commit structure |
 | `/ctx-score-loop` | Automatic iterative scoring on dependency + 4 axes after implementation (complete when the score exceeds 85) |
-| `/ctx-hallucination-audit` | Hallucination Guard audit loop. Verify dev facts with codegraph, isolate refuted claims, and repeat until the score reaches at least 87 |
+| `/ctx-hallucination-audit` | Hallucination Guard audit loop. Verify dev facts with graphify (codegraph fallback), isolate refuted claims, and repeat until the score reaches at least 87 |
 
 > **Hallucination Guard (always on).** It verifies dev facts such as paths,
 > symbols, APIs, configuration keys, and versions against the code graph so AI
-> guesses cannot leak out as facts. `codegraph` + `graphify` are **required
-> prerequisites for initial setup**. If either is missing,
-> `/team-ai-workflow-start` blocks progress and asks whether to install it in a
-> dialog. Rules: `extensions/hallucination-guard/`; guide:
+> guesses cannot leak out as facts. `graphify` (`graphifyy[mcp]`) is a **required
+> prerequisite for initial setup** (codegraph is an optional fallback). If `graphify`
+> is missing, `/team-ai-workflow-start` blocks progress and asks whether to install it
+> in a dialog. Rules: `extensions/hallucination-guard/`; guide:
 > `docs/hallucination-guard.md`.
 
 ---
@@ -216,7 +216,7 @@ aidlc-workflow/
 ├── scripts/                    # Installation and initialization
 │   ├── install-skills.sh       # Global skill installation
 │   ├── init-project.sh         # Create per-project ctx/, aidlc-docs/ and check code graph prerequisites
-│   ├── check-codegraph.sh      # codegraph + graphify + index prerequisite gate
+│   ├── check-graphify.sh       # graphify + graph.json prerequisite gate (codegraph fallback)
 │   └── harvest-assumptions.sh  # Collect uncertainty markers for the audit loop
 ├── templates/                  # Document templates
 ├── docs/                       # Detailed guides

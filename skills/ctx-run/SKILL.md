@@ -42,8 +42,9 @@ PROJECT CONTEXT (AUTO-INJECTED)
 
 HALLUCINATION GUARD (Rule 0 — always on):
 - Before stating ANY dev fact (path, symbol/type/method name, API signature, config key, DB
-  field, version, CLI flag), verify it against a concrete source — prefer codegraph
-  (`codegraph explore "<symbols>"` / `codegraph node <name>`) over memory; grep/Read as fallback.
+  field, version, CLI flag), verify it against a concrete source — prefer graphify
+  (`graphify query "<q>"` / `graphify explain "<entity>"` / `graphify path "<a>" "<b>"`, or the MCP
+  tools) over memory; codegraph/grep/Read as fallback.
 - Never guess contracts/fields/calculations, and never verify a guess with another guess.
 - If unverifiable, mark `⚠️ UNCERTAIN: … — {why}` instead of asserting it.
 - Full rules: `{{TEAM_AI_WORKFLOW_DIR}}/extensions/hallucination-guard/hallucination-guard.md`
