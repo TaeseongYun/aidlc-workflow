@@ -26,8 +26,10 @@ echo
 
 # ── Hallucination Guard precondition: code-graph substrate is MANDATORY ──────────
 # The guard verifies dev facts against a code graph; without it, setup must not proceed.
-echo "Checking code-graph preconditions (codegraph + graphify)…"
-if GATE_OUT="$(bash "${SCRIPT_DIR}/check-codegraph.sh" "${PROJECT_ROOT}")"; then
+# graphify is the primary substrate; codegraph (if present) is only an optional fallback.
+# --mode is auto-detected by the gate (brownfield if source files exist, else greenfield).
+echo "Checking code-graph preconditions (graphify)…"
+if GATE_OUT="$(bash "${SCRIPT_DIR}/check-graphify.sh" "${PROJECT_ROOT}")"; then
   GATE_RC=0
 else
   GATE_RC=$?
@@ -35,18 +37,18 @@ fi
 echo "${GATE_OUT}"
 
 if [[ "${GATE_RC}" -eq 2 ]]; then
-  # A required tool is missing. Bash cannot show a dialog, so fail loudly and defer the
+  # The graphify tool is missing. Bash cannot show a dialog, so fail loudly and defer the
   # install dialog to the /team-ai-workflow-start skill (per the plan's gate design).
   echo
-  echo "초기 세팅 불가 — codegraph/graphify 전제조건 미충족." >&2
+  echo "초기 세팅 불가 — graphify 전제조건 미충족." >&2
   echo "설치는 자동으로 진행하지 않습니다. Claude에서 /team-ai-workflow-start 를 실행하면" >&2
   echo "설치 여부를 대화 상자로 처리합니다 (또는 위 install 명령을 직접 실행하세요)." >&2
   exit 1
 elif [[ "${GATE_RC}" -eq 3 ]]; then
-  # Tools present but the index isn't built yet — build it (greenfield-safe).
-  echo "Building codegraph index…"
-  codegraph init "${PROJECT_ROOT}" || {
-    echo "codegraph init 실패 — 수동으로 'codegraph init ${PROJECT_ROOT}' 실행 후 재시도하세요." >&2
+  # Tool present, brownfield, but the graph isn't built yet — build it.
+  echo "Building graph (graphify .)…"
+  ( cd "${PROJECT_ROOT}" && graphify . ) || {
+    echo "graphify . 실패 — 수동으로 '(cd ${PROJECT_ROOT} && graphify .)' 실행 후 재시도하세요." >&2
     exit 1
   }
 fi
@@ -126,13 +128,20 @@ if [[ -f "${AGENT_FILE}" ]] && ! grep -q "Hallucination Guard" "${AGENT_FILE}"; 
 
 ## Hallucination Guard (ALWAYS ON)
 Verify every dev fact (paths, symbols, API sigs, config keys, versions) against a concrete
-source before stating it — prefer codegraph (\`codegraph explore\`/\`codegraph node\`) over memory,
-grep/Read as fallback. Never verify a guess with another guess. Read
+source before stating it — prefer graphify (\`graphify query\`/\`graphify explain\`/\`graphify path\`,
+or the MCP tools) over memory; codegraph/grep/Read as fallback. Never verify a guess with another guess. Read
 \`aidlc-docs/hallucination-ledger.md\` first; never reuse a quarantined claim.
 Full rules: ${GUARD_DOC}
 Audit loop: /ctx-hallucination-audit (run until Hallucination-Free Score ≥ 87).
 EOF
   echo "Wired Hallucination Guard pointer into $(basename "${AGENT_FILE}")"
+fi
+
+# .gitignore: keep the per-worktree graph out of version control (idempotent).
+GITIGNORE="${PROJECT_ROOT}/.gitignore"
+if [[ ! -f "${GITIGNORE}" ]] || ! grep -qx "graphify-out/" "${GITIGNORE}"; then
+  printf '\n# graphify code-graph output (per-worktree, not shared)\ngraphify-out/\n' >> "${GITIGNORE}"
+  echo "Ignored graphify-out/ in ${PROJECT_NAME}/.gitignore"
 fi
 
 # aidlc-docs/
@@ -182,5 +191,5 @@ echo "      ├── hallucination-ledger.md"
 echo "      ├── knowledge-log.md"
 echo "      └── features/"
 echo
-echo "Hallucination Guard active (codegraph + graphify verified). Audit loop: /ctx-hallucination-audit"
+echo "Hallucination Guard active (graphify verified). Audit loop: /ctx-hallucination-audit"
 echo "Next: fill in the (TODO) placeholders, then run /ctx-aidlc-run"

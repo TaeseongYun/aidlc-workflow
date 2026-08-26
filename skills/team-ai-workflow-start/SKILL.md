@@ -72,8 +72,8 @@ E. External orchestration detection (optional)
    - `.ouroboros/` or Ouroboros-related files exist → Ouroboros may be in use
 
 F. 코드 그래프 전제조건 (Hallucination Guard — 필수)
-   - `bash <본체경로>/scripts/check-codegraph.sh .` 를 실행하고 종료코드를 읽는다.
-   - 0 = 충족(codegraph + graphify + `.codegraph` 인덱스), 2 = 도구 누락, 3 = 인덱스 미생성.
+   - `bash <본체경로>/scripts/check-graphify.sh .` 를 실행하고 종료코드를 읽는다.
+   - 0 = 충족(graphify + `graphify-out/graph.json`), 2 = 도구 누락, 3 = brownfield 그래프 미생성.
    - 이 검사는 **초기 세팅/구현 라우팅보다 먼저** 평가한다 (CASE 0 참조).
 
 ────────────────────────────────────
@@ -88,7 +88,7 @@ Output the diagnosis results in the following format.
 ### 환경
 - 본체 위치: <경로 또는 "미설치">
 - 글로벌 스킬: <설치됨 / 미설치>
-- 코드 그래프 전제조건: <충족 / 도구 누락(codegraph·graphify) / 인덱스 미생성>
+- 코드 그래프 전제조건: <충족 / graphify 도구 누락 / 그래프 미생성>
 - 외부 연동: <OMC 감지 / Ouroboros 감지 / 없음>
 
 ### 현재 프로젝트 (<cwd>)
@@ -109,23 +109,22 @@ ROUTING DECISION TREE
 Based on the diagnosis results, recommend one of the following to the user.
 
 CASE 0: Code graph prerequisites not satisfied (evaluate before every other case — HARD GATE)
-- Condition: apply when diagnosis F reports that **either** codegraph or graphify
-  is missing (exit code 2). If only the index is missing (code 3), the tools are
-  available; create it with `codegraph init` and make the check pass.
+- Condition: apply when diagnosis F reports that `graphify` is missing (exit code 2).
+  If only the graph is missing on a brownfield project (code 3), the tool is
+  available; build it with `graphify .` and make the check pass.
 - **Prohibited**: do not route to any subsequent case, including initial setup,
   requirements, or implementation. Do not accept a free-text prompt such as
   "just continue" or "ignore it and proceed."
 - Response: first state clearly that initial setup cannot proceed because the
-  codegraph/graphify prerequisites are not satisfied. Then use an
+  graphify prerequisite is not satisfied. Then use an
   **AskUserQuestion dialog, not free text**, to ask whether to:
-    (1) install the missing tools, (2) show manual installation instructions, or (3) cancel.
-  - Read and present each installation command exactly from the `MISSING:` lines
-    emitted by `check-codegraph.sh` (codegraph:
-    `npm i -g @colbymchenry/codegraph`; graphify: the command specified by the registry).
+    (1) install graphify, (2) show manual installation instructions, or (3) cancel.
+  - Read and present the installation command exactly from the `MISSING:` line
+    emitted by `check-graphify.sh` (graphify: `uv tool install "graphifyy[mcp]"`).
   - If the user **explicitly approves** option (1), run the install command and
-    `codegraph init` with Bash. Never execute automatically without approval
+    `graphify .` with Bash. Never execute automatically without approval
     (skill-protocol Execution Boundary).
-  - After installation, rerun `check-codegraph.sh` and proceed to the next case
+  - After installation, rerun `check-graphify.sh` and proceed to the next case
     only after it passes (code 0).
 - Rationale: the guard's VERIFY step uses the code graph as its primary source.
   Without the graph, the prerequisite is not met, so setup cannot proceed.
@@ -278,7 +277,7 @@ EXECUTION FLOW
 
 STEP 1. Perform diagnosis
 - Run the DIAGNOSIS CHECKLIST above all at once with Bash, including the
-  `check-codegraph.sh` command in diagnosis F.
+  `check-graphify.sh` command in diagnosis F.
 - Output the results in the REPORT FORMAT.
 
 STEP 1.5. Code graph HARD GATE (CASE 0)
@@ -286,7 +285,7 @@ STEP 1.5. Code graph HARD GATE (CASE 0)
   proceed to intent confirmation or routing in STEP 2/3. Handle installation
   through an AskUserQuestion dialog as defined by CASE 0, and continue to STEP 2
   only after the check passes (exit code 0).
-- If only the index is missing (code 3), run `codegraph init` and continue.
+- If only the graph is missing on brownfield (code 3), run `graphify .` and continue.
 
 STEP 2. Confirm intent
 - Ask the user in one line what they explicitly want to do. Example:
@@ -310,7 +309,7 @@ WHEN TO STOP
 ────────────────────────────────────
 
 In the following situations, do not proceed and wait for user input.
-- Code graph prerequisites are not satisfied (codegraph/graphify missing): do
+- Code graph prerequisites are not satisfied (graphify missing): do
   not perform subsequent routing. Handle this only through the AskUserQuestion
   dialog in CASE 0; do not accept a free-text "continue" prompt.
 - Do not auto-execute core cloning, global installation, or project initialization before explicit user approval.
