@@ -114,3 +114,14 @@ Needs confirmation:
 Validate input first, plan without mutation, obtain approval, create the exact
 approved targets, and verify with `list`. Keep allocator stdout verbatim where
 it identifies paths or failures. Do not automatically start another skill.
+
+## Graph Isolation (per worktree)
+
+Each worktree is its own directory, so each gets its **own** `graphify-out/graph.json` — no branch
+shares another's in-flight graph. This skill does not build graphs (that happens per worktree via
+`init-project.sh` / `ctx-run`); it only creates the isolated worktrees. Downstream:
+
+- Build/refresh the graph inside each worktree (`graphify .` / `graphify . --update`).
+- Review across worktrees with `graphify prs --worktrees` (worktree → branch → PR blast radius).
+- After merging a branch to main, regenerate main's graph (`graphify . --update`).
+- `graphify-out/` is git-ignored (added by `init-project.sh`), so per-worktree graphs never collide.
