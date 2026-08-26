@@ -1,8 +1,8 @@
 # Frontend Detailed Skills
 
-**Reference-knowledge skills** that expand `guidance.md` (the team frontend baseline) into 6 topics. Each skill
+**Reference-knowledge skills** that expand `guidance.md` (the team frontend baseline) into 7 topics. Each skill
 follows the official skills format (`SKILL.md` + `reference.md`), auto-loads via `paths` when you touch the
-relevant files, and can also be invoked manually as `/frontend-*`. Deep-dive material lives in each skill's `reference.md`.
+relevant files, and can also be invoked manually as `/frontend-*`. Deep-dive material lives in each skill's `reference.md`. (`frontend-figma-to-code` is the newest — a capability skill, not a guard.)
 
 Consistency: these skills are a detailed expansion of `../guidance.md` and reference it by relative path.
 When project `ctx/` conflicts, the project CTX wins (same precedence as the guidance).
@@ -18,6 +18,7 @@ Stack: TypeScript + React (Next.js App Router when present); the same boundaries
 | [frontend-api-contract](frontend-api-contract/SKILL.md) | One API client module · typed boundary (no `any`) · error normalization · runtime response validation | `**/lib/api/**`, `**/api/**/*.ts`, `**/*.api.ts`, `**/services/**/*.ts`, `**/*client*.ts`, `**/openapi*.{yaml,json}` |
 | [frontend-accessibility](frontend-accessibility/SKILL.md) | **A11y safety guard** — semantic controls (no div-onClick) · labels/alt · focus management · keyboard · platform-over-library | `**/*.tsx`, `**/*.jsx`, `**/components/**` |
 | [frontend-security](frontend-security/SKILL.md) | **Vibe-coding security guard** — blocks vulnerable patterns in AI-generated code (XSS · bundle secrets · token storage · CSRF · open redirect · postMessage · SSRF/injection in server code · prototype pollution · hallucinated deps) | `**/*.tsx`, `**/*.ts`, `**/next.config.*`, `**/middleware.ts`, `**/app/**/route.ts`, `**/.env*` |
+| [frontend-figma-to-code](frontend-figma-to-code/SKILL.md) | Figma → code — shared `scripts/figma` manifest + DTCG tokens → React/Next components + theme (node→component · token→theme). Generated output must still pass the a11y + security floors | `**/tokens.json`, `**/*.tokens.json`, `**/design-tokens/**`, `**/figma*.json`, `**/theme/**/*.ts`, `**/tailwind.config.*` |
 
 ## Two safety guards
 
@@ -28,4 +29,4 @@ Frontend has **two** floors that are never lowered for speed:
   This guard auto-loads when you touch web source · config · env · middleware · route handlers and catches the most
   common vulnerable patterns.
 
-The other 4 skills are the architecture/data/structure rules these guards reference.
+The other 5 skills — architecture, data, structure, API contract, and `frontend-figma-to-code` — are the capability/quality rules; Figma-generated code is routed back through both guards before merge.
