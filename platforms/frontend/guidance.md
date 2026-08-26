@@ -95,7 +95,7 @@ styles/ or tokens        # design tokens, global styles
 
 ## Detailed Skills
 
-This baseline is expanded into six topic skills under
+This baseline is expanded into seven topic skills under
 [`skills/`](skills/README.md). Each is a reference-knowledge skill
 (`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
 also callable as `/frontend-*`. Stack: TypeScript + React (Next.js App Router
@@ -107,3 +107,4 @@ when present); the same boundaries apply to Vue/Svelte with names swapped.
 - [frontend-api-contract](skills/frontend-api-contract/SKILL.md) — one API client module, typed boundary (no `any`), error normalization, runtime response validation
 - [frontend-accessibility](skills/frontend-accessibility/SKILL.md) — **a11y safety guard**: semantic controls (no div-onClick), labels/alt, focus management, keyboard, platform-over-library
 - [frontend-security](skills/frontend-security/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (XSS, bundle secrets, token storage, CSRF, open redirect, postMessage, SSRF/injection in server code, prototype pollution, hallucinated deps)
+- [frontend-figma-to-code](skills/frontend-figma-to-code/SKILL.md) — Figma → React/Next via the shared `scripts/figma` manifest + DTCG tokens (node→component, token→theme); generated code must still pass the a11y + security floors

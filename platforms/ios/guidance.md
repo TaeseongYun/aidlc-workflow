@@ -114,7 +114,7 @@ codebase for one screen.
 
 ## Detailed Skills
 
-This baseline is expanded into six topic skills under
+This baseline is expanded into seven topic skills under
 [`skills/`](skills/README.md). Each is a reference-knowledge skill
 (`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
 also callable as `/ios-*`. Stack: Swift + SwiftUI + Swift Concurrency + the
@@ -126,3 +126,4 @@ Observation framework (`@Observable`), SPM modules.
 - [ios-platform-adapters](skills/ios-platform-adapters/SKILL.md) — system frameworks behind injected protocol adapters, permission-denied as a designed state, repository DTO↔domain mapping, UserDefaults/Keychain placement
 - [ios-navigation-deeplink](skills/ios-navigation-deeplink/SKILL.md) — URL schemes / Universal Links external contract, deep-link parameter validation, trust-boundary fallback, route data
 - [ios-security](skills/ios-security/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (Keychain vs UserDefaults, embedded secrets, ATS/TLS bypass, deep-link input, WKWebView, log/pasteboard leaks, weak crypto, Data Protection, hallucinated SPM deps)
+- [ios-figma-to-code](skills/ios-figma-to-code/SKILL.md) — Figma → SwiftUI via the shared `scripts/figma` manifest + DTCG tokens (node→View, token→asset-catalog/Theme); generated code must still pass ios-security
