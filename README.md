@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue) ![Made for Claude Code](https://img.shields.io/badge/made%20for-Claude%20Code-black)
 
-**[README in English](README.en.md)**
+**English** · [한국어](README.ko.md) · [中文](README.zh.md)
 
 A team-wide workflow for systematically carrying out AI requirements analysis, design, and verification. It ensures that humans make the important decisions while letting AI make the most of its domain knowledge.
 
@@ -109,7 +109,7 @@ Decompose requirements into work units of S/M/L size. Each UOW specifies Accepta
 
 ### Platform Guidance: Per-Platform Architecture Baseline
 
-`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn) captures the architecture baseline the agent must load before designing (`/ctx-aidlc-run` STEP 6.5) or implementing (`/ctx-run` ROLE 1) on that platform. Declare the platform in `ctx/project-profile.ctx.md`; precedence is project `ctx/` > platform guidance > general knowledge. The documents are self-contained markdown, so external repos can consume them via the installed path or raw GitHub URL — see [platforms/README.md](platforms/README.md).
+`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp) captures the architecture baseline the agent must load before designing (`/ctx-aidlc-run` STEP 6.5) or implementing (`/ctx-run` ROLE 1) on that platform. Declare the platform in `ctx/project-profile.ctx.md`; precedence is project `ctx/` > platform guidance > general knowledge. Each platform also ships detailed per-platform skills — figma-to-code, a vibe-coding security guard, testing, design-system, accessibility, i18n, observability, and contract-codegen — that auto-load when you touch the relevant files. The documents are self-contained markdown, so external repos can consume them via the installed path or raw GitHub URL — see [platforms/README.md](platforms/README.md).
 
 For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts.md).
 
@@ -189,7 +189,7 @@ cd other-project
 bash ~/workspace/aidlc-workflow/scripts/init-project.sh
 ```
 
-Detailed multi-account setup: [docs/omc-ouroboros-integration.md#5-멀티계정-멀티레포-셋업](docs/omc-ouroboros-integration.md)
+Detailed multi-account setup: [docs/omc-ouroboros-integration.md](docs/omc-ouroboros-integration.md)
 
 ---
 
@@ -202,7 +202,7 @@ aidlc-workflow/
 ├── extensions/                 # Rule packs
 │   ├── performance|security|api-contract/   # Optional (opt-in)
 │   └── hallucination-guard/    # Always on: guard rules + Linear routing
-├── platforms/                  # Per-platform architecture guidance (android, ios, backend, frontend, flutter, rn)
+├── platforms/                  # Per-platform guidance + skills (android, ios, backend, frontend, flutter, rn, kmp)
 ├── skills/                     # Skill sources (deployed by install-skills.sh)
 │   ├── team-ai-workflow-start/
 │   ├── ctx-aidlc-roadmap/
@@ -275,6 +275,8 @@ For a detailed contribution guide, see [CONTRIBUTING.md](CONTRIBUTING.md).
 Detailed per-release changes: [docs/changelog/](docs/changelog/)
 
 Major updates:
+- **2026-08-27**: Added KMP (Kotlin Multiplatform) as the 7th platform — guidance + 13 skills (figma-to-kmp, vibe-coding security guard, testing, and more)
+- **2026-08-26**: Per-platform skill families across platforms (testing, design-system, accessibility, contract-codegen, observability, i18n)
 - **2026-04-29**: Added the Phase 0 Roadmapping skill, formalized the multi-feature collaboration workflow
 - **2026-04-22**: Overconfidence prevention, strengthened verification, evaluation framework
 - **2026-04-14**: Lazy Loading + session separation as the default model, token diet
