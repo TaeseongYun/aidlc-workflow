@@ -24,6 +24,9 @@ requests that separate operation.
 - Never run `create` without explicit user approval of that target list.
 - Treat approval as valid only for the shown roadmap, base directory, and targets.
 - If any of those values changes before creation, show the new plan and ask again.
+- A worktree is a `git worktree` checkout (created via `git worktree add` inside
+  the allocator), never a plain directory. If the allocator script is missing,
+  halt — do not fall back to `mkdir` or hand-made directories.
 - Never overwrite an existing path or force-remove/recreate a worktree.
 - Do not infer manual slugs or a worktree count when roadmap detection returns none.
 - Run commands from the target project's git root, not the workflow repository.
