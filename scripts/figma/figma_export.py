@@ -36,6 +36,9 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from figma_token import resolve_token  # noqa: E402
+
 API = "https://api.figma.com/v1"
 
 # Figma node types that behave as containers.
@@ -222,6 +225,9 @@ def normalize_node(node: dict) -> dict:
     style = _style(node)
     if style:
         out["style"] = style
+    if node.get("exportSettings"):
+        # Designer flagged this node for export — figma_images treats it as an asset.
+        out["exportHint"] = True
     if ntype in ("frame", "stack"):
         out["layout"] = _layout(node)
     if ntype == "text":
@@ -418,6 +424,7 @@ SAMPLE_NODE = {
             "name": "Hero",
             "absoluteBoundingBox": {"width": 288, "height": 160},
             "fills": [{"type": "IMAGE", "imageRef": "abc123", "scaleMode": "FILL"}],
+            "exportSettings": [{"format": "PNG"}],
         },
     ],
 }
@@ -445,6 +452,7 @@ def demo() -> int:
     assert hero["type"] == "image"
     assert hero["image"]["ref"] == "abc123"
     assert hero["image"]["src"] is None  # resolved online via fetch_image_fills
+    assert hero["exportHint"] is True  # exportSettings -> asset for figma_images
 
     resolve_image_srcs(m, {"abc123": "https://img.example/hero.png"})
     assert m["screens"][0]["children"][2]["image"]["src"] == "https://img.example/hero.png"
@@ -500,9 +508,10 @@ def main() -> int:
     if args.demo:
         return demo()
 
-    token = os.environ.get("FIGMA_TOKEN")
+    token, _source = resolve_token()  # $FIGMA_TOKEN, else ~/.figma-token (figma_token.py --save)
     if not token or not args.file:
-        ap.error("need FIGMA_TOKEN env and --file (or use --demo)")
+        ap.error("need a Figma token ($FIGMA_TOKEN or 'figma_token.py --save') "
+                 "and --file (or use --demo)")
 
     # Confine output to the working tree before doing any work — --out is not a
     # place to escape to.
