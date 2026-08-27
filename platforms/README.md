@@ -15,6 +15,7 @@ signals.
 | Frontend (Web) | [frontend/guidance.md](frontend/guidance.md) |
 | Flutter | [flutter/guidance.md](flutter/guidance.md) |
 | React Native | [rn/guidance.md](rn/guidance.md) |
+| KMP (Kotlin Multiplatform) | [kmp/guidance.md](kmp/guidance.md) |
 
 ## Precedence
 
@@ -34,7 +35,7 @@ project ctx/ (project-profile, local CTX)  >  platforms/<platform>/guidance.md  
 
    ```markdown
    ## Platform
-   - Platform: android          # android | ios | backend | frontend | flutter | rn
+   - Platform: android          # android | ios | backend | frontend | flutter | rn | kmp
    - Guidance: {{TEAM_AI_WORKFLOW_DIR}}/platforms/android/guidance.md
    ```
 
@@ -44,10 +45,12 @@ project ctx/ (project-profile, local CTX)  >  platforms/<platform>/guidance.md  
    design) read the declared guidance file(s) before producing output.
 
 3. If no platform is declared, infer it from the repository layout
-   (`build.gradle.kts` + `AndroidManifest.xml` → android, `Package.swift`/
-   `*.xcodeproj` → ios, `pubspec.yaml` → flutter, `react-native` in
-   package.json → rn, other package.json with a UI framework → frontend,
+   (`kotlin("multiplatform")` in `build.gradle.kts` or a `commonMain`/`iosMain`
+   source set → kmp, `build.gradle.kts` + `AndroidManifest.xml` → android,
+   `Package.swift`/`*.xcodeproj` → ios, `pubspec.yaml` → flutter, `react-native`
+   in package.json → rn, other package.json with a UI framework → frontend,
    otherwise server code → backend) and state the inference in the output.
+   Check the KMP marker first — a KMP module also has `build.gradle.kts`.
 
 ## Using the documents from outside this repo
 
