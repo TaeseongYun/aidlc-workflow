@@ -1,7 +1,7 @@
 # ios-module-structure — Reference
 
-Deep-dive for `SKILL.md`. Package trees, Interface/Live split, composition-root
-DI. Decision criteria live in `SKILL.md`.
+Deep-dive for `SKILL.md`. Package trees, the API/Impl target pair,
+composition-root DI. Decision criteria live in `SKILL.md`.
 
 ## 1. Thin app target + SPM packages
 
@@ -15,7 +15,7 @@ Packages/
   CoreNetworking/        # API client, DTOs
   CoreData/              # repositories, data sources
   DesignSystem/          # tokens, shared views, modifiers
-  FeatureHome/           # one package per feature
+  FeatureHome/           # one package per feature — see §3
   FeatureCheckout/
 ```
 
@@ -38,24 +38,68 @@ Packages/
 // ❌ Adding Swinject/Resolver to a hand-composed app "for convenience" → over-engineering
 ```
 
-## 3. Interface / Live split — only on a real signal
+## 3. The API/Impl target pair — every feature, from day one
+
+One package per feature, two targets and two products:
 
 ```
-FeatureProfile/
+FeatureHome/
+  Package.swift
   Sources/
-    ProfileInterface/   # protocol + models another feature can depend on
-    ProfileLive/        # the real implementation
+    FeatureHomeAPI/     # navigation identity, route contracts, caller-facing interfaces
+    FeatureHomeImpl/    # views, view models, implementation
 ```
-
-- Split when **a second consumer** appears: another feature depends on Profile,
-  or you must mock Profile across a package boundary in tests. One consumer and
-  no cross-boundary mock → keep it a single target.
 
 ```swift
-// A feature depends on the Interface, never the Live target
-import ProfileInterface   // ✅
-// import ProfileLive     // ❌ couples to the implementation
+// FeatureHome/Package.swift
+let package = Package(
+    name: "FeatureHome",
+    products: [
+        .library(name: "FeatureHomeAPI",  targets: ["FeatureHomeAPI"]),
+        .library(name: "FeatureHomeImpl", targets: ["FeatureHomeImpl"]),
+    ],
+    dependencies: [ .package(path: "../CoreModel"), .package(path: "../FeatureProfile") ],
+    targets: [
+        .target(name: "FeatureHomeAPI",
+                dependencies: [.product(name: "CoreModel", package: "CoreModel")]),
+        .target(name: "FeatureHomeImpl",
+                dependencies: [
+                    "FeatureHomeAPI",
+                    // navigates into Profile — API product only, never its Impl
+                    .product(name: "FeatureProfileAPI", package: "FeatureProfile"),
+                ]),
+    ]
+)
 ```
+
+### What goes in the API target
+
+Only the surface a caller needs to reach this feature:
+
+```swift
+// FeatureHomeAPI/HomeDestination.swift
+public struct HomeDestination: Hashable {           // navigation identity + payload
+    public let userId: String
+    public init(userId: String) { self.userId = userId }
+}
+
+public protocol HomeEntry {                          // caller-facing entry interface
+    @MainActor func makeHomeView(_ destination: HomeDestination) -> AnyView
+}
+```
+
+No views, no view models, no repositories. A type two features share beyond the
+navigation payload graduates to `CoreModel`.
+
+### Import rules
+
+```swift
+import FeatureProfileAPI    // ✅ from another feature's Impl
+// import FeatureProfileImpl  ❌ only the App target may import Impl products
+```
+
+The App target imports every `Impl`, binds each `API` entry interface to its
+implementation in the composition root, and owns top-level navigation wiring.
 
 ## 4. Domain package stays UI-free
 
@@ -69,9 +113,10 @@ public struct Order: Sendable, Identifiable { public let id: UUID; public let to
 
 - [ ] App target holds only entry, DI wiring, lifecycle.
 - [ ] Feature/core logic lives in SPM packages.
-- [ ] Interface/Live split only where a second consumer / cross-boundary mock exists.
+- [ ] Every feature package has the `Feature<Name>API` + `Feature<Name>Impl` pair.
+- [ ] API targets hold navigation identity/route contracts/entry interfaces only.
+- [ ] Features import other features' API products — Impl products only in App.
 - [ ] DI is constructor injection via the composition root; no DI framework in a hand-composed app.
-- [ ] Features depend on Interfaces, not Live/impl targets.
 - [ ] `CoreModel` (domain) has no UI deps.
 - [ ] No god-package swallowing feature boundaries.
 

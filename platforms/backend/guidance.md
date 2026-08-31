@@ -62,17 +62,23 @@ Controller/Handler -> Service (UseCase) -> Repository -> DB / External Client Ad
 
 ## Module Baseline
 
-Follow the project's existing layout. Absent one:
+Follow the project's existing layout. Absent one, modularize **by domain**,
+each domain shipping an `api` + `impl` pair:
 
 ```
-api/ (or app/)           # controllers, request/response DTOs, exception handlers
-domain/                  # entities, domain services, repository interfaces
-infra/                   # repository impls, external clients, config
-batch/                   # scheduled/batch jobs (if any)
+app/                     # bootstrap only: main class, config, wiring
+domain/<name>/api        # :domain:<name>:api  — interfaces, DTOs, domain
+                         #   events other domains may consume
+domain/<name>/impl       # :domain:<name>:impl — controllers, services,
+                         #   repositories, entities — everything else
 ```
 
-Single-module is fine until a second deployable or a shared domain forces a
-split.
+- `api` is the domain's public contract: the interfaces, DTOs, and events
+  another domain is allowed to see. Entities and services never leak through it.
+- **Only `app` depends on `impl` modules** (component scan / wiring). A
+  domain's `impl` depends on other domains' `api` only — never their `impl`.
+- Layer rules inside each `impl` follow the Boundaries section above
+  (Controller → Service → Repository).
 
 ## Feature Slice Decision Table
 
@@ -126,13 +132,14 @@ split.
 
 ## Detailed Skills
 
-This baseline is expanded into six topic skills under
+This baseline is expanded into seven topic skills under
 [`skills/`](skills/README.md). Each is a reference-knowledge skill
 (`SKILL.md` + `reference.md`) that auto-loads on matching files (`paths`) and is
 also callable as `/backend-*`. Stack: Kotlin/Java + Spring Boot + JPA primary,
 Node/TypeScript shown alongside on the key rules.
 
 - [backend-architecture](skills/backend-architecture/SKILL.md) — dependency flow, layer responsibilities, transaction boundary, Feature Slice decision (umbrella)
+- [backend-module-structure](skills/backend-module-structure/SKILL.md) — domain-based modules, the mandatory {domain}:api|impl pair, cross-domain calls via api ports
 - [backend-api-contract](skills/backend-api-contract/SKILL.md) — RESPONSE SHAPE LOCK, error envelope (no stack traces), versioning, input validation, CORS, pagination
 - [backend-data-transactions](skills/backend-data-transactions/SKILL.md) — transaction boundary, N+1, idempotency, PII/excessive exposure, money/time, migrations
 - [backend-security-guard](skills/backend-security-guard/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (secrets, SQLi/injection, SSRF, deserialization, BOLA/BFLA, weak crypto, disabled security, hallucinated deps)

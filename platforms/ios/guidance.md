@@ -51,10 +51,14 @@ Packages/
   CoreDomain/            # use cases (only when orchestration exists)
   CoreData*/             # repositories, data sources, API clients
   DesignSystem/          # tokens, shared views, modifiers
-  Feature<Name>/         # one package per feature; split Interface/Live
-                         # targets ONLY when a second consumer needs it
+  Feature<Name>/         # one package per feature, always two targets:
+    Feature<Name>API     #   navigation identity, route contracts,
+                         #   caller-facing interfaces ONLY
+    Feature<Name>Impl    #   views, view models, implementation
 ```
 
+- Every feature ships the API/Impl target pair from day one. **Only the app
+  target imports `Impl`**; features import other features' `API` only.
 - Keep the app target minimal: composition root and lifecycle only.
 - Dependency injection is constructor/initializer injection through the
   composition root. Use the project's existing container if one exists; do not
@@ -122,7 +126,7 @@ Observation framework (`@Observable`), SPM modules.
 
 - [ios-architecture](skills/ios-architecture/SKILL.md) — dependency flow, layer responsibilities, `@MainActor`/actor isolation, navigation-as-data, Feature Slice decision (umbrella)
 - [ios-state-concurrency](skills/ios-state-concurrency/SKILL.md) — one state type per screen (enum, not parallel optionals), `@Observable`/`@MainActor`, Task ownership/cancellation, `Sendable`/actor isolation (no `@unchecked` silencer), async/await over Combine
-- [ios-module-structure](skills/ios-module-structure/SKILL.md) — thin app target + SPM packages, Interface/Live split timing, composition-root DI (no DI framework)
+- [ios-module-structure](skills/ios-module-structure/SKILL.md) — thin app target + SPM packages, the mandatory Feature\<Name\>API/Impl target pair, composition-root DI (no DI framework)
 - [ios-platform-adapters](skills/ios-platform-adapters/SKILL.md) — system frameworks behind injected protocol adapters, permission-denied as a designed state, repository DTO↔domain mapping, UserDefaults/Keychain placement
 - [ios-navigation-deeplink](skills/ios-navigation-deeplink/SKILL.md) — URL schemes / Universal Links external contract, deep-link parameter validation, trust-boundary fallback, route data
 - [ios-security](skills/ios-security/SKILL.md) — **vibe-coding security guard**: catches AI-generated vulnerabilities (Keychain vs UserDefaults, embedded secrets, ATS/TLS bypass, deep-link input, WKWebView, log/pasteboard leaks, weak crypto, Data Protection, hallucinated SPM deps)

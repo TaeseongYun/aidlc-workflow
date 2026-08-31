@@ -1,6 +1,6 @@
 # Backend Detailed Skills
 
-**Reference-knowledge skills** that expand `guidance.md` (the team backend baseline) into 6 topics. Each skill
+**Reference-knowledge skills** that expand `guidance.md` (the team backend baseline) into 7 topics. Each skill
 follows the official skills format (`SKILL.md` + `reference.md`), auto-loads via `paths` when you touch the
 relevant files, and can also be invoked manually as `/backend-*`. Deep-dive material lives in each skill's `reference.md`.
 
@@ -13,7 +13,8 @@ on the key rules.
 
 | Skill | Purpose | Auto-load (paths) |
 |-------|---------|-------------------|
-| [backend-architecture](backend-architecture/SKILL.md) | Server architecture skeleton — dependency flow · layer responsibilities · transaction boundary · Feature Slice. The umbrella that ties the other 5 together | (none — description keywords · manual · cross-links) |
+| [backend-architecture](backend-architecture/SKILL.md) | Server architecture skeleton — dependency flow · layer responsibilities · transaction boundary · Feature Slice. The umbrella that ties the other skills together | (none — description keywords · manual · cross-links) |
+| [backend-module-structure](backend-module-structure/SKILL.md) | Domain-based modules — the mandatory {domain}:api\|impl pair (api = interfaces/DTOs/events only) · only app depends on impls · cross-domain calls via api ports | `**/build.gradle.kts`, `**/settings.gradle.kts`, `**/build.gradle`, `**/pom.xml` |
 | [backend-api-contract](backend-api-contract/SKILL.md) | Response schema lock · error envelope · versioning · input-validation boundary · CORS · pagination | `**/*Controller.*`, `**/controller/**`, `**/routes/**`, `**/*.controller.ts`, `**/openapi*.yaml` |
 | [backend-data-transactions](backend-data-transactions/SKILL.md) | Transaction boundary · N+1 · idempotency · excessive sensitive-data exposure · money/time · migrations | `**/*Repository.*`, `**/entity/**`, `**/domain/**`, `**/db/migration/**`, `**/*.entity.ts` |
 | [backend-security-guard](backend-security-guard/SKILL.md) | **Vibe-coding security guard** — blocks vulnerable patterns in AI-generated code (secrets · SQLi · SSRF · deserialization · BOLA/BFLA · weak crypto · disabled security · hallucinated dependencies) | `**/*.java`, `**/*.kt`, `**/*.ts`, `**/*.py`, `**/application*.yml`, `**/.env*`, `**/Dockerfile` |
