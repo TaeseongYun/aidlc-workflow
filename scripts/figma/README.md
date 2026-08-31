@@ -5,10 +5,12 @@ Shared tooling behind every platform's `*-figma-to-code` skill.
 | Tool | Role |
 |---|---|
 | `figma_export.py` | Figma frame → `manifest.json` (normalized UI tree) + `tokens.json` (DTCG design tokens) |
-| `figma_images.py` | manifest → `assets/` (icons/images, durable local files) + `--frames` per-screen PNG renders |
+| `figma_images.py` | manifest → `assets/` (icons as svg, raster images as **webp**) + `--frames` per-screen PNG renders |
 | `figma_token.py` | check / save (hidden input) / clear the persisted access token |
 
-Stdlib only (`urllib`) — no `pip install`. Python 3.9+.
+Stdlib only (`urllib`) — no `pip install`. Python 3.9+. The one external
+helper: webp conversion in `figma_images.py` shells out to `cwebp`
+(`brew install webp`), with Pillow as an optional fallback.
 
 ## figma_export — manifest + design tokens
 
@@ -59,7 +61,14 @@ python3 scripts/figma/figma_images.py --manifest ./out/manifest.json --list
 Asset candidates are `image` nodes (raster fills), `vector` nodes and small
 icon-named containers (exported whole as `svg`), and nodes the designer flagged
 for export in Figma (`exportHint` in the manifest). A matched node absorbs its
-subtree — one export per asset, no double-rendering of children. The
+subtree — one export per asset, no double-rendering of children.
+
+**Raster assets ship as WebP, not PNG** — PNG straight into the app bundle
+inflates install size. The Figma images API can't emit webp, so the tool
+renders png and converts locally via `cwebp` (`brew install webp`) or Pillow;
+without an encoder it falls back to png with a warning (`--format webp` makes
+the missing encoder a hard error, `--format png` opts out). Frames stay PNG —
+they are a visual reference for scope confirmation, never shipped. The
 `assets-index.json` / `frames-index.json` files map node ids to files; bind
 components to the index entries, not to expiring URLs. Partial download
 failures are recorded in the index, not fatal.

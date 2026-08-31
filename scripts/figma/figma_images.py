@@ -8,7 +8,9 @@ through the Figma images API into durable local files the platform skills
 wire in.
 
   assets mode (default): manifest -> assets/ + assets-index.json
-                         (svg for vectors/icons, png for image fills)
+                         (svg for vectors/icons, webp for image fills — the
+                         Figma API renders png; converted locally via cwebp
+                         or Pillow so shipped assets stay small)
   --frames             : render each manifest screen as PNG -> frames/ +
                          frames-index.json (visual reference of what was
                          captured, never an implementation source)
@@ -27,6 +29,8 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 import urllib.error
 import urllib.parse
@@ -40,6 +44,33 @@ API = "https://api.figma.com/v1"
 ICON_NAME_HINTS = ("icon", "ic_", "ic-", "ic/", "logo", "glyph", "symbol")
 MAX_ICON_SIZE = 64  # px; small icon-named containers are exported whole
 MAX_DOWNLOAD_BYTES = 50 * 1024 * 1024
+WEBP_QUALITY = 90
+
+
+def _default_fmt(kind: str) -> str:
+    """Vectors ship as svg; rasters ship as webp (smaller than png in-app)."""
+    return "svg" if kind == "vector" else "webp"
+
+
+def has_webp_encoder() -> bool:
+    if shutil.which("cwebp"):
+        return True
+    try:
+        import PIL  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def encode_webp(png_path: str, webp_path: str) -> None:
+    """PNG -> WebP via cwebp (libwebp), else Pillow. Removes the png on success."""
+    if shutil.which("cwebp"):
+        subprocess.run(["cwebp", "-quiet", "-q", str(WEBP_QUALITY),
+                        png_path, "-o", webp_path], check=True)
+    else:
+        from PIL import Image
+        Image.open(png_path).save(webp_path, "WEBP", quality=WEBP_QUALITY)
+    os.unlink(png_path)
 
 
 def _get(path: str, token: str) -> dict:
@@ -147,16 +178,23 @@ def render_urls(file_key: str, ids: list[str], fmt: str, scale: float,
 def _download_group(file_key: str, items: list[dict], fmt: str, scale: float,
                     token: str, out_dir: str, subdir: str) -> tuple[list, list]:
     exported, failures = [], []
-    urls = render_urls(file_key, [c["nodeId"] for c in items], fmt, scale, token)
+    # The images API cannot emit webp — render png and convert locally.
+    api_fmt = "png" if fmt == "webp" else fmt
+    urls = render_urls(file_key, [c["nodeId"] for c in items], api_fmt, scale, token)
     for cand in items:
         url = urls.get(cand["nodeId"])
         if not url:
             failures.append({**cand, "reason": "no render url"})
             continue
         filename = f"{slugify(cand['name'] or cand['nodeId'])}-{slugify(cand['nodeId'])}.{fmt}"
+        dest = os.path.join(out_dir, filename)
         try:
-            download_binary(url, os.path.join(out_dir, filename))
-        except (ValueError, OSError) as err:
+            if fmt == "webp":
+                download_binary(url, dest + ".png")
+                encode_webp(dest + ".png", dest)
+            else:
+                download_binary(url, dest)
+        except (ValueError, OSError, subprocess.CalledProcessError) as err:
             failures.append({**cand, "reason": str(err)})
             continue
         exported.append({**cand, "format": fmt, "file": f"{subdir}/{filename}"})
@@ -173,9 +211,18 @@ def export_assets(manifest: dict, file_key: str, bundle_dir: str,
         print("[ok] no exportable image/icon nodes found", file=sys.stderr)
         return 0
     out_dir = os.path.join(bundle_dir, "assets")
+    webp_ok = has_webp_encoder()
+    if args.format == "webp" and not webp_ok:
+        raise SystemExit("no WebP encoder: install cwebp (brew install webp) "
+                         "or Pillow (pip install pillow)")
+    if not args.format and not webp_ok:
+        print("[warn] no WebP encoder (cwebp/Pillow) — falling back to png; "
+              "install cwebp to keep shipped assets small", file=sys.stderr)
     groups: dict[str, list[dict]] = {}
     for cand in candidates:
-        fmt = args.format or ("svg" if cand["kind"] == "vector" else "png")
+        fmt = args.format or _default_fmt(cand["kind"])
+        if fmt == "webp" and not webp_ok:
+            fmt = "png"
         groups.setdefault(fmt, []).append(cand)
     exported, failures = [], []
     for fmt, group in groups.items():
@@ -246,6 +293,28 @@ def demo() -> int:
     assert "1:9" not in by_id  # absorbed by the export-flagged parent
     assert "1:3" not in by_id  # plain text is not an asset
     assert slugify("Ic/Close 24") == "ic-close-24"
+    assert _default_fmt("vector") == "svg"
+    assert _default_fmt("image-fill") == "webp"      # rasters ship as webp, not png
+    assert _default_fmt("export-setting") == "webp"
+    if has_webp_encoder():  # exercise the real conversion when a codec exists
+        import struct, tempfile, zlib
+
+        def _chunk(t: bytes, d: bytes) -> bytes:
+            return (struct.pack(">I", len(d)) + t + d
+                    + struct.pack(">I", zlib.crc32(t + d)))
+        png = (b"\x89PNG\r\n\x1a\n"
+               + _chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0))
+               + _chunk(b"IDAT", zlib.compress(b"\x00\xff\x00\x00"))
+               + _chunk(b"IEND", b""))
+        with tempfile.TemporaryDirectory() as td:
+            src = os.path.join(td, "t.png")
+            dst = os.path.join(td, "t.webp")
+            with open(src, "wb") as f:
+                f.write(png)
+            encode_webp(src, dst)
+            with open(dst, "rb") as f:
+                assert f.read(4) == b"RIFF"          # webp container magic
+            assert not os.path.exists(src)           # png removed after convert
     print("figma_images self-check: OK")
     return 0
 
@@ -257,8 +326,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--manifest", help="path to figma_export manifest.json")
-    ap.add_argument("--format", choices=("png", "jpg", "svg", "pdf"),
-                    help="force one format (default: svg for vectors, png otherwise)")
+    ap.add_argument("--format", choices=("webp", "png", "jpg", "svg", "pdf"),
+                    help="force one format (default: svg for vectors, webp otherwise)")
     ap.add_argument("--scale", type=float, default=2.0, help="png/jpg scale (default 2)")
     ap.add_argument("--max", type=int, default=0, help="cap exported assets (0 = all)")
     ap.add_argument("--list", action="store_true",
