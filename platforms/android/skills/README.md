@@ -18,7 +18,7 @@ floor is the same.
 |------|------|-----------------|
 | [android-architecture](android-architecture/SKILL.md) | App architecture backbone — dependency flow, layer responsibilities, Feature Slice decision. The umbrella tying the other 5 together | (none — description keywords, manual, cross-links) |
 | [android-viewmodel-state](android-viewmodel-state/SKILL.md) | UiState/StateFlow, events (effect), SavedStateHandle, UDF | `**/*ViewModel.kt`, `**/ui/**/*.kt` |
-| [android-module-structure](android-module-structure/SKILL.md) | app/core/feature split, api\|impl split timing, convention plugins, version catalogs | `**/build.gradle.kts`, `**/settings.gradle.kts`, `**/libs.versions.toml`, `**/*.gradle` |
+| [android-module-structure](android-module-structure/SKILL.md) | app/core/feature split, the mandatory {feature}:api\|impl pair (api = navigation surface only), convention plugins, version catalogs | `**/build.gradle.kts`, `**/settings.gradle.kts`, `**/libs.versions.toml`, `**/*.gradle` |
 | [android-lifecycle-memory](android-lifecycle-memory/SKILL.md) | Lifecycle-aware collection, scope cancellation, onTrimMemory, leak prevention | `**/*Activity.kt`, `**/*Fragment.kt`, `**/ui/**/*.kt` |
 | [android-background-rules](android-background-rules/SKILL.md) | Background execution limits, WorkManager, foreground services, Doze, background location | `**/*Worker.kt`, `**/*Service.kt`, `**/AndroidManifest.xml` |
 | [android-security](android-security/SKILL.md) | **Security guard** — exported trust boundary, Intent/extras validation, data encryption, network security, Keystore, Play Integrity | `**/AndroidManifest.xml`, `**/network_security_config.xml`, `**/*.kt` |

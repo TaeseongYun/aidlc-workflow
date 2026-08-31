@@ -55,7 +55,7 @@ of a feature or app:
 
 ## Module Baseline
 
-Intentionally modular for product-sized apps; collapse for small ones:
+Every feature ships as an `api` + `impl` pair from day one:
 
 ```
 app                      # thin shell: manifest, DI wiring, entry Activity
@@ -63,13 +63,20 @@ core/designsystem        # theme, tokens, shared composables
 core/model               # domain models, no Android deps
 core/domain              # use cases (only when orchestration exists)
 core/data                # repositories, data sources, DTO mapping
-feature/<name>           # single module by default
-feature/<name>/api|impl  # split ONLY when another feature depends on it
+feature/<name>/api       # :feature:<name>:api  — navigation keys, Intent
+                         #   extras, Intent factories, result contracts ONLY
+feature/<name>/impl      # :feature:<name>:impl — screens, ViewModels,
+                         #   entry Activity, Hilt bindings — everything else
 build-logic              # convention plugins
 ```
 
-- Keep `app` minimal. Defer `api`/`impl` and `domain` splits until a second
-  consumer or a platform dependency forces them.
+- `api` is the feature's public contract: what a caller needs to navigate into
+  it and nothing more. Shared types beyond the navigation payload go to
+  `core:model`, shared behavior to `core:data`.
+- **Only `app` depends on `impl` modules** (DI wiring + manifest merge).
+  Features depend on other features' `api` only.
+- Keep `app` minimal. Defer the `core:domain` split until orchestration or
+  reused business rules actually exist.
 - New modules follow the existing convention-plugin setup; do not hand-write
   per-module build config that a convention plugin already covers.
 
@@ -146,7 +153,7 @@ also callable as `/android-*`:
 
 - [android-architecture](skills/android-architecture/SKILL.md) — dependency flow, layer responsibilities, Feature Slice decision (umbrella)
 - [android-viewmodel-state](skills/android-viewmodel-state/SKILL.md) — UiState/StateFlow, events/effects, SavedStateHandle, UDF
-- [android-module-structure](skills/android-module-structure/SKILL.md) — module split, api|impl timing, convention plugins, version catalogs
+- [android-module-structure](skills/android-module-structure/SKILL.md) — module split, the mandatory {feature}:api|impl pair, convention plugins, version catalogs
 - [android-lifecycle-memory](skills/android-lifecycle-memory/SKILL.md) — lifecycle-aware collection, scope cancellation, onTrimMemory, leaks
 - [android-background-rules](skills/android-background-rules/SKILL.md) — background execution limits, WorkManager, foreground services, Doze
 - [android-security](skills/android-security/SKILL.md) — **security guard**: exported trust boundary, Intent/extras validation, encryption, network config, Keystore

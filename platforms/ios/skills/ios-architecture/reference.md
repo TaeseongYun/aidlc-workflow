@@ -70,7 +70,8 @@ Packages/
   CoreDomain/       # use cases (only when orchestration exists)
   CoreData*/        # repositories, data sources, API clients
   DesignSystem/     # tokens, shared views, modifiers
-  Feature<Name>/    # one package per feature; Interface/Live split only when a 2nd consumer needs it
+  Feature<Name>/    # one package per feature; always two targets:
+                    #   Feature<Name>API (navigation surface) + Feature<Name>Impl
 ```
 
 Detail → [ios-module-structure].
