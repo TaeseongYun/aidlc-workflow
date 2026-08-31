@@ -148,6 +148,9 @@ second hardcoded palette or a `colorScheme == .dark ? … : …` fork.
   style modifiers.
 - **Icons.** `vector` nodes are icons — use an SF Symbol (`Image(systemName:)`) or
   export the asset to the catalog; don't reconstruct vector paths from the manifest.
+- **Raster assets are webp.** The shared pipeline (`figma_images.py`) delivers
+  raster images as webp to keep bundle size down — add them to the asset catalog
+  as-is (decoded natively on iOS 14+); don't convert back to png.
 - **Color & font from tokens.** The manifest's `color`/`fontSize` are hints; the
   view uses `Color("...")` / a `Font` token, not `Color(red:…)` / `.font(.system(size: 18))`.
 - **Dark mode.** Comes from asset-catalog appearances driven by token modes, not a

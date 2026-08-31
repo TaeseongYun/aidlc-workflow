@@ -93,6 +93,10 @@ Box { /* overlaid children */ }
 Icon(painter = painterResource(R.drawable.ic_star), contentDescription = null)
 ```
 
+Bundled raster assets from the shared pipeline (`figma_images.py`) arrive as
+**webp**, not png — drop them into `res/drawable-*` as-is (webp is supported
+since API 18 with transparency); never re-export or commit the png intermediate.
+
 `widthMode: fill`→`Modifier.fillMaxWidth()`/`weight(1f)`, `hug`→`wrapContentWidth/Height`,
 `fixed`→ a token dp (avoid raw px→dp).
 
