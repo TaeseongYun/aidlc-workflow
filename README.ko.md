@@ -135,9 +135,9 @@ ctx/
 
 > **Hallucination Guard (항상 활성).** 경로·심볼·API·설정 키·버전 등 개발
 > 사실을 코드 그래프와 대조 검증하여 AI의 추측이 사실로 누출되지 않도록 한다.
-> `graphify` (`graphifyy[mcp]`)는 **초기 설정의 필수 전제 조건**이다 (codegraph는 선택적 폴백).
-> `graphify`가 없으면 `/team-ai-workflow-start`가 진행을 차단하고 설치 여부를
-> 대화로 묻는다. 규칙: `extensions/hallucination-guard/`; 가이드:
+> `graphify` (`graphifyy[mcp]`)는 초기 설정에 **강력히 권장**되지만 필수는 아니다 (codegraph는 선택적 폴백).
+> `graphify`가 없으면 `/team-ai-workflow-start`가 설치 / degraded 모드로 진행 / 취소를
+> 대화로 묻는다. degraded 모드에서는 VERIFY가 grep/Read로 후퇴한다. 규칙: `extensions/hallucination-guard/`; 가이드:
 > `docs/hallucination-guard.md`.
 
 ---

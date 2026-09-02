@@ -138,6 +138,16 @@ Verify:
 3. All referenced tools/skills work
 4. File paths are correct
 
+CI (`.github/workflows/validate.yml`) runs `tools/validate-skills.sh` and the golden-baseline
+validators on every PR and on pushes to `main`. Run them locally before pushing to catch failures early:
+
+```bash
+bash tools/validate-skills.sh
+for d in minimal-bugfix standard-feature comprehensive-platform; do
+  bash tools/evaluator/validate-all.sh "examples/golden-baselines/$d"
+done
+```
+
 ---
 
 ## Editing Common Rules

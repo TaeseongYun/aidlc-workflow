@@ -65,6 +65,12 @@ If the table is empty, write "Not applicable".
 - performance-baseline: disabled / enabled
 - api-contract: disabled / enabled
 
+## Hallucination Guard
+- Mode: full / degraded
+  - `full` (default): graphify code graph available; VERIFY is graph-backed.
+  - `degraded`: graphify not installed; VERIFY falls back to grep/Read and dev facts
+    are marked `⚠️ UNCERTAIN` more aggressively. Set by `/team-ai-workflow-start` CASE 0.
+
 ## Roadmap Phase Progress (multi-feature only)
 - [ ] STEP R1: Input Validation (prepared-requirement only)
 - [ ] STEP R2: Feature Decomposition

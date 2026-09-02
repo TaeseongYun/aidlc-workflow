@@ -71,10 +71,11 @@ E. External orchestration detection (optional)
    - `.omc/` directory exists → OMC may be in use
    - `.ouroboros/` or Ouroboros-related files exist → Ouroboros may be in use
 
-F. 코드 그래프 전제조건 (Hallucination Guard — 필수)
+F. 코드 그래프 전제조건 (Hallucination Guard — 권장 substrate)
    - `bash <본체경로>/scripts/check-graphify.sh .` 를 실행하고 종료코드를 읽는다.
-   - 0 = 충족(graphify + `graphify-out/graph.json`), 2 = 도구 누락, 3 = brownfield 그래프 미생성.
-   - 이 검사는 **초기 세팅/구현 라우팅보다 먼저** 평가한다 (CASE 0 참조).
+   - 0 = 충족(graphify + `graphify-out/graph.json`), 2 = 도구 누락(→ degraded 가능), 3 = brownfield 그래프 미생성.
+   - graphify는 강력히 권장되지만 필수는 아니다. 없으면 VERIFY가 grep/Read로 degrade된다
+     (`common/graph-grounding.md`). 이 검사는 **다른 라우팅보다 먼저** 평가한다 (CASE 0 참조).
 
 ────────────────────────────────────
 REPORT FORMAT
@@ -88,7 +89,7 @@ Output the diagnosis results in the following format.
 ### 환경
 - 본체 위치: <경로 또는 "미설치">
 - 글로벌 스킬: <설치됨 / 미설치>
-- 코드 그래프 전제조건: <충족 / graphify 도구 누락 / 그래프 미생성>
+- 코드 그래프 전제조건: <충족 / graphify 도구 누락(degraded 가능) / 그래프 미생성>
 - 외부 연동: <OMC 감지 / Ouroboros 감지 / 없음>
 
 ### 현재 프로젝트 (<cwd>)
@@ -108,26 +109,27 @@ ROUTING DECISION TREE
 
 Based on the diagnosis results, recommend one of the following to the user.
 
-CASE 0: Code graph prerequisites not satisfied (evaluate before every other case — HARD GATE)
+CASE 0: Code graph prerequisites not satisfied (evaluate before every other case — non-blocking)
 - Condition: apply when diagnosis F reports that `graphify` is missing (exit code 2).
   If only the graph is missing on a brownfield project (code 3), the tool is
   available; build it with `graphify .` and make the check pass.
-- **Prohibited**: do not route to any subsequent case, including initial setup,
-  requirements, or implementation. Do not accept a free-text prompt such as
-  "just continue" or "ignore it and proceed."
-- Response: first state clearly that initial setup cannot proceed because the
-  graphify prerequisite is not satisfied. Then use an
-  **AskUserQuestion dialog, not free text**, to ask whether to:
-    (1) install graphify, (2) show manual installation instructions, or (3) cancel.
+- graphify is the guard's preferred VERIFY substrate but is NOT mandatory. Setup and
+  routing may proceed in DEGRADED mode, where VERIFY falls back to grep/Read per
+  `common/graph-grounding.md` (dev facts are marked `⚠️ UNCERTAIN` more aggressively).
+- Response: first state clearly that graphify is missing and that the guard will run in
+  DEGRADED mode unless installed. Then use an **AskUserQuestion dialog, not free text**,
+  to ask which to do:
+    (1) install graphify now, (2) proceed in degraded mode, or (3) cancel.
   - Read and present the installation command exactly from the `MISSING:` line
     emitted by `check-graphify.sh` (graphify: `uv tool install "graphifyy[mcp]"`).
   - If the user **explicitly approves** option (1), run the install command and
-    `graphify .` with Bash. Never execute automatically without approval
-    (skill-protocol Execution Boundary).
-  - After installation, rerun `check-graphify.sh` and proceed to the next case
-    only after it passes (code 0).
-- Rationale: the guard's VERIFY step uses the code graph as its primary source.
-  Without the graph, the prerequisite is not met, so setup cannot proceed.
+    `graphify .` with Bash, then rerun `check-graphify.sh` and continue once it passes
+    (code 0). Never execute automatically without approval (skill-protocol Execution Boundary).
+  - If the user chooses option (2), record `Hallucination Guard Mode: degraded` in
+    `aidlc-docs/aidlc-state.md` (create/update the field) and continue to the next case.
+  - If the user chooses option (3), stop and wait.
+- Rationale: the guard's VERIFY step prefers the code graph, but a missing tool must not
+  block a team from using the workflow — it degrades, it does not fail.
 
 CASE 1: Core not installed
 - Guidance: "You must clone the team-ai-workflow core first."
@@ -280,11 +282,10 @@ STEP 1. Perform diagnosis
   `check-graphify.sh` command in diagnosis F.
 - Output the results in the REPORT FORMAT.
 
-STEP 1.5. Code graph HARD GATE (CASE 0)
-- If diagnosis F reports a missing tool (exit code 2), **stop here**. Do not
-  proceed to intent confirmation or routing in STEP 2/3. Handle installation
-  through an AskUserQuestion dialog as defined by CASE 0, and continue to STEP 2
-  only after the check passes (exit code 0).
+STEP 1.5. Code graph check (CASE 0 — non-blocking)
+- If diagnosis F reports a missing tool (exit code 2), present the CASE 0
+  AskUserQuestion dialog (install / proceed in degraded mode / cancel). Only a
+  cancel choice stops here; install or degraded both continue to STEP 2.
 - If only the graph is missing on brownfield (code 3), run `graphify .` and continue.
 
 STEP 2. Confirm intent
@@ -309,9 +310,10 @@ WHEN TO STOP
 ────────────────────────────────────
 
 In the following situations, do not proceed and wait for user input.
-- Code graph prerequisites are not satisfied (graphify missing): do
-  not perform subsequent routing. Handle this only through the AskUserQuestion
-  dialog in CASE 0; do not accept a free-text "continue" prompt.
+- graphify is missing (CASE 0): present the AskUserQuestion dialog (install /
+  degraded / cancel) before routing. Only a cancel choice stops the flow; do not
+  accept a free-text "continue" prompt in place of the dialog. Install or degraded
+  both continue.
 - Do not auto-execute core cloning, global installation, or project initialization before explicit user approval.
 - There are 2 or more in-progress features but the user has not specified which one to continue with.
 - Request for automatic execution of external orchestration. This skill only routes; the actual invocation

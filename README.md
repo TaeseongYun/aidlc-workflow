@@ -135,10 +135,10 @@ For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts
 
 > **Hallucination Guard (always on).** It verifies dev facts such as paths,
 > symbols, APIs, configuration keys, and versions against the code graph so AI
-> guesses cannot leak out as facts. `graphify` (`graphifyy[mcp]`) is a **required
-> prerequisite for initial setup** (codegraph is an optional fallback). If `graphify`
-> is missing, `/team-ai-workflow-start` blocks progress and asks whether to install it
-> in a dialog. Rules: `extensions/hallucination-guard/`; guide:
+> guesses cannot leak out as facts. `graphify` (`graphifyy[mcp]`) is **strongly recommended**
+> for setup (codegraph is an optional fallback), but not mandatory. If `graphify`
+> is missing, `/team-ai-workflow-start` offers install / proceed-in-degraded-mode / cancel in a
+> dialog; in degraded mode VERIFY falls back to grep/Read. Rules: `extensions/hallucination-guard/`; guide:
 > `docs/hallucination-guard.md`.
 
 ---
@@ -275,6 +275,7 @@ For a detailed contribution guide, see [CONTRIBUTING.md](CONTRIBUTING.md).
 Detailed per-release changes: [docs/changelog/](docs/changelog/)
 
 Major updates:
+- **2026-09-03**: `graphify` is now a soft dependency — a missing tool degrades to grep/Read verification instead of blocking setup; added CI (`validate-skills.sh` + golden baselines) and made `validate-questions.sh` accept English field labels ([details](docs/changelog/2026-09-03-graphify-soft-dependency-and-ci.md))
 - **2026-08-27**: Added KMP (Kotlin Multiplatform) as the 7th platform — guidance + 13 skills (figma-to-kmp, vibe-coding security guard, testing, and more)
 - **2026-08-26**: Per-platform skill families across platforms (testing, design-system, accessibility, contract-codegen, observability, i18n)
 - **2026-04-29**: Added the Phase 0 Roadmapping skill, formalized the multi-feature collaboration workflow

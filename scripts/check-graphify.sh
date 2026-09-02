@@ -7,18 +7,22 @@
 # a fallback grounding source — it is NOT required.
 #
 # Consumed by:
-#   - scripts/init-project.sh  (hard-fails on a missing tool; auto-builds a missing graph on
-#     brownfield; passes --mode)
-#   - /team-ai-workflow-start skill (on a missing tool it must open an AskUserQuestion dialog,
-#     never a free-text "continue anyway" prompt)
+#   - scripts/init-project.sh  (warns and continues in DEGRADED mode on a missing tool;
+#     auto-builds a missing graph on brownfield; passes --mode)
+#   - /team-ai-workflow-start skill (on a missing tool it opens an AskUserQuestion dialog offering
+#     install / proceed-in-degraded-mode / cancel — never a free-text "continue anyway" prompt)
 #
 # Usage: scripts/check-graphify.sh [project-root] [--mode=brownfield|greenfield]
 #   project-root  default: current directory
 #   --mode        default: auto (brownfield if the project already contains source files)
 #
-# Exit codes (granular, so callers can distinguish block-vs-autofix-vs-defer):
+# graphify is STRONGLY RECOMMENDED, not mandatory: when it is absent the guard degrades to
+# grep/Read verification (see common/graph-grounding.md). The exit code is a diagnostic SIGNAL;
+# each caller decides its own policy (init-project.sh warns+continues, the skill prompts).
+#
+# Exit codes (granular, so callers can distinguish degraded-vs-autofix-vs-ready):
 #   0  ready (graphify present + graph built)  — OR greenfield with no graph yet (graph deferred)
-#   2  the graphify TOOL is missing              -> HARD BLOCK, needs install
+#   2  the graphify TOOL is missing              -> DEGRADED (VERIFY falls back to grep/Read); install recommended
 #   3  brownfield but the GRAPH is missing       -> auto-fixable via `graphify .`
 #
 # Output: one machine-readable line per check, plus a final `RESULT: <code> <summary>` line.
@@ -107,7 +111,7 @@ fi
 
 # ── VERDICT ──────────────────────────────────────────────────────────────────
 if [[ "$tool_missing" -eq 1 ]]; then
-  echo "RESULT: 2 tool missing — setup blocked; install required (${GRAPHIFY_INSTALL})"
+  echo "RESULT: 2 tool missing — degraded mode (VERIFY uses grep/Read); install recommended: ${GRAPHIFY_INSTALL}"
   exit 2
 elif [[ "$graph_missing" -eq 1 ]]; then
   if [[ "$MODE" == "greenfield" ]]; then

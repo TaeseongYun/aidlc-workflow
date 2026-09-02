@@ -13,16 +13,17 @@ This is the single entry point for team-ai-workflow. It only does the following 
 1. Diagnose the current environment state:
    - Core location (`$TEAM_AI_WORKFLOW_DIR`, `~/workspace/team-ai-workflow`, `~/work/team-ai-workflow`, `~/.team-ai-workflow`)
    - Whether skills are installed globally (`~/.claude/commands/ctx-aidlc-run.md`)
-   - **Code graph prerequisites (required)**: exit code from `bash <core-path>/scripts/check-graphify.sh .` (0 satisfied / 2 tool missing / 3 graph missing)
+   - **Code graph prerequisites (recommended)**: exit code from `bash <core-path>/scripts/check-graphify.sh .` (0 satisfied / 2 tool missing → degraded possible / 3 graph missing)
    - Whether the current project is initialized (`ctx/`, `aidlc-docs/`)
    - List of in-progress features (`aidlc-docs/features/*/status.md`)
    - External integration detection (`.omc/`, `.ouroboros/`)
 
-1.5. **HARD GATE (before all other routing)**: if the check reports a missing tool (code 2), initial setup cannot proceed.
-   Do not continue or accept a free-text "continue" prompt. Use an **AskUserQuestion dialog** to ask whether to
-   (1) run installation, (2) show manual instructions, or (3) cancel. Read installation commands from the `MISSING:` lines emitted by `check-graphify.sh`.
-   If the user explicitly approves (1), run the install command and `graphify .` with Bash, then rerun the check and confirm it passes.
-   If only the graph is missing on brownfield (code 3), run `graphify .` and continue.
+1.5. **Code graph check (before other routing — non-blocking)**: if the check reports a missing tool (code 2),
+   graphify is recommended but not mandatory. Use an **AskUserQuestion dialog** to ask whether to
+   (1) install graphify now, (2) proceed in degraded mode, or (3) cancel. Read installation commands from the `MISSING:` lines emitted by `check-graphify.sh`.
+   If the user approves (1), run the install command and `graphify .` with Bash, then rerun the check and confirm it passes.
+   If the user chooses (2), record `Hallucination Guard Mode: degraded` in `aidlc-docs/aidlc-state.md` and continue (VERIFY falls back to grep/Read per `common/graph-grounding.md`).
+   Only a cancel choice stops the flow. If only the graph is missing on brownfield (code 3), run `graphify .` and continue.
 
 2. After the gate passes, report the diagnosis results and ask the user their intent in one line:
    "Is the task you want to do this time (a) new feature requirements analysis (b) decomposing a large planning document (c) allocating approved roadmap features to worktrees (d) implementing approved requirements (e) environment setup?"
