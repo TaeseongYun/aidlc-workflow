@@ -66,9 +66,9 @@ for qid in $question_ids; do
     grab {print}
   ' "$QFILE" | head -30)
 
-  # 분류 (유형) 필드
-  if echo "$block" | grep -qi '분류:\|유형:' 2>/dev/null; then
-    type_val=$(echo "$block" | grep -oi '분류: *\(policy\|domain\|scope\)\|유형: *\(policy\|domain\|scope\)' | head -1)
+  # 분류 (유형) 필드 — labels are bilingual (KR: 분류/유형, EN: Type/Category)
+  if echo "$block" | grep -qi '분류:\|유형:\|Type:\|Category:' 2>/dev/null; then
+    type_val=$(echo "$block" | grep -oiE '(분류|유형|Type|Category): *(policy|domain|scope)' | head -1)
     if [[ -n "$type_val" ]]; then
       pass "$qnum: 분류 필드 있음 ($type_val)"
     else
@@ -78,31 +78,31 @@ for qid in $question_ids; do
     error "$qnum: 분류(유형) 필드 누락"
   fi
 
-  # 영향도 필드
-  if echo "$block" | grep -qi '영향도:' 2>/dev/null; then
+  # 영향도 필드 (KR: 영향도, EN: Impact)
+  if echo "$block" | grep -qi '영향도:\|Impact:' 2>/dev/null; then
     pass "$qnum: 영향도 필드 있음"
   else
     warn "$qnum: 영향도 필드 누락"
   fi
 
-  # 미응답 시 필드
-  if echo "$block" | grep -qi '미응답 시:' 2>/dev/null; then
-    fallback=$(echo "$block" | grep -oi '미응답 시: *\(BLOCK\|ASSUME\|AI-RECOMMEND\|DEFER\)' | head -1)
+  # 미응답 시 필드 (KR: 미응답 시, EN: If unanswered)
+  if echo "$block" | grep -qi '미응답 시:\|If unanswered:' 2>/dev/null; then
+    fallback=$(echo "$block" | grep -oiE '(미응답 시|If unanswered): *(BLOCK|ASSUME|AI-RECOMMEND|DEFER)' | head -1)
     pass "$qnum: 미응답 시 필드 있음 ($fallback)"
   else
     error "$qnum: 미응답 시 필드 누락"
   fi
 
-  # 범위(Scope Tag) 필드
-  if echo "$block" | grep -qi '범위:' 2>/dev/null; then
+  # 범위(Scope Tag) 필드 (KR: 범위, EN: Scope)
+  if echo "$block" | grep -qi '범위:\|Scope:' 2>/dev/null; then
     pass "$qnum: 범위 필드 있음"
   else
     warn "$qnum: 범위(Scope Tag) 필드 누락"
   fi
 
-  # 우선순위 필드
-  if echo "$block" | grep -qi '우선순위:' 2>/dev/null; then
-    priority_val=$(echo "$block" | grep -oi '우선순위: *P[0-2]' | head -1)
+  # 우선순위 필드 (KR: 우선순위, EN: Priority)
+  if echo "$block" | grep -qi '우선순위:\|Priority:' 2>/dev/null; then
+    priority_val=$(echo "$block" | grep -oiE '(우선순위|Priority): *P[0-2]' | head -1)
     if [[ -n "$priority_val" ]]; then
       pass "$qnum: 우선순위 필드 있음 ($priority_val)"
     else
@@ -130,8 +130,8 @@ for qid in $question_ids; do
     grab {print}
   ' "$QFILE" | head -30)
 
-  # 'policy' 유형 질문만 대상 ('유형: policy' 우선, 하위호환으로 '분류: policy'도 인정)
-  if echo "$block" | grep -qiE '(유형|분류): *policy' 2>/dev/null; then
+  # 'policy' 유형 질문만 대상 (KR 유형/분류, EN Type/Category — 값이 policy인 경우)
+  if echo "$block" | grep -qiE '(유형|분류|Type|Category): *policy' 2>/dev/null; then
     policy_found=$((policy_found + 1))
     if echo "$block" | grep -qi 'AI 추천:\|AI-RECOMMEND' 2>/dev/null; then
       error "$qnum: policy 질문에 AI 추천이 포함됨 (governance 위반)"
@@ -148,8 +148,9 @@ fi
 echo ""
 echo "--- 5. BLOCK 질문 현황 ---"
 block_open=$(grep -ci 'BLOCK' "$QFILE" 2>/dev/null || true)
-answered=$(grep -c '\[답변\]:.\+' "$QFILE" 2>/dev/null || true)
-unanswered=$(grep -c '\[답변\]: *$' "$QFILE" 2>/dev/null || true)
+# Answer label is bilingual (KR: [답변], EN: [Answer])
+answered=$(grep -cE '\[(답변|Answer)\]:.+' "$QFILE" 2>/dev/null || true)
+unanswered=$(grep -cE '\[(답변|Answer)\]: *$' "$QFILE" 2>/dev/null || true)
 
 echo "BLOCK 언급: ${block_open}회"
 echo "답변 완료: ${answered}건"
@@ -162,10 +163,11 @@ fi
 # --- 6. 확신도 태그 통계 ---
 echo ""
 echo "--- 6. 확신도 태그 통계 ---"
-certain=$(grep -c '\[확신: 확실\]' "$QFILE" 2>/dev/null || true)
-estimated=$(grep -c '\[확신: 추정\]' "$QFILE" 2>/dev/null || true)
-ai_rec=$(grep -c '\[확신: AI추천\]' "$QFILE" 2>/dev/null || true)
-deferred=$(grep -c '\[확신: 미정\]' "$QFILE" 2>/dev/null || true)
+# Confidence tag is bilingual (KR: [확신: 확실/추정/AI추천/미정], EN: [Confidence: certain/estimated/ai-recommended/undecided])
+certain=$(grep -ciE '\[(확신: 확실|Confidence: certain)\]' "$QFILE" 2>/dev/null || true)
+estimated=$(grep -ciE '\[(확신: 추정|Confidence: estimated)\]' "$QFILE" 2>/dev/null || true)
+ai_rec=$(grep -ciE '\[(확신: AI추천|Confidence: ai-recommended)\]' "$QFILE" 2>/dev/null || true)
+deferred=$(grep -ciE '\[(확신: 미정|Confidence: undecided)\]' "$QFILE" 2>/dev/null || true)
 
 echo "확실: ${certain}, 추정: ${estimated}, AI추천: ${ai_rec}, 미정: ${deferred}"
 

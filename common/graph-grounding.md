@@ -15,6 +15,15 @@ installed, is only a fallback graph source.
 - **No graphify** → fall back to `codegraph explore`/`codegraph node`, then grep/Read of the real
   source, then `ctx/` docs or official upstream docs.
 
+## Degraded mode (no graph tool)
+
+graphify is strongly recommended but not mandatory. When neither graphify nor codegraph is available
+(`aidlc-docs/aidlc-state.md` → `Hallucination Guard Mode: degraded`), this is a **supported operating
+mode**, not a failure — VERIFY drops to grep/Read of the real source. Because grep/Read gives narrower
+evidence than a call graph (it cannot follow dynamic dispatch or blast radius), mark dev facts
+`⚠️ UNCERTAIN` more aggressively and lean on BLOCK questions for anything load-bearing. Install graphify
+(`uv tool install "graphifyy[mcp]"`) to restore graph-backed verification.
+
 ## Provenance handling (edge confidence)
 
 Every graphify edge is labelled. Treat the labels as verification strength, not as fact:

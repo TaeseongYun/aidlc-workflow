@@ -11,9 +11,12 @@ all `ctx-*` skill runs automatically. See `README.md` for how it is wired.
 **Grounding substrate:** verification quality is only as good as the source you check against. The
 highest-quality source is a **code graph** — `graphify query "<q>"` / `graphify explain "<entity>"` /
 `graphify path "<a>" "<b>"` (or the MCP tools) return nodes, call paths, and verbatim `file:line`
-locations. That is why `graphify` + a built `graphify-out/graph.json` are enforced as setup
-preconditions (`scripts/check-graphify.sh`); codegraph, if present, is only a fallback source.
-Without the graph, VERIFY degrades to grep/memory — the exact failure mode that produces hallucination.
+locations. That is why `graphify` + a built `graphify-out/graph.json` are **strongly recommended** at
+setup (`scripts/check-graphify.sh`); codegraph, if present, is a fallback source. graphify is not
+mandatory: when it is absent the guard runs in **degraded mode** — a supported fallback where VERIFY
+drops to grep/Read (see `common/graph-grounding.md`) and dev facts are marked `⚠️ UNCERTAIN` more
+aggressively, since grep/Read is the failure surface where hallucination is most likely. Prefer the
+graph whenever it is available.
 
 ---
 

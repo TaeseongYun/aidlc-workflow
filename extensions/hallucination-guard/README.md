@@ -17,11 +17,13 @@ initial project setup and referenced from every project's `CLAUDE.md`, so there 
 
 ## How it is wired (all parts)
 
-1. **Precondition gate** — `scripts/check-graphify.sh` enforces `graphify` + a built
-   `graphify-out/graph.json` before setup proceeds. Missing the tool = setup blocked.
-   - `scripts/init-project.sh` hard-fails on a missing tool and auto-builds a missing graph (brownfield).
-   - `/team-ai-workflow-start` (skill) opens an **AskUserQuestion dialog** to install the missing
-     tool — never a free-text "continue anyway" prompt.
+1. **Precondition check** — `scripts/check-graphify.sh` looks for `graphify` + a built
+   `graphify-out/graph.json`. graphify is strongly recommended, not mandatory: missing the tool
+   drops the guard to **degraded mode** (VERIFY via grep/Read), it does not block setup.
+   - `scripts/init-project.sh` warns and continues in degraded mode on a missing tool, and
+     auto-builds a missing graph (brownfield).
+   - `/team-ai-workflow-start` (skill) opens an **AskUserQuestion dialog** offering install /
+     proceed-in-degraded-mode / cancel — never a free-text "continue anyway" prompt.
 2. **Guard rules** — `init-project.sh` appends a "Hallucination Guard (ALWAYS ON)" pointer to the
    generated `CLAUDE.md`, referencing `hallucination-guard.md`. Every `ctx-*` run bootstraps it.
 3. **Per-project state** (scaffolded by `init-project.sh` from `templates/`):
@@ -33,10 +35,12 @@ initial project setup and referenced from every project's `CLAUDE.md`, so there 
 5. **Execution hook** — `skills/ctx-run` references Rule 0 so dev facts get verified via graphify
    during implementation.
 
-## Why the code graph (graphify) is required
+## Why the code graph (graphify) is strongly recommended
 
 The guard verifies dev facts against a **concrete source**, preferring reading the code over recalling
 it. `graphify query` / `graphify explain` / `graphify path` (or the MCP tools) give nodes, call paths,
 and verbatim `file:line` in one shot — the best such source. Without the graph, VERIFY falls back to
-grep/memory, which is what causes hallucination in the first place. Hence the substrate is a hard
-precondition, not a nicety. (codegraph, if installed, is only a fallback.)
+grep/Read, which is a weaker surface where hallucination is more likely. That is why graphify is the
+strongly recommended default. It is not a hard precondition, though: when it is absent the guard runs
+in degraded mode (grep/Read, with `⚠️ UNCERTAIN` applied more aggressively). (codegraph, if installed,
+is a fallback graph source.)

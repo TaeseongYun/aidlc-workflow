@@ -1,0 +1,35 @@
+name: validate
+
+# Runs the repo's existing validators on every PR and on pushes to main.
+# All validators use only standard Unix tools (bash/grep/sed/awk) and run fully
+# offline — no graphify, jq, python, or network access required.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Skill structure checks (entrypoint, frontmatter, no hardcoded paths,
+      #    no cross-skill refs, referenced files exist). Exits non-zero on failure.
+      - name: Validate skills
+        run: bash tools/validate-skills.sh
+
+      # 2. Artifact/question/readiness-score checks against the golden baselines.
+      #    Warnings are exit 0 (not a failure); only real errors exit non-zero.
+      #    Run all baselines even if one fails, then fail the job if any did.
+      - name: Validate golden baselines
+        run: |
+          set -u
+          rc=0
+          for dir in minimal-bugfix standard-feature comprehensive-platform; do
+            echo "::group::validate-all $dir"
+            bash tools/evaluator/validate-all.sh "examples/golden-baselines/$dir" || rc=1
+            echo "::endgroup::"
+          done
+          exit "$rc"

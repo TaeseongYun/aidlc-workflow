@@ -133,7 +133,7 @@ ctx/
 | `/ctx-score-loop` | 实现后在依赖项 + 4 个维度上自动迭代评分（分数超过 85 时完成） |
 | `/ctx-hallucination-audit` | Hallucination Guard 审计循环。使用 graphify（codegraph 兜底）验证开发事实，隔离被反驳的声明，重复执行直到分数达到至少 87 |
 
-> **Hallucination Guard（始终开启）。** 它通过代码图验证路径、符号、API、配置键和版本等开发事实，防止 AI 猜测以事实形式泄漏。`graphify`（`graphifyy[mcp]`）是**初始设置的必要前提**（codegraph 为可选兜底）。如果缺少 `graphify`，`/team-ai-workflow-start` 会阻止进度并通过对话框询问是否安装。规则位于：`extensions/hallucination-guard/`；指南：`docs/hallucination-guard.md`。
+> **Hallucination Guard（始终开启）。** 它通过代码图验证路径、符号、API、配置键和版本等开发事实，防止 AI 猜测以事实形式泄漏。`graphify`（`graphifyy[mcp]`）在初始设置中**强烈推荐**但并非必需（codegraph 为可选兜底）。如果缺少 `graphify`，`/team-ai-workflow-start` 会通过对话框询问：安装 / 以降级（degraded）模式继续 / 取消；降级模式下 VERIFY 回退到 grep/Read。规则位于：`extensions/hallucination-guard/`；指南：`docs/hallucination-guard.md`。
 
 ---
 

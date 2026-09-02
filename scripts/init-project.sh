@@ -24,9 +24,10 @@ echo "Initializing team-ai-workflow structure in: ${PROJECT_ROOT}"
 echo "Project name: ${PROJECT_NAME}"
 echo
 
-# ── Hallucination Guard precondition: code-graph substrate is MANDATORY ──────────
-# The guard verifies dev facts against a code graph; without it, setup must not proceed.
-# graphify is the primary substrate; codegraph (if present) is only an optional fallback.
+# ── Hallucination Guard precondition: code-graph substrate is STRONGLY RECOMMENDED ──
+# The guard verifies dev facts against a code graph. graphify is the primary substrate;
+# codegraph (if present) is a fallback. When neither is available the guard degrades to
+# grep/Read verification (see common/graph-grounding.md) — setup still proceeds.
 # --mode is auto-detected by the gate (brownfield if source files exist, else greenfield).
 echo "Checking code-graph preconditions (graphify)…"
 if GATE_OUT="$(bash "${SCRIPT_DIR}/check-graphify.sh" "${PROJECT_ROOT}")"; then
@@ -37,19 +38,19 @@ fi
 echo "${GATE_OUT}"
 
 if [[ "${GATE_RC}" -eq 2 ]]; then
-  # The graphify tool is missing. Bash cannot show a dialog, so fail loudly and defer the
-  # install dialog to the /team-ai-workflow-start skill (per the plan's gate design).
+  # The graphify tool is missing. Warn and continue in DEGRADED mode — do NOT abort setup.
+  # /team-ai-workflow-start surfaces an install / degraded / cancel dialog on first run.
   echo
-  echo "초기 세팅 불가 — graphify 전제조건 미충족." >&2
-  echo "설치는 자동으로 진행하지 않습니다. Claude에서 /team-ai-workflow-start 를 실행하면" >&2
-  echo "설치 여부를 대화 상자로 처리합니다 (또는 위 install 명령을 직접 실행하세요)." >&2
-  exit 1
+  echo "WARN: graphify not found — continuing in DEGRADED mode (VERIFY falls back to grep/Read)." >&2
+  echo "Install later to enable graph-backed verification: uv tool install \"graphifyy[mcp]\"" >&2
+  echo
 elif [[ "${GATE_RC}" -eq 3 ]]; then
-  # Tool present, brownfield, but the graph isn't built yet — build it.
+  # Tool present, brownfield, but the graph isn't built yet — try to build it.
   echo "Building graph (graphify .)…"
   ( cd "${PROJECT_ROOT}" && graphify . ) || {
-    echo "graphify . 실패 — 수동으로 '(cd ${PROJECT_ROOT} && graphify .)' 실행 후 재시도하세요." >&2
-    exit 1
+    echo "WARN: 'graphify .' failed — continuing in DEGRADED mode. Retry manually later:" >&2
+    echo "  (cd ${PROJECT_ROOT} && graphify .)" >&2
+    GATE_RC=2
   }
 fi
 # ────────────────────────────────────────────────────────────────────────────────
@@ -191,5 +192,11 @@ echo "      ├── hallucination-ledger.md"
 echo "      ├── knowledge-log.md"
 echo "      └── features/"
 echo
-echo "Hallucination Guard active (graphify verified). Audit loop: /ctx-hallucination-audit"
+if [[ "${GATE_RC}" -eq 2 ]]; then
+  echo "Hallucination Guard active in DEGRADED mode (no graph; VERIFY uses grep/Read)."
+  echo "Install graphify to enable graph-backed verification: uv tool install \"graphifyy[mcp]\""
+  echo "Audit loop: /ctx-hallucination-audit"
+else
+  echo "Hallucination Guard active (graphify verified). Audit loop: /ctx-hallucination-audit"
+fi
 echo "Next: fill in the (TODO) placeholders, then run /ctx-aidlc-run"
