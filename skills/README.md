@@ -33,6 +33,10 @@ This directory is the source repository for the team's shared Codex skills.
   - CTX refinement
 - `ctx-commit-planner`
   - Commit separation planning
+- `ctx-aidlc-sync`
+  - One-shot content-level sync with upstream AWS AI-DLC (`awslabs/aidlc-workflows`)
+  - Dispositions upstream changes via `docs/methodology-references.md` (PORT/SKIP/ESCALATE),
+    works in a git worktree branch, and opens a PR only when the 4-axis sync score exceeds 90
 - `ctx-hallucination-audit`
   - Hallucination Guard audit loop. Verifies dev facts with graphify (codegraph
     fallback), isolates refuted items in the ledger, repeats until the
