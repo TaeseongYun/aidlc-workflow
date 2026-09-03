@@ -27,6 +27,8 @@ Target follow-up skills:
 - Post-implementation automatic scoring loop: `/ctx-score-loop` (only for features
   that pass GATE-3; autonomously iterates dependency/4-axis verification until the
   score exceeds 85)
+- Upstream methodology sync: `/ctx-aidlc-sync` (ports AWS AI-DLC upstream changes
+  into the workflow repo; PRs only above a 90-point sync score)
 - External orchestration (optional): oh-my-claudecode(OMC), Ouroboros
 
 ────────────────────────────────────

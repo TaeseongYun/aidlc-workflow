@@ -45,6 +45,7 @@ SKILLS=(
   "ctx-score-loop"
   "ctx-worktree"
   "ctx-hallucination-audit"
+  "ctx-aidlc-sync"
 )
 
 for skill in "${SKILLS[@]}"; do
