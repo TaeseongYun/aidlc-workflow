@@ -2,7 +2,8 @@ name: validate
 
 # Runs the repo's existing validators on every PR and on pushes to main.
 # All validators use only standard Unix tools (bash/grep/sed/awk) and run fully
-# offline — no graphify, jq, python, or network access required.
+# offline — no graphify, jq, or network access required (python3 stdlib only for
+# the graph_inventory.py self-check).
 on:
   pull_request:
   push:
@@ -20,7 +21,11 @@ jobs:
       - name: Validate skills
         run: bash tools/validate-skills.sh
 
-      # 2. Artifact/question/readiness-score checks against the golden baselines.
+      # 2. Helper-script self-checks (aidlc-log.sh, md-section.sh, graph_inventory.py).
+      - name: Test helper scripts
+        run: bash tools/test-scripts.sh
+
+      # 3. Artifact/question/readiness-score checks against the golden baselines.
       #    Warnings are exit 0 (not a failure); only real errors exit non-zero.
       #    Run all baselines even if one fails, then fail the job if any did.
       - name: Validate golden baselines

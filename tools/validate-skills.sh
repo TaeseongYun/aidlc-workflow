@@ -83,7 +83,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   # 설치 경로 진단(~/.claude/..., ~/.codex/skills/...)이나 글로벌 commands 경로는
   # 다른 스킬의 소스를 의존하는 것이 아니라 "설치 여부 확인"이므로 제외한다.
   cross_refs=$(grep -rn "skills/[a-z]" "$skill_dir" --include="*.md" 2>/dev/null \
-    | grep -v "_shared" | grep -v "common" \
+    | grep -v "_shared" | grep -v "common" | grep -v "skills/${skill_name}/" \
     | grep -vE '~?/?\.(claude|codex)[^ ]*skills/' \
     | grep -vE '\.claude/|\.codex/' || true)
   if [[ -z "$cross_refs" ]]; then
@@ -127,6 +127,28 @@ for skill_dir in "$SKILLS_DIR"/*/; do
       skip "REF-01: $skill_name — no internal file references to check"
     fi
   fi
+
+  # REF-02: {{TEAM_AI_WORKFLOW_DIR}}/<path> references resolve inside this repo
+  ref2_missing=$(grep -rhoE '\{\{TEAM_AI_WORKFLOW_DIR\}\}/[A-Za-z0-9_./-]+' "$skill_dir" --include="*.md" 2>/dev/null \
+    | sort -u | sed -e 's#{{TEAM_AI_WORKFLOW_DIR}}/##' -e 's#[.,)]*$##' \
+    | while IFS= read -r p; do [[ -e "$ROOT_DIR/$p" ]] || echo "$p"; done)
+  if [[ -z "$ref2_missing" ]]; then
+    pass "REF-02: $skill_name — all workflow-dir references resolve"
+  else
+    fail "REF-02: $skill_name — unresolved workflow-dir reference: $(echo "$ref2_missing" | head -3 | tr '\n' ' ')"
+  fi
+
+  # TOKEN-01: prompt-weight budget. Rough estimate: printable-ASCII bytes / 3.3 + other bytes / 3.
+  for f in "$skill_dir/SKILL.md" "$skill_dir/CLAUDE_COMMAND.md" "$skill_dir"/phases/*.md; do
+    [[ -f "$f" ]] || continue
+    case "$(basename "$f")" in SKILL.md) budget=5000 ;; CLAUDE_COMMAND.md) budget=4000 ;; *) budget=3000 ;; esac
+    est=$(LC_ALL=C awk '{ n = length($0); for (i = 1; i <= n; i++) { if (substr($0, i, 1) ~ /[ -~]/) a++; else o++ } } END { printf "%d", a / 3.3 + o / 3 }' "$f")
+    if (( est <= budget )); then
+      pass "TOKEN-01: $skill_name/$(basename "$f") — ~${est} tokens (budget ${budget})"
+    else
+      fail "TOKEN-01: $skill_name/$(basename "$f") — ~${est} tokens exceeds budget ${budget}"
+    fi
+  done
 
   echo ""
 done
