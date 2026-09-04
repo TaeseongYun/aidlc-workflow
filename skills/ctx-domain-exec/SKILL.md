@@ -127,6 +127,16 @@ Input format validation follows the `skills/_shared/skill-protocol.md` standard.
 
 ---
 
+## Pre-Implementation Loads (required before writing code)
+
+- `aidlc-docs/features/<feature-slug>/technical-design.md` when it exists: follow it; if a response shape or data model is undecided there, STOP and ask.
+- `{{TEAM_AI_WORKFLOW_DIR}}/platforms/<platform>/guidance.md` for the platform declared in `ctx/project-profile.ctx.md` (infer via `platforms/README.md` if undeclared).
+- `{{TEAM_AI_WORKFLOW_DIR}}/core/lazy-implementation.md`: apply the 7-rung ladder right before writing code.
+- Hallucination Guard Rule 0: verify every dev fact (path, API, field, version, flag) per `{{TEAM_AI_WORKFLOW_DIR}}/common/graph-grounding.md` before stating it.
+- After implementation, run the project build/test command and report the result verbatim.
+
+---
+
 ## Implementation Procedure (fixed internal order)
 
 This Skill must work only in the following order.

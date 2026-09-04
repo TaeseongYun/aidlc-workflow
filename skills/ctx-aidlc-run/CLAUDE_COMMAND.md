@@ -14,7 +14,7 @@ Write outputs to `aidlc-docs/`.
 - Analyze the request as greenfield or brownfield.
 - Assess depth level (minimal/standard/comprehensive) per `depth-levels.md`.
 - For prepared-requirement, run Input Validation (STEP 1-C) per `input-validation.md`.
-- For brownfield without existing RE artifacts, run Reverse Engineering (STEP 1.5).
+- For brownfield without existing RE artifacts, run Reverse Engineering (STEP 1.5). With a code graph, run `python3 {{TEAM_AI_WORKFLOW_DIR}}/scripts/graph_inventory.py .` first and read only the `## God Nodes` / `## Communities` sections of `graphify-out/GRAPH_REPORT.md` via `md-section.sh`; verify the `⚠️ UNCERTAIN (auto)` rows instead of exploring the source tree.
 - Scan and present extension opt-in questions per `extension-rules.md`.
 - Classify the request as `raw-request`, `prepared-requirement`, or `change-on-existing-feature`.
 - Extract requirement gaps with Question Governance (Focus Anchor, type classification, risk-based priority P0/P1/P2, AI recommendations, confidence tagging, question budget) per `question-governance.md`.
@@ -24,34 +24,47 @@ Write outputs to `aidlc-docs/`.
 - Write/update `aidlc-docs`.
 - Stop before any implementation.
 
-## Required Reading Order
+## Input Loading (lazy — read only what the current STEP needs)
+
+BOOTSTRAP (read immediately on start):
 1. `ctx/INDEX.md` when present
 2. `ctx/project-profile.ctx.md` when present
 3. `AGENTS.md` when present
 4. `CLAUDE.md` when present
 5. `README.md` when present
-5a. `aidlc-docs/_roadmap.md` when present (multi-feature mode awareness; never overwrite)
-6. Relevant additional `ctx/*`
-7. `{{TEAM_AI_WORKFLOW_DIR}}/README.md`
-8. `{{TEAM_AI_WORKFLOW_DIR}}/core/core-workflow.md`
-9. `{{TEAM_AI_WORKFLOW_DIR}}/core/requirements-analysis.md`
-10. `{{TEAM_AI_WORKFLOW_DIR}}/core/units-generation.md`
-11. `{{TEAM_AI_WORKFLOW_DIR}}/core/unit-sizing.md`
-12. `{{TEAM_AI_WORKFLOW_DIR}}/core/nfr-checklist.md`
-13. `{{TEAM_AI_WORKFLOW_DIR}}/core/readiness-score.md`
-14. `{{TEAM_AI_WORKFLOW_DIR}}/core/input-validation.md`
-15. `{{TEAM_AI_WORKFLOW_DIR}}/core/reverse-engineering.md`
-15. `{{TEAM_AI_WORKFLOW_DIR}}/common/question-rules.md`
-16. `{{TEAM_AI_WORKFLOW_DIR}}/common/question-governance.md`
-17. `{{TEAM_AI_WORKFLOW_DIR}}/common/no-implicit-decisions.md`
-18. `{{TEAM_AI_WORKFLOW_DIR}}/common/stage-gate-rules.md`
-19. `{{TEAM_AI_WORKFLOW_DIR}}/common/depth-levels.md`
-20. `{{TEAM_AI_WORKFLOW_DIR}}/common/content-validation.md`
-21. `{{TEAM_AI_WORKFLOW_DIR}}/common/extension-rules.md`
-22. `{{TEAM_AI_WORKFLOW_DIR}}/common/overconfidence-prevention.md`
-23. `{{TEAM_AI_WORKFLOW_DIR}}/common/error-recovery.md`
-24. `{{TEAM_AI_WORKFLOW_DIR}}/templates/technical-design.md`
-25. `{{TEAM_AI_WORKFLOW_DIR}}/extensions/` — scan for `*.opt-in.md` files
+6. `aidlc-docs/_roadmap.md` when present (multi-feature mode awareness; never overwrite)
+7. `aidlc-docs/aidlc-state.md` and `aidlc-docs/audit.md` when present
+8. Relevant additional `ctx/*` (only files related to the feature)
+9. `{{TEAM_AI_WORKFLOW_DIR}}/core/core-workflow.md`
+10. `{{TEAM_AI_WORKFLOW_DIR}}/common/no-implicit-decisions.md`
+11. `{{TEAM_AI_WORKFLOW_DIR}}/common/depth-levels.md`
+12. On resume only (aidlc-state.md already shows progress): `bash {{TEAM_AI_WORKFLOW_DIR}}/scripts/md-section.sh {{TEAM_AI_WORKFLOW_DIR}}/common/error-recovery.md "## 2. Session Resumption Procedure"`. Load the full file only when an error or inconsistency is actually found.
+
+Do not re-read files already read. Paths in the table below are relative to `{{TEAM_AI_WORKFLOW_DIR}}/`.
+
+PER-STEP LOADING (read only when entering the corresponding STEP):
+
+| Timing | Files to read |
+|------|----------|
+| STEP 1-C entry | `core/input-validation.md` |
+| STEP 1.5 entry | `core/reverse-engineering.md`, `templates/reverse-engineering/*`, `common/graph-grounding.md`; with a graph: `scripts/graph_inventory.py` + GRAPH_REPORT.md sections instead of source exploration (see STEP 1.5) |
+| STEP 1.5 Extension Scan | `common/extension-rules.md`, `extensions/*.opt-in.md` |
+| After STEP 3 completion | `common/overconfidence-prevention.md` (perform question-omission detection) |
+| STEP 3 entry | `templates/planning-draft.md` (raw-request only), `common/diagram-standards.md`, `common/graph-grounding.md`, `templates/graph-evidence.md` |
+| Reaching the first GATE | `bash {{TEAM_AI_WORKFLOW_DIR}}/scripts/md-section.sh {{TEAM_AI_WORKFLOW_DIR}}/common/stage-gate-rules.md "## Gate List" "## Gate Rules" "## Standard Approval Message Format" "## Audit Log Integration"` once (reused for all GATEs); at each GATE-N add `"### GATE-N:"` (its Per-Gate Review Items). Never load the whole file |
+| STEP 4 entry | `common/question-rules.md`, `common/question-governance.md`, `common/graph-grounding.md` |
+| STEP 5 entry | `core/requirements-analysis.md` |
+| STEP 5-V entry | `common/content-validation.md` |
+| STEP 5.5 entry | `templates/personas.md`, `templates/stories.md` |
+| STEP 5.7 entry | `templates/components.md`, `templates/services.md`, `templates/component-dependency.md` |
+| STEP 6 entry | `core/units-generation.md`, `core/unit-sizing.md`, `common/graph-grounding.md`, `common/overconfidence-prevention.md` (perform self-verification) |
+| STEP 6.5 entry | `templates/technical-design.md`, `templates/graph-evidence.md`, `core/nfr-checklist.md`, `common/graph-grounding.md`, `common/overconfidence-prevention.md` (perform self-verification) |
+| STEP 6.7 entry | `templates/infrastructure-design.md`, `templates/deployment-architecture.md`, `common/overconfidence-prevention.md` (perform self-verification) |
+| STEP 7 entry | `core/readiness-score.md` |
+| STEP 9 entry | `templates/build-instructions.md`, `templates/test-instructions.md` |
+
+If a conditional STEP is skipped, its files are not read.
+Additional Project `ctx/*` files are read selectively, only those related to the feature.
 
 ## Required Outputs
 
@@ -83,7 +96,7 @@ Create these additional files only for `raw-request`:
 - Do NOT modify frontend/backend runtime files.
 - Only edit `aidlc-docs/` during this command.
 - Even if requirements are fully resolved, STOP after documentation.
-- Implementation is allowed only in a separate `/ctx-run` command.
+- Implementation is allowed only in a separate `/ctx-domain-exec` command (or an OMC/Ouroboros handoff).
 
 ## Question Rules
 - Use the structured format from `question-rules.md` and governance rules from `question-governance.md`.
@@ -105,6 +118,7 @@ Create these additional files only for `raw-request`:
 - GATE-2 cannot be skipped under any classification. Direct entry into STEP 6 (UOW) is forbidden. GATE-2 does not pass while any unanswered BLOCK question remains.
 
 ## Behavior Rules
+- **Real-time audit/state updates**: after EVERY STEP start/complete/skip, GATE decision, and user answer, run `bash {{TEAM_AI_WORKFLOW_DIR}}/scripts/aidlc-log.sh <step|gate|answer|status|handoff|set> ...` once per event (`--help` lists the arguments). It writes the `templates/audit.md` block and updates `aidlc-state.md` in one call; do not Read/Edit those two files for these events unless the script exits non-zero. Do not batch events; several calls may share one turn.
 - Never make implicit business decisions.
 - If multiple valid policies or designs exist, create questions instead of deciding.
 - **Roadmap awareness**: when `aidlc-docs/_roadmap.md` exists, verify the working `feature-slug` matches a roadmap entry. Cite the roadmap's depends-on features and shared resources in `status.md` under a "Roadmap Context" section. If the slug is not in the roadmap, ask the user to (a) add it to the roadmap, (b) proceed as standalone, or (c) abort.

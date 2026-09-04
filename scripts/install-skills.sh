@@ -35,7 +35,6 @@ SKILLS=(
   "team-ai-workflow-start"
   "ctx-aidlc-roadmap"
   "ctx-aidlc-run"
-  "ctx-run"
   "ctx-architect-judge"
   "ctx-commit-planner"
   "ctx-domain-exec"

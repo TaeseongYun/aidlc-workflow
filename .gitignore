@@ -7,3 +7,4 @@
 
 # aidlc-docs (per-project output, not part of the framework)
 aidlc-docs/
+__pycache__/

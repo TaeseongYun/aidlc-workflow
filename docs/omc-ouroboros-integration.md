@@ -18,7 +18,7 @@ Using the two areas separately lets you run the same requirements outputs with m
 GATE approval is always done by a human. OMC/Ouroboros does not auto-pass a GATE.
 
 > **Restraint layer (ponytail)**: Unlike the two systems above that automate "how (How)", ponytail is responsible for
-> "**how little (How little)**" to build. It applies a 7-step restraint ladder in the implementation stage (`/ctx-run` ROLE 1),
+> "**how little (How little)**" to build. It applies a 7-step restraint ladder in the implementation stage (`/ctx-domain-exec`),
 > and can also be injected into OMC autopilot/ralph prompts.
 > Integration: [ponytail-integration.md](ponytail-integration.md), rules: [../core/lazy-implementation.md](../core/lazy-implementation.md)
 
@@ -34,7 +34,7 @@ When you first start on a new account or a new repo, calling this skill auto-dia
 - List of in-progress features
 - `.omc/` · `.ouroboros/` directory detection
 
-After diagnosis, it recommends the appropriate follow-up command (`/ctx-aidlc-roadmap`, `/ctx-aidlc-run`, `/ctx-run`,
+After diagnosis, it recommends the appropriate follow-up command (`/ctx-aidlc-roadmap`, `/ctx-aidlc-run`, `/ctx-domain-exec`,
 or an OMC/Ouroboros handoff).
 
 ```text

@@ -32,7 +32,7 @@ initial project setup and referenced from every project's `CLAUDE.md`, so there 
 4. **The audit loop** — `/ctx-hallucination-audit` (skill) runs HARVEST → VERIFY (graphify) → SCORE →
    RECORD → QUARANTINE → CAPTURE, looping until the Hallucination-Free Score ≥ 87.
    `scripts/harvest-assumptions.sh` feeds it the deterministic marker hits.
-5. **Execution hook** — `skills/ctx-run` references Rule 0 so dev facts get verified via graphify
+5. **Execution hook** — `skills/ctx-domain-exec` references Rule 0 so dev facts get verified via graphify
    during implementation.
 
 ## Why the code graph (graphify) is strongly recommended

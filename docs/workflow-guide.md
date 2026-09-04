@@ -34,6 +34,8 @@ Running STEP 1~9 all in one session causes **inconsistent answers and contradict
 | **B. Definition** | 4, 5, 5.5, 5.7, 6 | `requirements.md`, `unit-of-work.md` | After GATE-3 passes |
 | **C. Design** | 6.5, 6.7, 7, 8, 9 | `technical-design.md`, `build-instructions.md` | After GATE-5 passes |
 
+The STEP text of each Phase lives in `skills/ctx-aidlc-run/phases/phase-{a,b,c}.md`; `SKILL.md` (PHASE ROUTER) loads only the current Phase's file, and every audit/state event is written with `scripts/aidlc-log.sh`.
+
 ### Application criteria
 
 | Depth Level | Session separation | Reason |
@@ -109,7 +111,7 @@ Related outputs:
 - Purpose:
   - Make actual code changes based on the approved requirements
 - Skills used:
-  - `/ctx-run`
+  - `/ctx-domain-exec`
 - Results of this stage:
   - Code changes
   - Tests
@@ -121,14 +123,14 @@ Related outputs:
 1. Start requirements analysis with `/ctx-aidlc-run`
 2. Create `aidlc-docs/features/<feature-slug>/` outputs
 3. Collect planning/owner answers to the questions document
-4. Implement with `/ctx-run`
+4. Implement with `/ctx-domain-exec`
 
 ### Pattern A-1. Starting from a raw requirement
 1. Enter the original request from marketing/operations/the business as-is.
 2. First create `request-intake.md` and `planning-draft.md` with `/ctx-aidlc-run`.
 3. Organize policy, exceptions, operations, and success criteria into a questions document.
 4. After incorporating answers, promote `requirements.md` to an implementation-ready state.
-5. Then implement with `/ctx-run`.
+5. Then implement with `/ctx-domain-exec`.
 
 ### Pattern A-2. Request to add to an existing feature
 1. First use `/ctx-aidlc-run` to determine whether it can be linked to an existing `feature-slug`.
@@ -136,7 +138,7 @@ Related outputs:
 3. If it is an independent feature, create a new feature folder.
 
 ### Pattern B. Simple implementation request
-- If `ctx/` and `aidlc-docs` already contain all the needed decisions, go straight to `/ctx-run`
+- If `ctx/` and `aidlc-docs` already contain all the needed decisions, go straight to `/ctx-domain-exec`
 
 ### Pattern C. Large change mixed with policy
 - Always start from `/ctx-aidlc-run`
@@ -155,7 +157,7 @@ For the session separation guide, see the "Session separation (default execution
 - When you need to check the scope of impact first in a brownfield
 - When starting a new greenfield project
 
-## When is /ctx-run alone enough
+## When is /ctx-domain-exec alone enough
 - When the answer is already clear in the CTX and existing docs
 - When it is a small change that simply follows an existing pattern
 - When no new API/policy/settlement judgment is needed
@@ -245,7 +247,7 @@ ctx/
     └── commit-workflow.ctx.md
 ```
 
-### 5. Implement with /ctx-run
+### 5. Implement with /ctx-domain-exec
 - From this point, use both `ctx` and `aidlc-docs` together as the basis.
 
 ## Principles for handling raw requirements
@@ -306,7 +308,7 @@ Relevant CTX Path(s):
 ### Example of starting implementation
 
 ```text
-/ctx-run
+/ctx-domain-exec
 
 Implement based on the approved content in aidlc-docs and ctx.
 Do not assume new policy; use only existing decisions.

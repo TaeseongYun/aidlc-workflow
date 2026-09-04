@@ -41,7 +41,7 @@ project ctx/ (project-profile, local CTX)  >  platforms/<platform>/guidance.md  
 
    A project spanning multiple platforms lists one line per platform.
 
-2. `ctx-run` ROLE 1 (IMPLEMENTOR) and `ctx-aidlc-run` STEP 6.5 (technical
+2. `ctx-domain-exec` (implementation) and `ctx-aidlc-run` STEP 6.5 (technical
    design) read the declared guidance file(s) before producing output.
 
 3. If no platform is declared, infer it from the repository layout

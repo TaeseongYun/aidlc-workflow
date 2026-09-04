@@ -74,7 +74,7 @@ graph LR
     D --> F["GATE-0<br/>(human approval)"]
     F --> W["/ctx-worktree<br/>(optional isolation)"]
     W --> E
-    E --> G["/ctx-run<br/>or OMC/Ouroboros"]
+    E --> G["/ctx-domain-exec<br/>or OMC/Ouroboros"]
     G --> H["Implementation complete"]
 ```
 
@@ -109,7 +109,7 @@ ctx/
 
 ### Platform Guidance: 플랫폼별 아키텍처 베이스라인
 
-`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp)는 해당 플랫폼에서 설계(`/ctx-aidlc-run` STEP 6.5) 또는 구현(`/ctx-run` ROLE 1) 전에 에이전트가 로드해야 할 아키텍처 베이스라인을 담고 있다. 플랫폼은 `ctx/project-profile.ctx.md`에 선언하며, 우선순위는 프로젝트 `ctx/` > platform guidance > 일반 지식 순이다. 각 플랫폼에는 figma-to-code, vibe-coding security guard, testing, design-system, accessibility, i18n, observability, contract-codegen 등 상세한 플랫폼별 스킬이 함께 제공되며, 관련 파일을 건드리면 자동으로 로드된다. 문서는 독립적인 마크다운 형식이므로 외부 레포에서도 설치 경로 또는 raw GitHub URL로 사용할 수 있다 — [platforms/README.md](platforms/README.md) 참고.
+`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp)는 해당 플랫폼에서 설계(`/ctx-aidlc-run` STEP 6.5) 또는 구현(`/ctx-domain-exec`) 전에 에이전트가 로드해야 할 아키텍처 베이스라인을 담고 있다. 플랫폼은 `ctx/project-profile.ctx.md`에 선언하며, 우선순위는 프로젝트 `ctx/` > platform guidance > 일반 지식 순이다. 각 플랫폼에는 figma-to-code, vibe-coding security guard, testing, design-system, accessibility, i18n, observability, contract-codegen 등 상세한 플랫폼별 스킬이 함께 제공되며, 관련 파일을 건드리면 자동으로 로드된다. 문서는 독립적인 마크다운 형식이므로 외부 레포에서도 설치 경로 또는 raw GitHub URL로 사용할 수 있다 — [platforms/README.md](platforms/README.md) 참고.
 
 개념에 대한 자세한 설명은 [docs/concepts.md](docs/concepts.md)를 참고하라.
 
@@ -123,7 +123,6 @@ ctx/
 | `/ctx-aidlc-roadmap` | Phase 0: 멀티 피처 로드맵 분해 (GATE-0) |
 | `/ctx-worktree` | 승인된 병렬 안전 피처를 격리된 git worktree에 할당 |
 | `/ctx-aidlc-run` | Phase A-C: 요구사항 분석, 설계, 산출물 생성 |
-| `/ctx-run` | 구현: 승인된 요구사항을 바탕으로 코드 작성 |
 | `/ctx-architect-judge` | 도메인 범위 및 CTX 참조 결정 |
 | `/ctx-domain-exec` | 영향받는 도메인 식별 |
 | `/ctx-reviewer` | CTX 위반 여부 검증 |
@@ -161,7 +160,7 @@ team-ai-workflow는 "**무엇을 만들지**"를 결정한다. oh-my-claudecode 
 
 team-ai-workflow가 "**무엇을**", OMC/Ouroboros가 "**어떻게, 자동으로**"를 담당한다면,
 [ponytail](https://github.com/DietrichGebert/ponytail)은 "**얼마나 적게**"를 담당한다.
-구현 직전(`/ctx-run` ROLE 1)에 7단계 절제 사다리를 적용하여 과도한 엔지니어링을 방지한다.
+구현 직전(`/ctx-domain-exec`)에 7단계 절제 사다리를 적용하여 과도한 엔지니어링을 방지한다.
 플러그인을 설치하지 않아도 [core/lazy-implementation.md](core/lazy-implementation.md) 규칙만으로 동작하며,
 검증·보안·AC·정책 등 안전 가드는 절대 제거하지 않는다.
 
@@ -207,7 +206,6 @@ aidlc-workflow/
 │   ├── ctx-aidlc-roadmap/
 │   ├── ctx-worktree/
 │   ├── ctx-aidlc-run/
-│   ├── ctx-run/
 │   ├── ctx-score-loop/
 │   ├── ctx-hallucination-audit/
 │   └── ... (12 skills)

@@ -122,7 +122,7 @@ it identifies paths or failures. Do not automatically start another skill.
 
 Each worktree is its own directory, so each gets its **own** `graphify-out/graph.json` — no branch
 shares another's in-flight graph. This skill does not build graphs (that happens per worktree via
-`init-project.sh` / `ctx-run`); it only creates the isolated worktrees. Downstream:
+`init-project.sh` / `graphify .`); it only creates the isolated worktrees. Downstream:
 
 - Build/refresh the graph inside each worktree (`graphify .` / `graphify . --update`).
 - Review across worktrees with `graphify prs --worktrees` (worktree → branch → PR blast radius).

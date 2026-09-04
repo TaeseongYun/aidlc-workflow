@@ -26,22 +26,20 @@ volume; it never trims requirements, design, or safety.
 
 ## 1. Where It Plugs In
 
-In team-ai-workflow, the one place code is actually written is `ctx-run`'s **ROLE 1 — IMPLEMENTOR**.
-ponytail's trimming acts right before that point, and checks the result in **ROLE 3 — REVIEWER**.
+In team-ai-workflow, the one place code is actually written is `ctx-domain-exec`.
+ponytail's trimming acts right before that point, and `ctx-reviewer` checks the result.
 
 ```text
 /ctx-aidlc-run            ← requirements/design (GATE-2/3, human approval)
   ↓ (GATE-3 passed)
-/ctx-run
-  ROLE 0 ARCHITECT        ← no trimming (scope judgment)
-  ROLE 1 IMPLEMENTOR      ← ★ apply the 7-rung ladder just before writing code
-  ROLE 2 TEST_WRITER      ← trimming only on duplicate tests/mocks
-  ROLE 3 REVIEWER         ← ★ over-engineering check (maps to /ponytail-review)
-  ROLE 4~6               ← no trimming
+/ctx-architect-judge      ← no trimming (scope judgment)
+/ctx-domain-exec          ← ★ apply the 7-rung ladder just before writing code
+/ctx-reviewer             ← ★ over-engineering check (maps to /ponytail-review)
+/ctx-updater ~ /ctx-commit-planner ← no trimming
 ```
 
 The source of the trimming rules is in [`core/lazy-implementation.md`](../core/lazy-implementation.md).
-The ctx-run skill applies the ladder in ROLE 1 / ROLE 3 based on this document.
+`ctx-domain-exec` applies the ladder and `ctx-reviewer` checks it, based on this document.
 **Even without installing the ponytail plugin**, you get the trimming effect from these rules alone.
 
 ---
@@ -70,11 +68,11 @@ lower down is more powerful.
 
 ### 3-A. Rules Only (No Plugin Install, Default Recommendation)
 
-`ctx-run` applies it automatically in ROLE 1/3 based on `core/lazy-implementation.md`.
+`ctx-domain-exec` applies it automatically based on `core/lazy-implementation.md`.
 No extra install is needed, and it follows along on other accounts/repos just by running install-skills.sh.
 
 ```text
-/ctx-run
+/ctx-domain-exec
 Implement based on the following outputs. Apply the 7-rung ladder from core/lazy-implementation.md (full).
 - aidlc-docs/features/<slug>/requirements.md
 - aidlc-docs/features/<slug>/unit-of-work.md
@@ -172,11 +170,11 @@ When team-ai-workflow + OMC/Ouroboros + ponytail operate in the same repo.
 
 | Scenario | Recommended combination |
 |---------|-----------|
-| Light trimming with rules only | `/ctx-run` (core/lazy-implementation.md applied automatically) |
+| Light trimming with rules only | `/ctx-domain-exec` (core/lazy-implementation.md applied automatically) |
 | Automatic implementation + trimming | `/ctx-aidlc-run` → `/oh-my-claudecode:autopilot` (inject the ladder) |
 | Need metrics / dedicated commands | Install the ponytail plugin + `/ponytail-review`, `/ponytail-gain` |
 | Cleaning up legacy/over-engineered code | ponytail `ultra` + `/ponytail-audit` |
-| Simple change | `/ctx-run` + `lite` |
+| Simple change | `/ctx-domain-exec` + `lite` |
 
 ---
 ---
@@ -196,8 +194,8 @@ never trims requirements, design, or safety.
 
 ## 1. Where it plugs in
 
-The only place code is written is `ctx-run` **ROLE 1 — IMPLEMENTOR**; the ladder runs just
-before it, and **ROLE 3 — REVIEWER** checks the result. The rule source lives in
+The only place code is written is `ctx-domain-exec`; the ladder runs just
+before it, and `ctx-reviewer` checks the result. The rule source lives in
 [`core/lazy-implementation.md`](../core/lazy-implementation.md), so you get the effect
 **even without installing the plugin**.
 
@@ -210,7 +208,7 @@ feature? 5. Installed dependency? 6. One line? 7. Only then: minimum code. Safet
 
 ## 3. Three usage levels
 
-- **A. Rules only (default):** `ctx-run` applies `core/lazy-implementation.md` in ROLE 1/3.
+- **A. Rules only (default):** `ctx-domain-exec` applies `core/lazy-implementation.md`; `ctx-reviewer` checks it.
   No install; travels with `install-skills.sh`.
 - **B. Inject into OMC:** add the ladder to the autopilot/ralph prompt (keep safety guards explicit).
 - **C. Install the plugin (optional):** `/plugin marketplace add DietrichGebert/ponytail`
@@ -231,6 +229,6 @@ beats brevity. ponytail artifacts never overwrite `aidlc-docs/`; log decisions t
 
 ## 6. Recommended scenarios
 
-Rules-only → `/ctx-run`. Automated + trimmed → `/ctx-aidlc-run` → autopilot with ladder.
+Rules-only → `/ctx-domain-exec`. Automated + trimmed → `/ctx-aidlc-run` → autopilot with ladder.
 Metrics/commands → install plugin. Legacy cleanup → `ultra` + `/ponytail-audit`. Simple
 change → `lite`.

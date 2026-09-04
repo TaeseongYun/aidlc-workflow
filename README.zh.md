@@ -74,7 +74,7 @@ graph LR
     D --> F["GATE-0<br/>(human approval)"]
     F --> W["/ctx-worktree<br/>(optional isolation)"]
     W --> E
-    E --> G["/ctx-run<br/>or OMC/Ouroboros"]
+    E --> G["/ctx-domain-exec<br/>or OMC/Ouroboros"]
     G --> H["Implementation complete"]
 ```
 
@@ -109,7 +109,7 @@ ctx/
 
 ### Platform Guidance：各平台架构基准
 
-`platforms/<platform>/guidance.md`（android、ios、backend、frontend、flutter、rn、kmp）记录了 agent 在该平台进行设计（`/ctx-aidlc-run` STEP 6.5）或实现（`/ctx-run` ROLE 1）之前必须加载的架构基准。在 `ctx/project-profile.ctx.md` 中声明平台；优先级为：项目 `ctx/` > platform guidance > 通用知识。每个平台还附带详细的各平台专属技能——figma-to-code、vibe-coding 安全守卫、测试、设计系统、无障碍、i18n、可观测性和 contract-codegen——在你触及相关文件时自动加载。这些文档为自包含的 Markdown 文件，外部仓库可通过已安装路径或原始 GitHub URL 使用它们——参见 [platforms/README.md](platforms/README.md)。
+`platforms/<platform>/guidance.md`（android、ios、backend、frontend、flutter、rn、kmp）记录了 agent 在该平台进行设计（`/ctx-aidlc-run` STEP 6.5）或实现（`/ctx-domain-exec`）之前必须加载的架构基准。在 `ctx/project-profile.ctx.md` 中声明平台；优先级为：项目 `ctx/` > platform guidance > 通用知识。每个平台还附带详细的各平台专属技能——figma-to-code、vibe-coding 安全守卫、测试、设计系统、无障碍、i18n、可观测性和 contract-codegen——在你触及相关文件时自动加载。这些文档为自包含的 Markdown 文件，外部仓库可通过已安装路径或原始 GitHub URL 使用它们——参见 [platforms/README.md](platforms/README.md)。
 
 有关概念的详细说明，请参见 [docs/concepts.md](docs/concepts.md)。
 
@@ -123,7 +123,6 @@ ctx/
 | `/ctx-aidlc-roadmap` | Phase 0：多功能路线图分解（GATE-0） |
 | `/ctx-worktree` | 将已批准的并行安全功能分配到独立的 git worktree |
 | `/ctx-aidlc-run` | Phase A-C：需求分析、设计、产出物生成 |
-| `/ctx-run` | 实现：基于已批准需求编写代码 |
 | `/ctx-architect-judge` | 确定领域范围和 CTX 引用 |
 | `/ctx-domain-exec` | 识别受影响的领域 |
 | `/ctx-reviewer` | 验证是否存在 CTX 违规 |
@@ -156,7 +155,7 @@ team-ai-workflow 决定"**构建什么**"。oh-my-claudecode（OMC）和 Ourobor
 
 如果 team-ai-workflow 处理"**构建什么**"，OMC/Ouroboros 处理"**如何自动实现**"，
 那么 [ponytail](https://github.com/DietrichGebert/ponytail) 处理"**用最少的代码实现**"。
-它在实现之前（`/ctx-run` ROLE 1）应用一个 7 步约束阶梯，防止过度工程化。
+它在实现之前（`/ctx-domain-exec`）应用一个 7 步约束阶梯，防止过度工程化。
 即使不安装插件，仅凭 [core/lazy-implementation.md](core/lazy-implementation.md) 的规则也能运作，
 且它从不削减安全守卫（验证、安全、AC、策略）。
 
@@ -202,7 +201,6 @@ aidlc-workflow/
 │   ├── ctx-aidlc-roadmap/
 │   ├── ctx-worktree/
 │   ├── ctx-aidlc-run/
-│   ├── ctx-run/
 │   ├── ctx-score-loop/
 │   ├── ctx-hallucination-audit/
 │   └── ... (12 skills)

@@ -28,7 +28,7 @@ Controller/Handler -> Service (UseCase) -> Repository -> DB / External Client Ad
 ## API Contract
 
 - The response shape is part of the requirement, never an implementation
-  detail. This aligns with `ctx-run`'s RESPONSE SHAPE LOCK: if the shape is
+  detail. This aligns with the STEP 6.5 technical-design rule (response shapes must be decided): if the shape is
   not explicitly decided, STOP and ask — do not pick String vs List, nullable
   vs default, or flat vs nested on your own.
 - New/changed endpoints are recorded in the feature's technical design
@@ -103,7 +103,7 @@ domain/<name>/impl       # :domain:<name>:impl — controllers, services,
   slice or integration tests for the controller contract (status codes,
   response shape, validation errors). Follow existing test conventions.
 - Build verification: `./gradlew build` (or the project's equivalent) after
-  implementation, per `ctx-run` ROLE 1.
+  implementation, per `ctx-domain-exec`.
 
 ## Feature Implementation Checklist
 

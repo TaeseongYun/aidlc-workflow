@@ -1,0 +1,22 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {"id": "OrderService", "label": "OrderService", "source_file": "orders/service.py", "line": 10, "community": 0},
+    {"id": "OrderRepo", "label": "OrderRepo", "source_file": "orders/repo.py", "line": 3, "community": 0},
+    {"id": "PaymentGateway", "label": "PaymentGateway", "source_file": "payments/gateway.py", "line": 20, "community": 1},
+    {"id": "RefundPolicy", "label": "RefundPolicy", "source_file": "payments/refund.py", "line": 5, "community": 1},
+    {"id": "Logger", "label": "Logger", "source_file": "common/logging.py", "line": 1, "community": 2},
+    {"id": "RedisCache", "label": "RedisCache", "source_file": "infra/cache.py", "line": 8, "community": 2}
+  ],
+  "links": [
+    {"source": "OrderService", "target": "OrderRepo", "relation": "calls", "confidence": "EXTRACTED"},
+    {"source": "OrderService", "target": "PaymentGateway", "relation": "calls", "confidence": "EXTRACTED"},
+    {"source": "RefundPolicy", "target": "OrderService", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.6},
+    {"source": "OrderService", "target": "Logger", "relation": "imports", "confidence": "EXTRACTED"},
+    {"source": "PaymentGateway", "target": "Logger", "relation": "imports", "confidence": "EXTRACTED"},
+    {"source": "OrderRepo", "target": "RedisCache", "relation": "uses", "confidence": "AMBIGUOUS"}
+  ],
+  "hyperedges": []
+}
