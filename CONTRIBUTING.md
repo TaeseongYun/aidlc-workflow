@@ -32,7 +32,6 @@ skills/                       # Skill source files (you edit here)
 ├── team-ai-workflow-start/   # Entry point skill
 ├── ctx-aidlc-roadmap/        # Phase 0 roadmapping
 ├── ctx-aidlc-run/            # Phase A-C analysis
-├── ctx-run/                  # Implementation
 └── ... (7 skills total)
 
 common/                       # Shared rules (rules library)

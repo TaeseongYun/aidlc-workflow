@@ -1,5 +1,5 @@
 ---
-description: Entry point for team-ai-workflow on any account/repo. Detects state, sets up if needed, and routes to ctx-aidlc-roadmap / ctx-worktree / ctx-aidlc-run / ctx-run. Also bridges to oh-my-claudecode and Ouroboros workflows.
+description: Entry point for team-ai-workflow on any account/repo. Detects state, sets up if needed, and routes to ctx-aidlc-roadmap / ctx-worktree / ctx-aidlc-run / ctx-domain-exec. Also bridges to oh-my-claudecode and Ouroboros workflows.
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Skill, AskUserQuestion
 ---
@@ -21,8 +21,8 @@ This skill does not perform work directly. It only does the following 3 things:
 3. Listens to the user's intent and routes to the appropriate follow-up skill.
 
 Target follow-up skills:
-- team-ai-workflow core: `/ctx-aidlc-roadmap`, `/ctx-worktree`, `/ctx-aidlc-run`, `/ctx-run`
-- Auxiliary skills: `/ctx-architect-judge`, `/ctx-domain-exec`, `/ctx-reviewer`,
+- team-ai-workflow core: `/ctx-aidlc-roadmap`, `/ctx-worktree`, `/ctx-aidlc-run`, `/ctx-domain-exec`
+- Auxiliary skills: `/ctx-architect-judge`, `/ctx-reviewer`,
   `/ctx-updater`, `/ctx-refiner`, `/ctx-commit-planner`
 - Post-implementation automatic scoring loop: `/ctx-score-loop` (only for features
   that pass GATE-3; autonomously iterates dependency/4-axis verification until the
@@ -38,7 +38,7 @@ CORE RULES
 - Do not create files arbitrarily without diagnosis results.
 - Automatic execution is performed only when the user explicitly consents.
 - This skill does not analyze requirements directly. Analysis is always done by `/ctx-aidlc-run`.
-- This skill does not write code. Implementation is always done by `/ctx-run`.
+- This skill does not write code. Implementation is always done by `/ctx-domain-exec` (or an OMC/Ouroboros handoff).
 - Respond to the user in Korean. Keep code/commands in English.
 
 ────────────────────────────────────
@@ -167,7 +167,7 @@ CASE 6: Initialization complete, single-feature requirements present
 - Recommendation: `/ctx-aidlc-run`
 
 CASE 7: requirements.md approval complete, implementation stage
-- Recommendation: `/ctx-run`
+- Recommendation: `/ctx-architect-judge` → `/ctx-domain-exec`, or an OMC/Ouroboros handoff (Pattern 1~3 below)
 
 CASE 8: Multiple in-progress features
 - Ask the user which feature to continue with, and guide them to read that status.md first.
@@ -327,6 +327,6 @@ NON-GOALS
 
 - Requirements analysis/question extraction (→ `/ctx-aidlc-run`)
 - Multi-feature roadmap authoring (→ `/ctx-aidlc-roadmap`)
-- Implementation/test/review (→ `/ctx-run` and its sub-skills)
+- Implementation/test/review (→ `/ctx-domain-exec`, `/ctx-reviewer` and the other ctx-* skills)
 - Automatic code modification (→ `/ctx-updater`)
 - Direct invocation of external systems (the user invokes them with a separate skill)

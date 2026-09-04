@@ -8,8 +8,8 @@ transcribed so that it does not conflict with aidlc-workflow's CTX, gate, and ov
 > But: **"Be lazy about the solution, never lazy about reading."** To write less code,
 > read the problem and the existing code more deeply.
 
-Apply this rule **right before writing new code (mainly `ctx-run`'s ROLE 1 — IMPLEMENTOR)**.
-Do not apply it during the requirements analysis/design steps (before ROLE 0, before GATE-3).
+Apply this rule **right before writing new code (mainly `ctx-domain-exec`)**.
+Do not apply it during the requirements analysis/design steps (before `ctx-architect-judge`, before GATE-3).
 "What to build" at those steps is already controlled by human gates.
 
 ---
@@ -55,7 +55,7 @@ Omitting any of the above on the grounds that you "reduced it to one line" is a 
 ## 3. When it applies and when it does not
 
 ### It applies
-- In `ctx-run` ROLE 1 (IMPLEMENTOR), right before writing production code.
+- In `ctx-domain-exec`, right before writing production code.
 - When delegating implementation to OMC autopilot / ralph (inject the ladder into the prompt).
 - In refactoring/extension work, when about to rebuild existing code (rung 2 takes priority).
 

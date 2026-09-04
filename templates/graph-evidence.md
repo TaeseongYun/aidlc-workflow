@@ -1,4 +1,4 @@
-<!-- workflow-step: STEP-3..6.5 | producer: ctx-aidlc-run + ctx-run (ROLE 0) | condition: graph substrate available -->
+<!-- workflow-step: STEP-3..6.5 | producer: ctx-aidlc-run + ctx-architect-judge | condition: graph substrate available -->
 # Graph Evidence
 
 It is recommended to create this file at `aidlc-docs/features/<feature-slug>/graph-evidence.md`.

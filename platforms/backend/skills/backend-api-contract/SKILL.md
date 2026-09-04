@@ -29,7 +29,7 @@ Deeper material (error envelope samples, versioning strategy, CORS config) lives
 
 - The response schema is a requirement. **If it is not explicitly decided, STOP and
   ask** — do not pick String vs List, nullable vs default, or flat vs nested on your
-  own. (Aligns with `ctx-run`'s RESPONSE SHAPE LOCK.)
+  own. (Aligns with the STEP 6.5 technical-design rule: response shapes must be decided.)
 - A refactor must not **silently** change the response shape. Adding a field is
   additive; removing/retyping is a design decision (approval required).
 

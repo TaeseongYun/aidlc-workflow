@@ -74,7 +74,7 @@ graph LR
     D --> F["GATE-0<br/>(human approval)"]
     F --> W["/ctx-worktree<br/>(optional isolation)"]
     W --> E
-    E --> G["/ctx-run<br/>or OMC/Ouroboros"]
+    E --> G["/ctx-domain-exec<br/>or OMC/Ouroboros"]
     G --> H["Implementation complete"]
 ```
 
@@ -109,7 +109,7 @@ Decompose requirements into work units of S/M/L size. Each UOW specifies Accepta
 
 ### Platform Guidance: Per-Platform Architecture Baseline
 
-`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp) captures the architecture baseline the agent must load before designing (`/ctx-aidlc-run` STEP 6.5) or implementing (`/ctx-run` ROLE 1) on that platform. Declare the platform in `ctx/project-profile.ctx.md`; precedence is project `ctx/` > platform guidance > general knowledge. Each platform also ships detailed per-platform skills — figma-to-code, a vibe-coding security guard, testing, design-system, accessibility, i18n, observability, and contract-codegen — that auto-load when you touch the relevant files. The documents are self-contained markdown, so external repos can consume them via the installed path or raw GitHub URL — see [platforms/README.md](platforms/README.md).
+`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp) captures the architecture baseline the agent must load before designing (`/ctx-aidlc-run` STEP 6.5) or implementing (`/ctx-domain-exec`) on that platform. Declare the platform in `ctx/project-profile.ctx.md`; precedence is project `ctx/` > platform guidance > general knowledge. Each platform also ships detailed per-platform skills — figma-to-code, a vibe-coding security guard, testing, design-system, accessibility, i18n, observability, and contract-codegen — that auto-load when you touch the relevant files. The documents are self-contained markdown, so external repos can consume them via the installed path or raw GitHub URL — see [platforms/README.md](platforms/README.md).
 
 For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts.md).
 
@@ -123,7 +123,6 @@ For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts
 | `/ctx-aidlc-roadmap` | Phase 0: multi-feature roadmap decomposition (GATE-0) |
 | `/ctx-worktree` | Allocate approved parallel-safe features to isolated git worktrees |
 | `/ctx-aidlc-run` | Phase A-C: requirements analysis, design, artifact generation |
-| `/ctx-run` | Implementation: write code based on approved requirements |
 | `/ctx-architect-judge` | Determine domain scope and CTX references |
 | `/ctx-domain-exec` | Identify affected domains |
 | `/ctx-reviewer` | Verify whether there are CTX violations |
@@ -162,7 +161,7 @@ For detailed patterns and configuration, see [docs/omc-ouroboros-integration.md]
 
 If team-ai-workflow handles "**what**" and OMC/Ouroboros handle "**how, automatically**",
 then [ponytail](https://github.com/DietrichGebert/ponytail) handles "**how little**".
-It applies a 7-step restraint ladder right before implementation (`/ctx-run` ROLE 1) to prevent over-engineering.
+It applies a 7-step restraint ladder right before implementation (`/ctx-domain-exec`) to prevent over-engineering.
 It works with just the [core/lazy-implementation.md](core/lazy-implementation.md) rules even without installing the plugin,
 and it never cuts safety guards (verification, security, AC, policy).
 
@@ -208,7 +207,6 @@ aidlc-workflow/
 │   ├── ctx-aidlc-roadmap/
 │   ├── ctx-worktree/
 │   ├── ctx-aidlc-run/
-│   ├── ctx-run/
 │   ├── ctx-score-loop/
 │   ├── ctx-hallucination-audit/
 │   └── ... (12 skills)

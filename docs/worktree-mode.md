@@ -16,7 +16,7 @@ It is a two-part capability:
 After `/ctx-aidlc-roadmap` has produced `aidlc-docs/_roadmap.md` (Phase 0) and
 the roadmap has a phase whose features are meant to run in parallel. Each
 parallel-safe feature is then developed on its own worktree, typically with a
-separate `/ctx-aidlc-run` → `/ctx-run` session.
+separate `/ctx-aidlc-run` → `/ctx-domain-exec` session.
 
 ## Detection signal
 

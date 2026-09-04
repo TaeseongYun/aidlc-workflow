@@ -22,7 +22,7 @@ source ~/.zshrc
 bash ~/workspace/aidlc-workflow/scripts/install-skills.sh
 ```
 
-Skills such as `/team-ai-workflow-start`, `/ctx-aidlc-run`, and `/ctx-run` are installed globally.
+Skills such as `/team-ai-workflow-start`, `/ctx-aidlc-run`, and `/ctx-domain-exec` are installed globally.
 
 In a **multi-account** environment (e.g., a Claude Code secondary account at `~/.claude-personal/`),
 run it once more with the target home changed via environment variables.
@@ -84,7 +84,7 @@ initialization, in-progress features, OMC/Ouroboros detection) and tells you the
 /ctx-aidlc-roadmap → (when multi-feature) decompose a large prepared plan into features + GATE-0
 /ctx-worktree      → optionally create isolated worktrees for parallel-safe features
 /ctx-aidlc-run     → requirements analysis + question extraction (per feature)
-/ctx-run           → implementation based on approved requirements
+/ctx-domain-exec   → implementation based on approved requirements
 ```
 
 ### OMC / Ouroboros Integration
@@ -95,7 +95,7 @@ or Ouroboros evolve. Detailed patterns: [docs/omc-ouroboros-integration.md](docs
 ### Code Restraint (ponytail)
 
 If you want to reduce the amount of code during the implementation stage, use [ponytail](https://github.com/DietrichGebert/ponytail)'s
-7-step restraint ladder alongside. `/ctx-run` applies it automatically in ROLE 1/3 based on [core/lazy-implementation.md](core/lazy-implementation.md),
+7-step restraint ladder alongside. `/ctx-domain-exec` applies it automatically based on [core/lazy-implementation.md](core/lazy-implementation.md),
 so it works without installing the plugin. Details: [docs/ponytail-integration.md](docs/ponytail-integration.md)
 
 ### Requirements Analysis
@@ -139,7 +139,7 @@ After running, artifacts are generated under `aidlc-docs/features/<feature-slug>
 After answering the questions marked BLOCK in `requirement-verification-questions.md`:
 
 ```text
-/ctx-run
+/ctx-domain-exec
 
 Implement based on the content approved in aidlc-docs and ctx.
 

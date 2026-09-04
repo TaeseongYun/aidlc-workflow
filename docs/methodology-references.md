@@ -23,7 +23,7 @@ A framework that defines the AI-driven software development lifecycle as 25 arti
 
 | Item | Reason |
 |------|------|
-| AI-DLC's implementation/deployment automation | Our framework only covers requirements/design. Implementation is separated into a dedicated skill (`/ctx-run`) |
+| AI-DLC's implementation/deployment automation | Our framework only covers requirements/design. Implementation is separated into dedicated skills (`/ctx-domain-exec` and the other ctx-* skills, or an OMC/Ouroboros handoff) |
 | All 25 artifacts | 5 (Monitoring, Observability, Deployment Pipeline, etc.) are excluded as operational concerns |
 | Estimation system | Deliberately excluded. We use only S/M/L sizing and do not do time estimation |
 
@@ -147,7 +147,7 @@ Parts designed in-house without any external source:
 | CTX-based execution rule system | "CTX is not a design document but a set of execution rules to prevent AI misbehavior" |
 | Stage Gate approval system (8 stages) | GATE-1 ~ GATE-5 + conditional gate combinations |
 | Readiness Score (quantitative evaluation) | 6 areas on a 100-point scale + bonus point system |
-| Skill pipeline (`/ctx-run`) | architect → implementor → test → reviewer → updater → refiner → commit planner |
+| Skill pipeline (ctx-* skills) | architect → implementor → reviewer → updater → refiner → commit planner |
 | No-Implicit-Decisions principle | If two or more valid designs exist, always stop and ask |
 | Execution Boundary principle | A rule that each skill never performs actions outside its own responsibility |
 | No-estimation principle | Does not do time estimation, using only S/M/L sizing |

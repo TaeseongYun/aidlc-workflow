@@ -19,8 +19,6 @@ This directory is the source repository for the team's shared Codex skills.
 - `ctx-aidlc-run`
   - For requirements/design analysis
   - Uses the `team-ai-workflow + ctx + aidlc-docs` flow
-- `ctx-run`
-  - For implementation execution
 - `ctx-architect-judge`
   - Requirement/impact scope judgment
 - `ctx-domain-exec`
@@ -62,13 +60,13 @@ bash scripts/install-skills.sh
 ### Single Feature
 1. Requirements analysis: `/ctx-aidlc-run`
 2. Reflect human approval/answers
-3. Implementation execution: `/ctx-run`
+3. Implementation execution: `/ctx-domain-exec` (or an OMC/Ouroboros handoff)
 
 ### Multi-feature (large prepared planning document)
 1. Roadmap: `/ctx-aidlc-roadmap` → generate `aidlc-docs/_roadmap.md`, approve GATE-0
 2. Optional isolated allocation: `/ctx-worktree` → approve the detected worktree plan
 3. Each team member runs `/ctx-aidlc-run` for their own feature (input: the excerpt of the relevant section from the source)
 4. Reflect human approval/answers
-5. Implementation execution: `/ctx-run` (per feature)
+5. Implementation execution: `/ctx-domain-exec` (per feature, or an OMC/Ouroboros handoff)
 
 Detailed operating procedure: `docs/multi-feature-coordination.md`

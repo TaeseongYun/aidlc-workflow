@@ -52,7 +52,7 @@ Do NOT create any `aidlc-docs/features/<slug>/` folders. Per-feature folders are
 - Do NOT write `requirements.md`, `unit-of-work.md`, or any per-feature documents.
 - Do NOT make business policy or design decisions. Defer to per-feature `/ctx-aidlc-run` STEP 4.
 - Stop at GATE-0. Do not proceed to per-feature analysis even if user says "continue".
-- Implementation is allowed only via separate `/ctx-run` after each feature's GATE-3.5 / GATE-5.
+- Implementation is allowed only via separate `/ctx-domain-exec` after each feature's GATE-3.5 / GATE-5.
 
 ## Entry Conditions
 - `prepared-requirement` AND multi-feature signal (≥2 features OR ≥3 distinct domains).

@@ -20,7 +20,7 @@ versions, CLI flags, library behavior, build/deploy, security).
 ────────────────────────────────────
 책임 범위 / 절대 금지 (Guardrail)
 ────────────────────────────────────
-- 판정·기록·격리만 한다. 기능 구현이나 설계 변경은 하지 않는다 (→ `/ctx-run`).
+- 판정·기록·격리만 한다. 기능 구현이나 설계 변경은 하지 않는다 (→ `/ctx-domain-exec`).
 - ledger·knowledge-log는 **append-only**. 삭제/덮어쓰기 금지 (상태 변경은 Status 필드로만).
 - 격리(QUARANTINED)된 주장은 재검증·재사용하지 않는다.
 - 추측을 다른 추측으로 검증하지 않는다.

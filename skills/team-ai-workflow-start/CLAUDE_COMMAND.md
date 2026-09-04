@@ -1,5 +1,5 @@
 ---
-description: Entry point for team-ai-workflow on any account/repo. Detects state, sets up if needed, and routes to ctx-aidlc-roadmap / ctx-worktree / ctx-aidlc-run / ctx-run. Also bridges to oh-my-claudecode and Ouroboros workflows.
+description: Entry point for team-ai-workflow on any account/repo. Detects state, sets up if needed, and routes to ctx-aidlc-roadmap / ctx-worktree / ctx-aidlc-run / ctx-domain-exec. Also bridges to oh-my-claudecode and Ouroboros workflows.
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Skill, AskUserQuestion
 ---
@@ -32,7 +32,7 @@ This is the single entry point for team-ai-workflow. It only does the following 
    - (a) → `/ctx-aidlc-run`
    - (b) → `/ctx-aidlc-roadmap`
    - (c) → `/ctx-worktree`
-   - (d) → `/ctx-run`
+   - (d) → `/ctx-domain-exec`
    - (e) → install/init scripts (run upon user approval)
 
 To connect with OMC autopilot/ralph or Ouroboros evolve, hand off to the external tool after requirements approval (passing GATE-2/3). GATE approval is always done by a human.
