@@ -290,6 +290,12 @@ STEP 1.5. Code graph check (CASE 0 — non-blocking)
   cancel choice stops here; install or degraded both continue to STEP 2.
 - If only the graph is missing on brownfield (code 3), run `graphify .` and continue.
 
+STEP 1.7. Recall prior run results (non-blocking)
+- Before routing, surface earlier results so the session has continuity. When a graph is
+  present, prefer `graphify query "<question>"`; otherwise read the local structured log:
+  `npx tsx {{TEAM_AI_WORKFLOW_DIR}}/scripts/run-logger.ts recall --project . --limit 20`
+- Protocol: `{{TEAM_AI_WORKFLOW_DIR}}/common/run-logging.md`. Skip silently if `aidlc-docs/` is absent.
+
 STEP 2. Confirm intent
 - Ask the user in one line what they explicitly want to do. Example:
   - "Is the task you want to do this time (a) new feature requirements analysis

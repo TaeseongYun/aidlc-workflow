@@ -166,6 +166,11 @@ STEP LIFECYCLE (common to all STEPs) — each line is one `aidlc-log.sh` call (s
 - On completion: `aidlc-log.sh step <slug> STEP-{ID} "{Name}" completed "" "{outputs}"` (audit + aidlc-state.md `[x]`)
 - On a GATE decision: `aidlc-log.sh gate <slug> GATE-{N} "{Name}" approved|change-requested|skipped "{user text verbatim}"`
 - On receiving a user answer: `aidlc-log.sh answer <slug> "{question id}" "{user text verbatim}" "{impact}"`
+- On a GATE decision or a unit-of-work completion → also append a **result** entry to the structured run
+  log (protocol: `{{TEAM_AI_WORKFLOW_DIR}}/common/run-logging.md`), so later runs and graphify can retrieve
+  outcomes: `npx tsx {{TEAM_AI_WORKFLOW_DIR}}/scripts/run-logger.ts append --project . --feature <slug>
+  --skill ctx-aidlc-run --phase <GATE-N|unit:<id>> --kind <gate|unit> --result "<outcome>"`. Result-level
+  only — the per-event audit trail stays in `aidlc-log.sh`.
 - This pattern is applied automatically to all STEPs. Do not repeat it in individual STEPs.
 
 PHASE ROUTER (load only the current Phase's STEP text):

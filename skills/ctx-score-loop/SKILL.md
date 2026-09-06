@@ -31,7 +31,7 @@ Framework root: `{{TEAM_AI_WORKFLOW_DIR}}`
     STEP B: Actually run build/test commands (unrun axis = 0 points)
     STEP C: 4-axis scoring (25 points each, rationale required)
     STEP D: verdict judgment
-    STEP E: Append Score History + mirror to status.md + report
+    STEP E: Append Score History + mirror to status.md + run log + report
   } until verdict != CONTINUE
 ```
 
@@ -69,6 +69,16 @@ On halt:
 - Do NOT auto-restart after a halt without human approval.
 - Do NOT auto-pass GATEs.
 - Do NOT modify/delete human-authored dependency md items (`<!-- src: human -->`).
+
+## Run Log (result capture)
+On each round's STEP E, also append the verdict to the structured run log so later runs (and graphify)
+can retrieve it. Protocol: `{{TEAM_AI_WORKFLOW_DIR}}/common/run-logging.md`.
+```bash
+npx tsx {{TEAM_AI_WORKFLOW_DIR}}/scripts/run-logger.ts append --project . \
+  --feature <feature-slug> --skill ctx-score-loop --phase score-round-<N> --kind score \
+  --result "<verdict> <total>/100" --refs "dependency-check.md,status.md"
+```
+When a round closes `COMPLETE`, append a second `--kind unit` entry marking the unit finished.
 
 ## Detailed Guide
 `{{TEAM_AI_WORKFLOW_DIR}}/docs/score-loop-guide.md`
