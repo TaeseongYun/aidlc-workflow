@@ -99,6 +99,9 @@ STEP 6 — CAPTURE → LINEAR (per corrected REFUTED item)
 STEP 7 — REPORT (this round) — always show, per finding: **Cause / What / Fix**.
 - Then the round row: Harvested / Refuted / Corrected / Unresolved / **Score** / Result.
 - Append the row to the ledger's **Round Log**.
+- Also append the round result to the structured run log (protocol:
+  `{{TEAM_AI_WORKFLOW_DIR}}/common/run-logging.md`) so later runs and graphify can retrieve it:
+  `npx tsx {{TEAM_AI_WORKFLOW_DIR}}/scripts/run-logger.ts append --project . --feature <slug> --skill ctx-hallucination-audit --phase round-<N> --kind hallucination --result "<harvested>/<refuted>/<corrected>, score <S>" --mode <full|degraded>`
 
 STEP 8 — LOOP DECISION
 - **Score >= 87** → STOP. Print final summary + ledger/knowledge-log deltas.

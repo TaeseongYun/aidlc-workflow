@@ -273,6 +273,7 @@ For a detailed contribution guide, see [CONTRIBUTING.md](CONTRIBUTING.md).
 Detailed per-release changes: [docs/changelog/](docs/changelog/)
 
 Major updates:
+- **2026-09-06**: Run-result logger — `scripts/run-logger.ts` records typed results to `aidlc-docs/run-log.ndjson` and a graphify-ingestible `run-log.md` mirror, so past outcomes are retrievable via `graphify query` (or local `recall` in degraded mode); wired into score-loop, hallucination-audit, aidlc-run, and session entry ([details](docs/changelog/2026-09-06-run-logger-and-graphify-rag.md))
 - **2026-09-03**: `graphify` is now a soft dependency — a missing tool degrades to grep/Read verification instead of blocking setup; added CI (`validate-skills.sh` + golden baselines) and made `validate-questions.sh` accept English field labels ([details](docs/changelog/2026-09-03-graphify-soft-dependency-and-ci.md))
 - **2026-08-27**: Added KMP (Kotlin Multiplatform) as the 7th platform — guidance + 13 skills (figma-to-kmp, vibe-coding security guard, testing, and more)
 - **2026-08-26**: Per-platform skill families across platforms (testing, design-system, accessibility, contract-codegen, observability, i18n)
