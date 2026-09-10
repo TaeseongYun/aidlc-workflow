@@ -138,6 +138,18 @@ Verdicts per round, mirroring `ctx-score-loop`:
 - Escalations needing a human decision: <list or "none">
 ```
 
+## Run Log (result capture)
+
+Same result-capture convention as the sibling loop skills
+(`{{TEAM_AI_WORKFLOW_DIR}}/common/run-logging.md`), but this skill runs on the
+**framework repo itself**, which has no `aidlc-docs/`. So the sync result is NOT
+written to `aidlc-docs/run-log.ndjson` (that artifact is per-consumer-project;
+emitting it here would commit a stray `aidlc-docs/` into the sync PR). Instead the
+structured, retrievable record is `docs/upstream-sync-state.md` — SHA range, date,
+and disposition table, updated inside the sync PR — which is already
+graphify-ingestible Markdown. Keep the per-axis scores and disposition reasons there
+and in the PR body; that IS the run log for this skill.
+
 ## Halt Conditions
 
 Upstream unreachable; state file references a SHA unknown upstream (history
