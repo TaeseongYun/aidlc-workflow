@@ -45,6 +45,7 @@ SKILLS=(
   "ctx-worktree"
   "ctx-hallucination-audit"
   "ctx-aidlc-sync"
+  "mobile-webview-bridge"
 )
 
 for skill in "${SKILLS[@]}"; do

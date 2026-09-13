@@ -35,6 +35,12 @@ This directory is the source repository for the team's shared Codex skills.
   - One-shot content-level sync with upstream AWS AI-DLC (`awslabs/aidlc-workflows`)
   - Dispositions upstream changes via `docs/methodology-references.md` (PORT/SKIP/ESCALATE),
     works in a git worktree branch, and opens a PR only when the 4-axis sync score exceeds 90
+- `mobile-webview-bridge`
+  - JS ↔ native WebView bridge for Android / iOS / KMP / React Native / Flutter
+  - One shared protocol (envelope, handshake, security, threading, lifecycle) +
+    per-platform reference bindings; generator mode (scaffold from a message
+    contract) and guard mode (severity-rated review checklist)
+  - Offline envelope validator: `scripts/validate_envelope.py`
 - `ctx-hallucination-audit`
   - Hallucination Guard audit loop. Verifies dev facts with graphify (codegraph
     fallback), isolates refuted items in the ledger, repeats until the
