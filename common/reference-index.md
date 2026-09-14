@@ -27,9 +27,19 @@ these common guides > general knowledge.
 | **dependency-management** | Direct/transitive deps, lockfiles, supply-chain, update cadence | [guide](dependency-management/reference/guide.md) | [skills](dependency-management/SKILLS.md) |
 | **incident-postmortem** | Severity, incident lifecycle, blameless postmortems, action items | [guide](incident-postmortem/reference/guide.md) | [skills](incident-postmortem/SKILLS.md) |
 
+## Workflow rule files (single-file rules, loaded lazily by the skills)
+
+The standalone rules under `common/` are not topic pairs; each is loaded by the skill/STEP
+that needs it (see the per-step loading table in `skills/ctx-aidlc-run/SKILL.md`):
+
+`question-rules.md`, `question-governance.md`, `stage-gate-rules.md`, `depth-levels.md`,
+`no-implicit-decisions.md`, `overconfidence-prevention.md`, `content-validation.md`,
+`error-recovery.md`, `extension-rules.md`, `graph-grounding.md`, `run-logging.md`,
+`diagram-standards.md`, plus `frameworks/` (JTBD, RICE, MoSCoW prioritization).
+
 ## Conventions
 
-- English only; no emojis (repo documentation policy).
+- English only (repo language policy — see CONTRIBUTING.md); avoid emojis in these guides.
 - Guides open with a one-line `>` summary and end with a `## References` section citing well-known sources.
 - Cross-links between topics are relative (`../<topic>/reference/guide.md`).
 - Related workflow skills are referenced in command form (e.g. `/ctx-reviewer`).

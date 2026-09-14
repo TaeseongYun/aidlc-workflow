@@ -1,4 +1,5 @@
 ---
+name: team-ai-workflow-start
 description: Entry point for team-ai-workflow on any account/repo. Detects state, sets up if needed, and routes to ctx-aidlc-roadmap / ctx-worktree / ctx-aidlc-run / ctx-domain-exec. Also bridges to oh-my-claudecode and Ouroboros workflows.
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Skill, AskUserQuestion
@@ -73,36 +74,37 @@ E. External orchestration detection (optional)
    - `.omc/` directory exists → OMC may be in use
    - `.ouroboros/` or Ouroboros-related files exist → Ouroboros may be in use
 
-F. 코드 그래프 전제조건 (Hallucination Guard — 권장 substrate)
-   - `bash <본체경로>/scripts/check-graphify.sh .` 를 실행하고 종료코드를 읽는다.
-   - 0 = 충족(graphify + `graphify-out/graph.json`), 2 = 도구 누락(→ degraded 가능), 3 = brownfield 그래프 미생성.
-   - graphify는 강력히 권장되지만 필수는 아니다. 없으면 VERIFY가 grep/Read로 degrade된다
-     (`common/graph-grounding.md`). 이 검사는 **다른 라우팅보다 먼저** 평가한다 (CASE 0 참조).
+F. Code graph prerequisites (Hallucination Guard — recommended substrate)
+   - Run `bash <core-path>/scripts/check-graphify.sh .` and read the exit code.
+   - 0 = satisfied (graphify + `graphify-out/graph.json`), 2 = tool missing (→ degraded possible), 3 = brownfield graph not built.
+   - graphify is strongly recommended but not mandatory. Without it, VERIFY degrades to grep/Read
+     (`common/graph-grounding.md`). Evaluate this check **before all other routing** (see CASE 0).
 
 ────────────────────────────────────
 REPORT FORMAT
 ────────────────────────────────────
 
-Output the diagnosis results in the following format.
+Output the diagnosis results in the following format
+(render headings/labels in Korean at runtime, per the response-language rule in CORE RULES).
 
 ```markdown
-## team-ai-workflow 진단
+## team-ai-workflow diagnosis
 
-### 환경
-- 본체 위치: <경로 또는 "미설치">
-- 글로벌 스킬: <설치됨 / 미설치>
-- 코드 그래프 전제조건: <충족 / graphify 도구 누락(degraded 가능) / 그래프 미생성>
-- 외부 연동: <OMC 감지 / Ouroboros 감지 / 없음>
+### Environment
+- Core location: <path or "not installed">
+- Global skills: <installed / not installed>
+- Code graph prerequisites: <satisfied / graphify tool missing (degraded possible) / graph not built>
+- External integration: <OMC detected / Ouroboros detected / none>
 
-### 현재 프로젝트 (<cwd>)
-- 초기화 상태: <완료 / 부분 / 미초기화>
-- 진행 중 feature: <N개 / 없음>
-- multi-feature 모드: <yes / no>
+### Current project (<cwd>)
+- Initialization state: <complete / partial / not initialized>
+- In-progress features: <N / none>
+- multi-feature mode: <yes / no>
 
-### 다음 단계 후보
-1. <상황별 권장 명령>
-2. <대안>
-3. <대안>
+### Next-step candidates
+1. <recommended command for the situation>
+2. <alternative>
+3. <alternative>
 ```
 
 ────────────────────────────────────
@@ -145,14 +147,14 @@ CASE 1: Core not installed
 CASE 2: Core exists but global skills are not installed
 - Recommended command:
   ```bash
-  bash <본체경로>/scripts/install-skills.sh
+  bash <core-path>/scripts/install-skills.sh
   ```
 - Automatic execution allowed upon user approval.
 
 CASE 3: Global skills exist but the current project is not initialized
 - Recommended command:
   ```bash
-  bash <본체경로>/scripts/init-project.sh
+  bash <core-path>/scripts/init-project.sh
   ```
 - After automatic execution, propose auto-filling `ctx/INDEX.md` to the user.
 
@@ -189,13 +191,13 @@ The two do not conflict. Connect them with the following patterns.
 ### Pattern 1 — Full automation to the end with OMC autopilot
 
 ```text
-사용자 요청
+User request
   ↓
-/team-ai-workflow-start   ← 진단 + 라우팅
+/team-ai-workflow-start   ← diagnosis + routing
   ↓
-/ctx-aidlc-run            ← 요구사항/설계 (사람 GATE)
-  ↓ (GATE-2/3 통과)
-/oh-my-claudecode:autopilot ← 구현/테스트/검증 자동 반복
+/ctx-aidlc-run            ← requirements/design (human GATEs)
+  ↓ (GATE-2/3 passed)
+/oh-my-claudecode:autopilot ← automated implement/test/verify loop
 ```
 
 OMC autopilot takes `aidlc-docs/features/<slug>/requirements.md` and
@@ -204,11 +206,11 @@ OMC autopilot takes `aidlc-docs/features/<slug>/requirements.md` and
 ### Pattern 2 — Evolutionary implementation with Ouroboros evolve
 
 ```text
-/ctx-aidlc-run            ← Seed가 될 requirements 생성
+/ctx-aidlc-run            ← generate the requirements that become the Seed
   ↓
 /ouroboros:seed            ← requirements.md → Seed spec
   ↓
-/ouroboros:evolve          ← 진화 루프
+/ouroboros:evolve          ← evolutionary loop
 ```
 
 Ouroboros is most effective when there is a measurable goal (test pass rate,
@@ -218,9 +220,9 @@ as the Seed's verification.
 ### Pattern 3 — Complete a single feature with the ralph loop
 
 ```text
-/ctx-aidlc-run            ← requirements + UOW 확정
-  ↓ (GATE-3 통과)
-/oh-my-claudecode:ralph   ← 검증 통과까지 반복 실행
+/ctx-aidlc-run            ← finalize requirements + UOW
+  ↓ (GATE-3 passed)
+/oh-my-claudecode:ralph   ← loop until verification passes
 ```
 
 Suitable for small (S size) features. Use the UOW's verification method as ralph's

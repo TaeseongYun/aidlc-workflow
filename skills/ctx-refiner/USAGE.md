@@ -5,63 +5,63 @@
 ### Input
 
 ```markdown
-## 정제 대상 CTX
-- 파일 경로:
+## Refinement Target CTX
+- File paths:
   - ctx/global/coding-conventions.ctx.md
 
-## 정제 목적
-- 개발 전 최종 규칙 집합 생성
+## Refinement Purpose
+- Generate the final rule set before development
 
-## 적용 범위
+## Applicable Scope
 - Global CTX
 ```
 
 ### Output
 
 ```markdown
-## 삭제된 규칙
+## Deleted Rules
 
-### 삭제 1
-- 규칙 문장: "코드는 가독성 있게 작성한다."
-- 삭제 사유: 애매함 (Q3 실패: 명령형 한 문장으로 구체화 불가)
+### Deletion 1
+- Rule sentence: "Write code with readability in mind."
+- Deletion reason: ambiguous (Q3 failure: cannot be made concrete as a single imperative sentence)
 
-### 삭제 2
-- 규칙 문장: "좋은 코드를 작성하기 위해 노력한다."
-- 삭제 사유: AI 오작동과 직접 연결되지 않음 (Q1 실패)
+### Deletion 2
+- Rule sentence: "Strive to write good code."
+- Deletion reason: not directly connected to AI malfunction (Q1 failure)
 
-### 삭제 3
-- 규칙 문장: "성능을 고려하여 개발한다."
-- 삭제 사유: 애매함 (Q2 실패: 구체적 오류로 이어지지 않음)
+### Deletion 3
+- Rule sentence: "Develop with performance in mind."
+- Deletion reason: ambiguous (Q2 failure: does not lead to a specific error)
 
-## 병합된 규칙
+## Merged Rules
 
-### 병합 1
-- 병합 전:
-  - 규칙 A: "Entity 클래스에는 @Entity 어노테이션을 붙인다."
-  - 규칙 B: "JPA Entity에는 반드시 @Entity를 선언한다."
-- 병합 후:
-  - 규칙 C: "Entity 클래스에 @Entity 어노테이션을 선언한다."
+### Merge 1
+- Before merge:
+  - Rule A: "Attach the @Entity annotation to Entity classes."
+  - Rule B: "JPA Entities must declare @Entity."
+- After merge:
+  - Rule C: "Declare the @Entity annotation on Entity classes."
 
-## 최종 CTX
+## Final CTX
 
-### 코딩 컨벤션
+### Coding Conventions
 
-- 규칙: "Entity 클래스에 @Entity 어노테이션을 선언한다."
-  - 이 규칙이 없으면 AI는: @Entity 누락으로 JPA가 해당 클래스를 인식하지 못해 테이블 매핑 실패
+- Rule: "Declare the @Entity annotation on Entity classes."
+  - Without this rule, the AI: omits @Entity so JPA does not recognize the class and table mapping fails
 
-- 규칙: "연관관계 필드에 @JoinColumn을 명시한다."
-  - 이 규칙이 없으면 AI는: JoinColumn 생략으로 예측 불가능한 FK 컬럼명 생성
+- Rule: "Specify @JoinColumn on association fields."
+  - Without this rule, the AI: omits JoinColumn and unpredictable FK column names are generated
 
-- 규칙: "Repository 인터페이스는 JpaRepository를 상속한다."
-  - 이 규칙이 없으면 AI는: CrudRepository 상속으로 페이징/정렬 메서드 누락
+- Rule: "Repository interfaces extend JpaRepository."
+  - Without this rule, the AI: extends CrudRepository and paging/sorting methods are missing
 
-## 정제 판정
+## Refinement Judgment
 
-- 정제 전 규칙 수: 8
-- 정제 후 규칙 수: 3
-- 감소율: 62.5%
-- 판정: 성공
-- 사유: 규칙 수 62.5% 감소, 모든 규칙에 오작동 명시 완료, 설명 문장 없음
+- Rules before refinement: 8
+- Rules after refinement: 3
+- Reduction rate: 62.5%
+- Judgment: success
+- Reason: rule count reduced by 62.5%, malfunction stated for every rule, no explanatory sentences
 ```
 
 ---
@@ -71,29 +71,29 @@
 ### Input
 
 ```markdown
-## 정제 대상 CTX
-- 파일 경로:
+## Refinement Target CTX
+- File paths:
   - ctx/local/user-service.ctx.md
 
-## 정제 목적
-- 서비스 레이어 규칙 정제
+## Refinement Purpose
+- Refine the service-layer rules
 
-## 적용 범위
+## Applicable Scope
 - Local CTX
 ```
 
 ### Output
 
 ```markdown
-## 정제 실패
+## Refinement Failed
 
-- 실패 사유:
-  - 규칙 수가 실질적으로 줄지 않음 (감소율 5%)
-  - 삭제 가능한 규칙이 1개뿐이며, 나머지는 모두 AI 오작동과 직접 연결됨
+- Failure reason:
+  - The rule count did not decrease substantially (reduction rate 5%)
+  - Only 1 rule is deletable; all the rest are directly connected to AI malfunction
 
-- 정제 전 규칙 수: 20
-- 현재 규칙 수: 19
-- 감소율: 5%
+- Rules before refinement: 20
+- Current rule count: 19
+- Reduction rate: 5%
 ```
 
 ---
@@ -103,23 +103,23 @@
 ### Input
 
 ```markdown
-## 정제 대상
+## Refinement Target
 - ctx/global/coding.md
 
-## 목적
-- 정리
+## Purpose
+- Cleanup
 ```
 
 ### Output
 
 ```markdown
-## 정제 중단
+## Refinement Stopped
 
-중단 사유:
-- 입력 포맷 불일치: `정제 대상 CTX`, `정제 목적`, `적용 범위` 섹션 형식 미준수
+Stop reason:
+- Input format mismatch: the `Refinement Target CTX`, `Refinement Purpose`, and `Applicable Scope` section format is not followed
 
-확인이 필요한 사항:
-1. `## 정제 대상 CTX` 섹션과 `- 파일 경로:` 형식 사용
-2. `## 정제 목적` 섹션 추가
-3. `## 적용 범위` 섹션에 Global CTX | Local CTX | 혼합 중 하나 명시
+Items that need confirmation:
+1. Use the `## Refinement Target CTX` section with the `- File paths:` format
+2. Add the `## Refinement Purpose` section
+3. In the `## Applicable Scope` section, specify one of Global CTX | Local CTX | mixed
 ```

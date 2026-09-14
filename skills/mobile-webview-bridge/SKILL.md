@@ -14,6 +14,7 @@ description: >
   native, or on "웹뷰 브리지 만들어줘", "JS ↔ 네이티브 통신", "웹뷰에서 네이티브 호출",
   "브리지 보안 리뷰", "webview bridge", "review my JS bridge". NOT for building
   the web page's UI, native networking unrelated to a WebView, or deep links.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 ROLE: WEBVIEW_BRIDGE_ENGINEER

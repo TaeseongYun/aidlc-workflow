@@ -32,7 +32,7 @@ skills/                       # Skill source files (you edit here)
 ├── team-ai-workflow-start/   # Entry point skill
 ├── ctx-aidlc-roadmap/        # Phase 0 roadmapping
 ├── ctx-aidlc-run/            # Phase A-C analysis
-└── ... (7 skills total)
+└── ... (one directory per skill; see README Skill List)
 
 common/                       # Shared rules (rules library)
 core/                         # Core analysis logic
@@ -64,24 +64,28 @@ Each skill is a directory with:
 
 ```text
 skills/<skill-name>/
-├── SKILL.md           # Main skill definition (frontmatter + role + rules)
-├── CLAUDE_COMMAND.md  # Optional: alternative for Claude commands
-└── other files        # Supplementary docs, templates
+├── SKILL.md           # The single entrypoint (frontmatter + role + rules).
+│                      # CLAUDE_COMMAND.md is FORBIDDEN — dual entrypoints drifted
+│                      # apart twice and the validator (SKILL-01) hard-fails them.
+└── other files        # Supplementary docs, templates (phases/, references/, scripts/)
 ```
 
 ### Frontmatter (Required)
 
 ```markdown
 ---
+name: skill-name
 description: What this skill does in one sentence
-model: haiku | sonnet | opus
 allowed-tools: Read, Write, Edit, Bash, Skill
+model: haiku | sonnet | opus   # optional
 ---
 ```
 
-- `description`: One line, user-facing
-- `model`: Recommended model size
-- `allowed-tools`: Tools this skill uses
+- `name`: Matches the directory name (required)
+- `description`: One line, user-facing (required)
+- `allowed-tools`: Tools this skill uses (required)
+- `model`: Optional pin; omit to inherit the session's model
+- No other keys (legacy `version:` / `command:` are dead metadata)
 
 ### Content Structure
 
@@ -262,8 +266,10 @@ Before submitting a PR, ensure:
 
 - **Documentation content**: English (user guides, rules, concepts)
 - **Code, commands, commit messages**: English
-- **Skill prompts/output**: English (interaction with the user)
+- **Skill prompts/output**: English (runtime chat language may differ — a skill may instruct "respond to the user in Korean"; that is a conversation setting, not a document rule)
 - **Comments in skill files**: English preferred (international readability)
+- **Backward compatibility**: legacy Korean input labels stay accepted where a skill documents them; new content is English-only
+- Full two-layer rules (repo content vs runtime artifacts): [docs/style-guide.md](docs/style-guide.md)
 
 ---
 

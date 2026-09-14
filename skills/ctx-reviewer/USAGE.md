@@ -14,14 +14,14 @@
 ```
 /ctx-reviewer
 
-## 참조된 Global CTX
+## Referenced Global CTX
 - ctx/back-end/api/api-response.ctx.md
 - ctx/back-end/api/error-handling.ctx.md
 
-## 참조된 Local CTX
+## Referenced Local CTX
 - ctx/back-end/domain/notification.ctx.md
 
-## 리뷰 대상 코드
+## Review Target Code
 ```java
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class NotificationService {
     @Transactional
     public void markAsRead(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
-            .orElseThrow(() -> new NotFoundException("알림을 찾을 수 없습니다."));
+            .orElseThrow(() -> new NotFoundException("Notification not found."));
         notification.markAsRead();
     }
 
@@ -46,7 +46,7 @@ public class NotificationService {
 }
 ```
 
-## Executor 실행 모드
+## Executor Execution Mode
 - ARCHITECT_CONFIRMED
 ```
 
@@ -74,15 +74,15 @@ public class NotificationService {
 ```
 /ctx-reviewer
 
-## 참조된 Global CTX
+## Referenced Global CTX
 - ctx/back-end/api/api-design.ctx.md
 - ctx/back-end/api/api-response.ctx.md
 - ctx/back-end/api/error-handling.ctx.md
 
-## 참조된 Local CTX
+## Referenced Local CTX
 - ctx/back-end/domain/grade.ctx.md
 
-## 리뷰 대상 코드
+## Review Target Code
 ```java
 @RestController
 @RequiredArgsConstructor
@@ -99,7 +99,7 @@ public class GradeController {
 }
 ```
 
-## Executor 실행 모드
+## Executor Execution Mode
 - EXECUTOR_ONLY
 ```
 
@@ -130,20 +130,20 @@ public class GradeController {
 ```
 /ctx-reviewer
 
-## 참조된 Global CTX
-- API 응답 규칙 참조
+## Referenced Global CTX
+- See the API response rules
 
-## 참조된 Local CTX
-- 등급 관련 CTX
+## Referenced Local CTX
+- Grade-related CTX
 
-## 리뷰 대상 코드
+## Review Target Code
 ```java
-// 일부 코드만 발췌
+// only an excerpt of the code
 gradeService.findByUserId(userId);
 ```
 
-## Executor 실행 모드
-- (미명시)
+## Executor Execution Mode
+- (not specified)
 ```
 
 **Expected output:**

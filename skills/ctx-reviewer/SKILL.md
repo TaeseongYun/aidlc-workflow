@@ -1,8 +1,7 @@
 ---
 name: ctx-reviewer
 description: Judge whether implemented code violates CTX and identify recurring rules. Implementing, modifying, or proposing designs is forbidden.
-version: 1.0.0
-command: /ctx-reviewer
+allowed-tools: Read, Bash, Grep, Glob
 ---
 
 # ctx-reviewer
@@ -45,21 +44,24 @@ This Skill **never performs** the following.
 ## Input Format (fixed)
 
 ```markdown
-## 참조된 Global CTX
-- (CTX 파일 경로 목록)
+## Referenced Global CTX
+- (CTX file path list)
 
-## 참조된 Local CTX
-- (CTX 파일 경로 목록)
+## Referenced Local CTX
+- (CTX file path list)
 
-## 리뷰 대상 코드
+## Review Target Code
 ```java
-// 구현된 코드
+// implemented code
 ```
-Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
 
-## Executor execution mode
+## Executor Execution Mode
 - ARCHITECT_CONFIRMED | EXECUTOR_ONLY
 ```
+
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
+Backward compatibility: the pre-migration Korean headings (`## 참조된 Global CTX`, `## 참조된 Local CTX`,
+`## 리뷰 대상 코드`, `## Executor 실행 모드`) are accepted as equivalents.
 
 ### Input Validation
 
@@ -146,12 +148,14 @@ The output must follow the format and order below.
 - Rule A → Global CTX | Local CTX | Do not reflect
 - (If none, "Not applicable")
 
-## 4. CTX Reflection Proposal
-- Target file: ...
+## 4. CTX Reflection Proposal List
+### Proposal 1
+- Target file path: ...
 - Insertion location: ...
 - Sentence to add: "..."
 - AI malfunction if omitted: ...
-- (If none, "None")
+
+(One `### Proposal N` block per proposal — this exact structure is `ctx-updater`'s enforced input. If none, "None")
 
 **Notes:**
 - Do not change the output order

@@ -5,32 +5,32 @@
 ### Input
 
 ```markdown
-## CTX 반영 제안 목록
+## CTX Reflection Proposal List
 
-### 제안 1
-- 대상 파일 경로: CLAUDE.md
-- 삽입 위치: ## 📐 코딩 컨벤션 > ### ✅ Java 코드 스타일 섹션 마지막
-- 추가할 문장: - Entity 클래스의 연관관계 필드에는 반드시 `@JoinColumn` 어노테이션을 명시한다.
-- 이 규칙이 없으면 발생하는 오작동: AI가 연관관계 매핑 시 JoinColumn을 생략하여 예측 불가능한 컬럼명이 생성된다.
+### Proposal 1
+- Target file path: CLAUDE.md
+- Insertion location: end of the ## 📐 Coding Conventions > ### ✅ Java Code Style section
+- Sentence to add: - Always specify the `@JoinColumn` annotation on association fields of Entity classes.
+- AI malfunction if omitted: When mapping associations, the AI omits JoinColumn and unpredictable column names are generated.
 ```
 
 ### Output
 
 ```markdown
-## CTX 반영 결과
+## CTX Reflection Result
 
-### 반영 성공
-| 제안 번호 | 파일 | 삽입 위치 | 추가된 문장 |
+### Reflection Success
+| Proposal No. | File | Insertion Location | Added Sentence |
 |-----------|------|-----------|-------------|
-| 1 | CLAUDE.md | ## 📐 코딩 컨벤션 > ### ✅ Java 코드 스타일 섹션 마지막 | - Entity 클래스의 연관관계 필드에는 반드시 `@JoinColumn` 어노테이션을 명시한다. |
+| 1 | CLAUDE.md | end of the ## 📐 Coding Conventions > ### ✅ Java Code Style section | - Always specify the `@JoinColumn` annotation on association fields of Entity classes. |
 
-### 반영 실패 (있는 경우)
-없음
+### Reflection Failure (if any)
+None
 
-### 반영 요약
-- 총 제안 수: 1
-- 성공: 1
-- 실패: 0
+### Reflection Summary
+- Total proposals: 1
+- Success: 1
+- Failure: 0
 ```
 
 ---
@@ -40,23 +40,23 @@
 ### Input
 
 ```markdown
-## CTX 반영 제안
+## CTX Reflection Proposal
 
-### 제안 1
-- 파일: CLAUDE.md
-- 위치: 코딩 컨벤션 어딘가
-- 문장: JoinColumn 관련 규칙 추가
+### Proposal 1
+- File: CLAUDE.md
+- Location: somewhere in the coding conventions
+- Sentence: add a JoinColumn-related rule
 ```
 
 ### Output
 
 ```markdown
-## CTX 반영 중단
+## CTX Reflection Stopped
 
-중단 사유:
-- 입력 포맷 불일치: 필수 항목 `대상 파일 경로`, `삽입 위치`, `추가할 문장`, `이 규칙이 없으면 발생하는 오작동`이 누락됨
+Stop reason:
+- Input format mismatch: the required items `Target file path`, `Insertion location`, `Sentence to add`, and `AI malfunction if omitted` are missing
 
-중단된 제안:
-- 제안 번호: 1
-- 대상 파일: 식별 불가
+Stopped proposal:
+- Proposal No.: 1
+- Target file: cannot be identified
 ```

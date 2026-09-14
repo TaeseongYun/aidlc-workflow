@@ -1,4 +1,5 @@
 ---
+name: ctx-score-loop
 description: Dependency-aware score loop — implement once, then auto-iterate 4-axis scoring until >85 or stalled
 model: opus
 allowed-tools: Read, Write, Edit, Bash, Skill

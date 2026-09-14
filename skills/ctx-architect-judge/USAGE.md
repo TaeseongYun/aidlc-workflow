@@ -14,16 +14,16 @@
 ```
 /ctx-architect-judge
 
-## 작업 요구사항
-- 사용자 등급(Grade) 조회 API에 캐싱 적용
+## Task Requirements
+- Apply caching to the user grade (Grade) lookup API
 
-## 제공된 Global CTX
-- @ctx/back-end/api/api-design.ctx.md                                                                                                                                                                                                                                                                       
-- @ctx/back-end/api/api-response.ctx.md                                                                                                                                                                                                                                                                     
-- @ctx/back-end/api/error-handling.ctx.md                                                                                                                                                                                                                                                                   
-- @ctx/back-end/api/swagger-global.ctx.md   
+## Provided Global CTX
+- @ctx/back-end/api/api-design.ctx.md
+- @ctx/back-end/api/api-response.ctx.md
+- @ctx/back-end/api/error-handling.ctx.md
+- @ctx/back-end/api/swagger-global.ctx.md
 
-## 제공된 Local CTX
+## Provided Local CTX
 - .ctx/domains/grade/grade-domain.ctx.md
 - .ctx/domains/grade/grade-api.ctx.md
 ```
@@ -51,14 +51,14 @@
 ```
 /ctx-architect-judge
 
-## 작업 요구사항
-- 성능 개선
+## Task Requirements
+- Improve performance
 
-## 제공된 Global CTX
-- 전역 캐싱 정책 참조
+## Provided Global CTX
+- See the global caching policy
 
-## 제공된 Local CTX
-- 등급 관련 규칙 참조
+## Provided Local CTX
+- See the grade-related rules
 ```
 
 **Expected output:**

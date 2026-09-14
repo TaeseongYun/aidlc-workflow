@@ -1,8 +1,7 @@
 ---
 name: ctx-architect-judge
 description: Decide domain scope and CTX references before execution
-version: 1.0.0
-command: /ctx-architect-judge
+allowed-tools: Read, Grep, Glob
 ---
 
 # ctx-architect-judge
@@ -57,19 +56,20 @@ but the **judgment material** to be used in the next step.
 This Skill must accept only input with the structure below.
 
 ```markdown
-## 작업 요구사항
-- (자연어 요구사항)
+## Task Requirements
+- (natural-language requirements)
 
-## 제공된 Global CTX
-- (CTX 파일 경로 목록)
+## Provided Global CTX
+- (CTX file path list)
 
-## 제공된 Local CTX
-- (CTX 파일 경로 목록)
+## Provided Local CTX
+- (CTX file path list)
 ```
 
 ---
 
 Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
+Backward compatibility: the pre-migration Korean headings (`## 작업 요구사항`, `## 제공된 Global CTX`, `## 제공된 Local CTX`) are accepted as equivalents.
 
 ## Input Validation Rules
 

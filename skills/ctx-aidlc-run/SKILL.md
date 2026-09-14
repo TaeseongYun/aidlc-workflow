@@ -1,4 +1,5 @@
 ---
+name: ctx-aidlc-run
 description: Run team-ai-workflow requirements/design workflow using project CTX and write outputs to aidlc-docs
 model: opus
 allowed-tools: Read, Write, Edit, Bash
@@ -134,22 +135,22 @@ Session-separation notice message format (appended after the GATE approval messa
 
 ```markdown
 ---
-### 세션 분리 안내
+### Session Separation Notice
 
-Phase {현재} 작업이 완료되었습니다. 현재 depth level은 **{depth}**입니다.
+Phase {current} work is complete. The current depth level is **{depth}**.
 
-> {comprehensive: "세션을 분리해 주세요 (필수)." / standard: "세션 분리를 권장합니다." / minimal: "한 세션에서 계속 진행해도 됩니다."}
+> {comprehensive: "Please start a new session (required)." / standard: "Starting a new session is recommended." / minimal: "You may continue in this session."}
 
-다음 세션에서 아래를 입력하면 Phase {다음}으로 이어갑니다:
+Enter the following in the next session to continue with Phase {next}:
 
 \`\`\`
 /ctx-aidlc-run
 
-Phase {다음}을 시작한다.
-aidlc-state.md를 먼저 읽고 현재 상태를 확인해라.
+Start Phase {next}.
+Read aidlc-state.md first and check the current state.
 
-관련 산출물:
-- {이전 Phase 핵심 산출물 경로 목록}
+Related outputs:
+- {list of the previous Phase's key output paths}
 \`\`\`
 ```
 
@@ -175,7 +176,7 @@ STEP LIFECYCLE (common to all STEPs) — each line is one `aidlc-log.sh` call (s
 - This pattern is applied automatically to all STEPs. Do not repeat it in individual STEPs.
 
 PHASE ROUTER (load only the current Phase's STEP text):
-- Determine the Phase: the user prompt first ("Phase B를 시작한다"), else `aidlc-state.md` (Current Phase / first unchecked STEP), else Phase A.
+- Determine the Phase: the user prompt first (e.g., "Phase B를 시작한다" — "start Phase B"), else `aidlc-state.md` (Current Phase / first unchecked STEP), else Phase A.
 - Read exactly one file, then execute its STEPs in order:
   - Phase A (STEP 1 ~ GATE-1): `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-aidlc-run/phases/phase-a.md`
   - Phase B (STEP 4 ~ GATE-3): `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-aidlc-run/phases/phase-b.md`

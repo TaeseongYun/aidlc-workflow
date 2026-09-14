@@ -22,27 +22,27 @@
 ```
 /ctx-domain-exec
 
-## 실행 모드
+## Execution Mode
 - ARCHITECT_CONFIRMED
 
-## Architect 판단 결과
+## Architect Judgment Result
 
-### 1. 영향 도메인 목록
-- Grade: 사용자 등급 조회 기능이 Grade 도메인에 속함
+### 1. Affected Domain List
+- Grade: The user grade lookup feature belongs to the Grade domain
 
-### 2. 반드시 참조해야 할 Local CTX
+### 2. Local CTX That Must Be Referenced
 - ctx/back-end/domain/grade.ctx.md
 
-### 3. Global CTX 영향 여부
-- 영향 있음
-- ctx/back-end/api/api-response.ctx.md 응답 형식 준수 필요
+### 3. Whether Global CTX Is Impacted
+- Impacted
+- Compliance with the ctx/back-end/api/api-response.ctx.md response format is required
 
-### 4. 판단 불가 / 추가 확인 필요 지점
-- 없음
+### 4. Points That Cannot Be Judged / Require Additional Confirmation
+- None
 
-## 작업 요구사항
-- GradeService에 사용자 ID로 등급 조회하는 메서드 추가
-- 등급이 없으면 기본 등급(BRONZE) 반환
+## Task Requirements
+- Add a method to GradeService that looks up the grade by user ID
+- Return the default grade (BRONZE) if no grade exists
 ```
 
 **Expected output:**
@@ -80,23 +80,23 @@ Confirmed that the implementation above does not go beyond the CTX scope provide
 ```
 /ctx-domain-exec
 
-## 실행 모드
+## Execution Mode
 - EXECUTOR_ONLY
 
-## 작업 요구사항
-- NotificationService에 알림 읽음 처리 메서드 추가
-- 알림 ID로 조회하여 readAt 필드를 현재 시각으로 업데이트
+## Task Requirements
+- Add a mark-as-read method to NotificationService
+- Look up by notification ID and update the readAt field to the current time
 
-## 사용자 보증 선언 (필수)
-- 이 작업은 단일 도메인 범위임을 보증한다
-- 참조할 Local CTX를 직접 명시한다
+## User Guarantee Declaration (required)
+- I guarantee that this task is within a single-domain scope
+- I specify the Local CTX to reference directly
 
-## Global CTX (강제 참조)
+## Global CTX (forced reference)
 - ctx/back-end/api/api-design.ctx.md
 - ctx/back-end/api/api-response.ctx.md
 - ctx/back-end/api/error-handling.ctx.md
 
-## Local CTX (선택 참조)
+## Local CTX (optional reference)
 - ctx/back-end/domain/notification.ctx.md
 ```
 
@@ -115,7 +115,7 @@ Confirmed that the implementation above does not go beyond the CTX scope provide
 @Transactional
 public void markAsRead(Long notificationId) {
     Notification notification = notificationRepository.findById(notificationId)
-        .orElseThrow(() -> new NotFoundException("알림을 찾을 수 없습니다."));
+        .orElseThrow(() -> new NotFoundException("Notification not found."));
     notification.markAsRead();
 }
 ```
@@ -137,17 +137,17 @@ Confirmed that the implementation above does not go beyond the CTX scope provide
 ```
 /ctx-domain-exec
 
-## 실행 모드
+## Execution Mode
 - EXECUTOR_ONLY
 
-## 작업 요구사항
-- 결제 취소 기능 구현
+## Task Requirements
+- Implement the payment cancellation feature
 
-## 사용자 보증 선언 (필수)
-- 이 작업은 단일 도메인 범위임을 보증한다
-- 참조할 Local CTX를 직접 명시한다
+## User Guarantee Declaration (required)
+- I guarantee that this task is within a single-domain scope
+- I specify the Local CTX to reference directly
 
-## Local CTX (선택 참조)
+## Local CTX (optional reference)
 - ctx/back-end/domain/kcp-payment.ctx.md
 ```
 
@@ -170,28 +170,28 @@ Questions that need confirmation:
 ```
 /ctx-domain-exec
 
-## 실행 모드
+## Execution Mode
 - ARCHITECT_CONFIRMED
 
-## Architect 판단 결과
+## Architect Judgment Result
 
-### 1. 영향 도메인 목록
-- Settlement: 정산 처리 기능
-- Payment: 결제 연동 기능
+### 1. Affected Domain List
+- Settlement: settlement processing feature
+- Payment: payment integration feature
 
-### 2. 반드시 참조해야 할 Local CTX
+### 2. Local CTX That Must Be Referenced
 - ctx/back-end/domain/settlement.ctx.md
 - ctx/back-end/domain/kcp-payment.ctx.md
 
-### 3. Global CTX 영향 여부
-- 영향 있음
+### 3. Whether Global CTX Is Impacted
+- Impacted
 
-### 4. 판단 불가 / 추가 확인 필요 지점
-- Settlement과 Payment 도메인 간 트랜잭션 경계가 불명확함
-- 정산 실패 시 결제 롤백 정책이 CTX에 명시되지 않음
+### 4. Points That Cannot Be Judged / Require Additional Confirmation
+- The transaction boundary between the Settlement and Payment domains is unclear
+- The payment rollback policy on settlement failure is not specified in the CTX
 
-## 작업 요구사항
-- 정산 완료 시 결제 상태 변경
+## Task Requirements
+- Change the payment status when settlement completes
 ```
 
 **Expected output:**
@@ -216,22 +216,22 @@ Questions that need confirmation:
 ```
 /ctx-domain-exec
 
-## 실행 모드
+## Execution Mode
 - EXECUTOR_ONLY
 
-## 작업 요구사항
-- 프렌즈가 프로그램을 등록하면 알림 발송
+## Task Requirements
+- Send a notification when a friend registers a program
 
-## 사용자 보증 선언 (필수)
-- 이 작업은 단일 도메인 범위임을 보증한다
-- 참조할 Local CTX를 직접 명시한다
+## User Guarantee Declaration (required)
+- I guarantee that this task is within a single-domain scope
+- I specify the Local CTX to reference directly
 
-## Global CTX (강제 참조)
+## Global CTX (forced reference)
 - ctx/back-end/api/api-design.ctx.md
 - ctx/back-end/api/api-response.ctx.md
 - ctx/back-end/api/error-handling.ctx.md
 
-## Local CTX (선택 참조)
+## Local CTX (optional reference)
 - ctx/back-end/domain/friends.ctx.md
 ```
 

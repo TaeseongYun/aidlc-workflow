@@ -14,7 +14,7 @@ if [[ ! -e "$SCOPE" ]]; then
 fi
 
 # The workflow's own uncertainty markers + generic hedging words.
-PATTERN='UNCERTAIN|RISK:|TODO:|확신: 추정|확신: AI추천|ASSUME|추정|가정|probably|likely|should be|I think|by convention|typically'
+PATTERN='UNCERTAIN|RISK:|TODO:|Confidence: Estimated|Confidence: AI-Recommended|확신: 추정|확신: AI추천|ASSUME|추정|가정|probably|likely|should be|I think|by convention|typically'
 
 echo "# Harvested assumptions (scope: $SCOPE)"
 echo "# Each line 'file:line: text' is a claim to VERIFY against graphify/code/ctx/docs."

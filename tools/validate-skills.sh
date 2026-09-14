@@ -72,6 +72,23 @@ check_skill_dir() {
   fi
 
   if [[ "$family" == "workflow" ]]; then
+    # FRONT-01: one frontmatter convention — name+description+allowed-tools required,
+    # model optional, and no dead legacy keys (version:/command:).
+    local fm
+    fm=$(sed -n '/^---$/,/^---$/p' "$entry_file")
+    local front_missing=""
+    echo "$fm" | grep -q "^name:" || front_missing="$front_missing name"
+    echo "$fm" | grep -q "^allowed-tools:" || front_missing="$front_missing allowed-tools"
+    local front_dead=""
+    echo "$fm" | grep -qE "^(version|command):" && front_dead=" (drop legacy version:/command:)"
+    if [[ -z "$front_missing" && -z "$front_dead" ]]; then
+      pass "FRONT-01: $skill_name — frontmatter convention (name/description/allowed-tools)"
+    else
+      fail "FRONT-01: $skill_name — missing:${front_missing:- none}${front_dead}"
+    fi
+  fi
+
+  if [[ "$family" == "workflow" ]]; then
     # SKILL-03: references the shared skill protocol
     if grep -q "skill-protocol" "$entry_file"; then
       pass "SKILL-03: $skill_name — references skill-protocol"

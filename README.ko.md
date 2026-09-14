@@ -212,7 +212,7 @@ aidlc-workflow/
 │   ├── ctx-aidlc-run/
 │   ├── ctx-score-loop/
 │   ├── ctx-hallucination-audit/
-│   └── ... (12 skills)
+│   └── ... (one directory per skill — see the Skill List table)
 ├── tools/                      # Validation tools (evaluator, skill-validator)
 ├── scripts/                    # Installation and initialization
 │   ├── install-skills.sh       # Global skill installation

@@ -1,46 +1,40 @@
 # Style Guide
 
-This is the standard for mixing Korean/English when writing outputs.
+Language rules for this repo and for the artifacts the workflow produces.
+Two layers, one rule each:
 
-## Principles
+1. **Repository content** (skills, rules, templates, docs, commit messages in THIS repo): **English**.
+   Source of truth: [CONTRIBUTING.md](../CONTRIBUTING.md) "Language Rules".
+2. **Runtime artifacts** (the `aidlc-docs/` a team produces in ITS project): body text in the
+   team's working language; **all structural labels in English** so they can be parsed by
+   code/automation and validated by `tools/evaluator/`.
 
-- Outputs must be quick for teammates to read.
-- Keep proper nouns and technical terms in English.
-- Write explanations and judgments in Korean.
+## Repository content (this repo)
 
-## Section Headings
+| Item | Language |
+|------|----------|
+| Skill prompts, rule docs, templates, README/docs | English |
+| Commit messages | English |
+| Quoted examples of what a user might type | May stay in the user's language, with an English gloss |
+| Backward-compat notes listing legacy Korean labels | Allowed (they document accepted input) |
 
-| Location | Language | Example |
-|------|------|------|
-| Template section titles | English | `## Goal`, `## In-Scope`, `## Summary` |
-| Workflow rule doc sections | Korean | `## 원칙`, `## 게이트 목록`, `## 승인 필요 항목` |
-
-Reason: template headings are fixed in English for consistency across projects. Rule docs are read by the internal team, so Korean reads naturally.
-
-## Field Labels
-
-| Location | Language | Example |
-|------|------|------|
-| Question doc labels | Korean (required) | 분류, 영향도, 이유, 선택지, 미응답 시, [답변] |
-| UOW field labels | Korean | 책임, 예상 위치, 의존성, 규모, 수용 기준, 검증 방법 |
-| Status values | English | `OPEN`, `ANSWERED`, `BLOCK`, `ASSUME-A`, `TODO` |
-
-Reason: keep it consistent with the "labels must be in Korean" rule in `common/question-rules.md`. Status values stay in English so they can be parsed by code/automation.
-
-## Body
+## Runtime artifacts (a consuming project's aidlc-docs/)
 
 | Item | Language | Example |
-|------|------|------|
-| Requirement descriptions | Korean | "재구매 고객에게 자동으로 할인 쿠폰을 발급한다" |
-| Technical terms | Keep in English | API, DB, Entity, Repository, JPA, batch |
-| File paths | English | `ctx/project-profile.ctx.md` |
-| Commit messages | Korean (excluding type/scope) | `feat: (coupon) 쿠폰 도메인 기본 구조 추가` |
+|------|----------|---------|
+| Section headings & field labels | English (required) | `## Goal`, `Scope`, `Type`, `Category`, `Impact`, `If-unanswered` |
+| Status values | English (required) | `OPEN`, `ANSWERED`, `BLOCK`, `ASSUME-A`, `TODO` |
+| Requirement/answer body text | Team's working language | "재구매 고객에게 자동으로 할인 쿠폰을 발급한다" |
+| Technical terms, file paths, code | English | `ctx/project-profile.ctx.md`, Repository, JPA |
+| Commit messages in the team's project | Per the project's `ctx/workflow/commit-workflow.ctx.md`; default English | — |
 
-## Prohibited Mixing
+Label rule source: `common/question-rules.md` ("Labels must always use English").
+Chat responses to the user follow the user's language (e.g. `team-ai-workflow-start` responds in Korean); that is a conversation setting, not a document rule.
 
-- Do not needlessly mix Korean and English within a single sentence.
+## Prohibited mixing (body text, any language)
+
+- Do not needlessly mix languages within a single sentence.
   - Bad: "유저의 order를 cancel하는 로직"
   - Good: "사용자의 주문을 취소하는 로직" or, in a technical context, "Order 취소 로직"
-- Do not alternate between Korean and English for the same concept within the same document.
-  - Bad: mixing "쿠폰" and "coupon" in the same document
-  - Good: unify to one ("쿠폰" in the body, "coupon" in code/paths)
+- Do not alternate between two words for the same concept within one document
+  (pick "쿠폰" or "coupon" for body text; code/paths always use the English identifier).

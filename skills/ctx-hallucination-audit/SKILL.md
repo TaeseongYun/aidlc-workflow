@@ -1,4 +1,5 @@
 ---
+name: ctx-hallucination-audit
 description: Hallucination audit loop — find where the AI guessed wrong (dev facts), record & quarantine each, repeat until Hallucination-Free Score >= 87. Verifies via graphify first (codegraph fallback); pushes lessons to Linear.
 model: opus
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Skill
@@ -8,31 +9,31 @@ ROLE: HALLUCINATION_AUDITOR
 MODE: ITERATIVE_LOOP
 STOP_CONDITION: Hallucination-Free Score >= 87 (never self-approve below it)
 
-이 스킬은 Hallucination Guard의 Rule 4 루프를 구현한다. 공통 실행 프로토콜은
-`{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`, 규칙 원문은
-`{{TEAM_AI_WORKFLOW_DIR}}/extensions/hallucination-guard/hallucination-guard.md`를 따른다.
-한국어로 응답하되 코드/명령은 영문 유지.
+This skill implements the Hallucination Guard's Rule 4 loop. The shared execution protocol is
+`{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`; the rule source is
+`{{TEAM_AI_WORKFLOW_DIR}}/extensions/hallucination-guard/hallucination-guard.md`.
+Respond to the user in Korean. Keep code/commands in English.
 
 Scope = `$ARGUMENTS` if given, else `aidlc-docs/` **plus every dev-fact claim the AI made in the
 current session**. "Dev fact" = Rule 0 list (paths, API sigs, names, config keys, DB fields,
 versions, CLI flags, library behavior, build/deploy, security).
 
 ────────────────────────────────────
-책임 범위 / 절대 금지 (Guardrail)
+Scope of Responsibility / Absolute Prohibitions (Guardrail)
 ────────────────────────────────────
-- 판정·기록·격리만 한다. 기능 구현이나 설계 변경은 하지 않는다 (→ `/ctx-domain-exec`).
-- ledger·knowledge-log는 **append-only**. 삭제/덮어쓰기 금지 (상태 변경은 Status 필드로만).
-- 격리(QUARANTINED)된 주장은 재검증·재사용하지 않는다.
-- 추측을 다른 추측으로 검증하지 않는다.
-- Score < 87에서 스스로 완료/핸드오프 판정 금지.
+- Verdicts, recording, and quarantine only. No feature implementation or design changes (→ `/ctx-domain-exec`).
+- The ledger and knowledge-log are **append-only**. No deleting/overwriting (state changes via the Status field only).
+- Quarantined (QUARANTINED) claims are never re-verified or reused.
+- Never verify a guess with another guess.
+- No self-declared completion/handoff while Score < 87.
 
 ────────────────────────────────────
 PRE-FLIGHT (once)
 ────────────────────────────────────
 1. Read `aidlc-docs/hallucination-ledger.md` and `aidlc-docs/knowledge-log.md`.
 2. Note existing Quarantine entries — a **breach** is any of them reappearing as fact.
-3. 코드 그래프 확인: `graphify-out/graph.json` 가 있는지 확인한다. 없으면 `graphify .` 로 빌드한
-   뒤 진행(전제조건). 그래프 없이 VERIFY하지 않는다. (codegraph는 선택적 fallback.)
+3. Code graph check: confirm `graphify-out/graph.json` exists. If not, build it with `graphify .`
+   before proceeding (precondition). Never VERIFY without a graph. (codegraph is an optional fallback.)
 
 ────────────────────────────────────
 ONE ROUND (repeat until STOP)
@@ -45,13 +46,13 @@ STEP 1 — HARVEST
 
 STEP 2 — VERIFY (per claim) — graphify first
 - Find a **concrete source**, in this order:
-  1. **graphify** — `graphify query "<question>"` / `graphify explain "<entity>"` / `graphify path
-     "<a>" "<b>"` (또는 MCP `query_graph`/`get_node`) 로 노드·경로 + `file:line`을 확인한다. (1차 소스)
-     엣지 provenance를 판정에 반영한다: `EXTRACTED`(원문 명시)는 근거로 사용 가능, `INFERRED`는
-     실제 소스를 재확인한 뒤에만 CONFIRMED, `AMBIGUOUS`는 UNRESOLVED/BLOCK 로 처리한다.
-  2. **codegraph fallback** — graphify가 없거나 못 덮으면 `codegraph explore`/`codegraph node`.
-  3. **grep/Read** — 그래도 못 덮는 경우 실제 파일 확인.
-  4. `ctx/` 또는 공식 문서 (`WebFetch`/`WebSearch`).
+  1. **graphify** — confirm nodes/paths + `file:line` via `graphify query "<question>"` /
+     `graphify explain "<entity>"` / `graphify path "<a>" "<b>"` (or MCP `query_graph`/`get_node`). (primary source)
+     Apply edge provenance to the verdict: `EXTRACTED` (explicit in source) is usable as evidence;
+     `INFERRED` becomes CONFIRMED only after re-checking the actual source; `AMBIGUOUS` is treated as UNRESOLVED/BLOCK.
+  2. **codegraph fallback** — when graphify is absent or does not cover it, `codegraph explore`/`codegraph node`.
+  3. **grep/Read** — when still not covered, check the actual files.
+  4. `ctx/` or official docs (`WebFetch`/`WebSearch`).
 - Never verify a guess with another guess. Assign a verdict:
   - **CONFIRMED** — matches a real source. Drop from findings.
   - **REFUTED** — contradicted by a real source. Record it.

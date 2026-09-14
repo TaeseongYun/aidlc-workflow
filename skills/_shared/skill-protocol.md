@@ -23,20 +23,26 @@ Input format validation is based on **logical structure**.
 ## Output Constraints
 
 - Do NOT change output order
-- Do NOT omit items (if absent, state "없음" or "해당 없음" explicitly)
+- Do NOT omit items (if absent, state "None" or "Not applicable" explicitly)
 - Code block usage follows per-skill rules
 
 ## Standard Output Format on Halt
 
 ```markdown
-## [동작명] 중단
+## [Action] Halted
 
-중단 사유:
-- (구체적인 중단 사유)
+Halt reason:
+- (specific halt reason)
 
-확인이 필요한 사항:
+Items that need confirmation:
 1. ...
 ```
+
+Backward compatibility: outputs and inputs using the pre-migration Korean
+equivalents ("없음" / "해당 없음", `## [동작명] 중단`, `중단 사유:`,
+`확인이 필요한 사항:`) are accepted as identical to the English forms.
+When responding to the user in Korean (per a skill's own response-language rule),
+render this template in Korean; the English form here is the documentation standard.
 
 On halt:
 - Do NOT propose alternatives

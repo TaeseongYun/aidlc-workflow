@@ -1,8 +1,7 @@
 ---
 name: ctx-updater
 description: Update existing code or documents according to requirements. Judging domains, changing designs, and interpreting or creating CTX are forbidden.
-version: 1.0.0
-command: /ctx-updater
+allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
 # ctx-updater
@@ -44,30 +43,35 @@ This Skill **never performs** the following.
 
 ## Input Format (enforced)
 
+This is the exact shape `ctx-reviewer` emits in its "CTX Reflection Proposal List" output section.
+
 ```markdown
-## CTX 반영 제안 목록
+## CTX Reflection Proposal List
 
-### 제안 1
-- 대상 파일 경로:
-- 삽입 위치:
-- 추가할 문장:
-- 이 규칙이 없으면 발생하는 오작동:
+### Proposal 1
+- Target file path:
+- Insertion location:
+- Sentence to add:
+- AI malfunction if omitted:
 
-### 제안 2
-- 대상 파일 경로:
-- 삽입 위치:
-- 추가할 문장:
-- 이 규칙이 없으면 발생하는 오작동:
+### Proposal 2
+- Target file path:
+- Insertion location:
+- Sentence to add:
+- AI malfunction if omitted:
 ```
-Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard
+(logical structure only — a numbering prefix on the heading such as "## 4. CTX Reflection Proposal List" is accepted).
+Backward compatibility: the pre-migration Korean labels (`## CTX 반영 제안 목록`, `### 제안 N`,
+`대상 파일 경로` / `삽입 위치` / `추가할 문장` / `이 규칙이 없으면 발생하는 오작동`) are accepted as exact equivalents.
 
 ### Input Validation (required)
 
 - If it is not the format above, **stop immediately**
-- If `대상 파일 경로` is empty, **stop immediately**
-- If `삽입 위치` is empty, **stop immediately**
-- If `추가할 문장` is empty, **stop immediately**
-- If `이 규칙이 없으면 발생하는 오작동` is empty, **stop immediately**
+- If `Target file path` is empty, **stop immediately**
+- If `Insertion location` is empty, **stop immediately**
+- If `Sentence to add` is empty, **stop immediately**
+- If `AI malfunction if omitted` is empty, **stop immediately**
 
 ---
 
