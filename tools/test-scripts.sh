@@ -78,5 +78,16 @@ check "inventory: stdout summary"   "^cycles: orders ↔ payments" "$TMP/inv.out
 expect_rc 4 "inventory: refuses overwrite" python3 "$GI" "$TMP/proj"
 expect_rc 3 "inventory: no graph"          python3 "$GI" "$TMP"
 
+echo "--- worktree_alloc.py ---"
+expect_rc 0 "worktree_alloc: selftest" python3 "$ROOT/scripts/worktree_alloc.py" --selftest
+
+echo "--- run-logger.ts ---"
+# tsx is fetched by npx on demand; skip (do not fail) where that is unavailable.
+if npx --yes tsx --version >/dev/null 2>&1; then
+  expect_rc 0 "run-logger: selftest" npx --yes tsx "$ROOT/scripts/run-logger.ts" --selftest
+else
+  echo "[SKIP] run-logger: selftest — tsx unavailable (offline?)"
+fi
+
 echo ""
 if (( fails > 0 )); then echo "❌ $fails script check(s) failed"; exit 1; else echo "✅ all script checks passed"; fi

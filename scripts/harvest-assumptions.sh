@@ -20,8 +20,11 @@ echo "# Harvested assumptions (scope: $SCOPE)"
 echo "# Each line 'file:line: text' is a claim to VERIFY against graphify/code/ctx/docs."
 echo
 
+# --no-ignore/--hidden: match grep's behavior so the harvest is identical
+# whichever tool is installed (rg would otherwise honor .gitignore and skip
+# hidden files, giving a different audit input on different machines).
 if command -v rg >/dev/null 2>&1; then
-  rg -n --no-heading -e "$PATTERN" "$SCOPE" || echo "(none found — clean)"
+  rg -n --no-heading --no-ignore --hidden -g '!.git' -e "$PATTERN" -- "$SCOPE" || echo "(none found — clean)"
 else
-  grep -rnE "$PATTERN" "$SCOPE" || echo "(none found — clean)"
+  grep -rnE --exclude-dir=.git -- "$PATTERN" "$SCOPE" || echo "(none found — clean)"
 fi

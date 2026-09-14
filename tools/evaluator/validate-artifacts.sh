@@ -79,17 +79,27 @@ check_empty_sections() {
   local prev_heading=""
   local prev_line=0
   local current_line=0
+  local content_since=0
 
+  # A section is empty when no non-blank body line appears between one heading
+  # and the next (blank lines between headings are the normal markdown layout,
+  # so a line-distance check can never fire).
   while IFS= read -r line; do
     ((current_line++))
     if [[ "$line" =~ ^##+ ]]; then
-      if [[ -n "$prev_heading" ]] && (( current_line - prev_line <= 1 )); then
+      if [[ -n "$prev_heading" && $content_since -eq 0 ]]; then
         warn "$file: '$prev_heading' 섹션이 비어 있음 (${prev_line}줄)"
       fi
       prev_heading="$line"
       prev_line=$current_line
+      content_since=0
+    elif [[ -n "${line// /}" ]]; then
+      content_since=1
     fi
   done < "$FEATURE_DIR/$file"
+  if [[ -n "$prev_heading" && $content_since -eq 0 ]]; then
+    warn "$file: '$prev_heading' 섹션이 비어 있음 (${prev_line}줄)"
+  fi
 }
 
 for file in "requirements.md" "status.md" "unit-of-work.md"; do
@@ -102,8 +112,13 @@ echo "--- 4. 참조 무결성 ---"
 
 if [[ -f "$FEATURE_DIR/unit-of-work.md" ]]; then
   uow_ids=$(grep -oE 'UOW-[0-9]+' "$FEATURE_DIR/unit-of-work.md" | sort -u)
-  uow_count=$(echo "$uow_ids" | wc -l | tr -d ' ')
-  pass "unit-of-work.md: UOW ID ${uow_count}개 발견"
+  if [[ -z "$uow_ids" ]]; then
+    # echo "" | wc -l prints 1, so count only when the list is non-empty
+    error "unit-of-work.md: UOW ID가 하나도 없음"
+  else
+    uow_count=$(echo "$uow_ids" | wc -l | tr -d ' ')
+    pass "unit-of-work.md: UOW ID ${uow_count}개 발견"
+  fi
 
   # Summary 테이블의 UOW와 본문 헤딩의 UOW 비교
   summary_ids=$(grep -E '^\|.*UOW-[0-9]+' "$FEATURE_DIR/unit-of-work.md" 2>/dev/null | grep -oE 'UOW-[0-9]+' | sort -u)
@@ -150,8 +165,8 @@ for file in "$FEATURE_DIR"/*.md; do
     fi
   fi
 
-  # 유니코드 박스 문자 사용 감지
-  if grep -P '[┌─│└┐┘├┤┬┴┼]' "$file" 2>/dev/null; then
+  # 유니코드 박스 문자 사용 감지 (-P는 BSD grep에 없어 macOS에서 조용히 죽는다 — ERE 사용)
+  if grep -qE '┌|─|│|└|┐|┘|├|┤|┬|┴|┼' "$file" 2>/dev/null; then
     error "$fname: 유니코드 박스 문자 사용 감지 (ASCII만 허용)"
   fi
 done

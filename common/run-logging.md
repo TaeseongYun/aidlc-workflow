@@ -49,7 +49,7 @@ npx tsx {{TEAM_AI_WORKFLOW_DIR}}/scripts/run-logger.ts append --project . \
   [--detail "..."] [--artifacts a,b] [--refs a,b] [--confidence certain] [--mode full]
 ```
 
-Structured callers may pass `--json '<entry>'` or pipe a JSON entry on stdin instead of flags.
+Structured callers may pass `--json '<entry>'` or `--stdin` with a JSON entry piped on stdin instead of flags.
 
 ## Recall (at run entry / when prior context matters)
 

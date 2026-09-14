@@ -12,7 +12,12 @@ on:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    # macOS included: the scripts are authored on macOS (BSD grep/sed, bash 3.2)
+    # and Linux-only CI already shipped one check that was dead on Macs.
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -21,9 +26,31 @@ jobs:
       - name: Validate skills
         run: bash tools/validate-skills.sh
 
-      # 2. Helper-script self-checks (aidlc-log.sh, md-section.sh, graph_inventory.py).
+      # 2. Helper-script self-checks (aidlc-log.sh, md-section.sh,
+      #    graph_inventory.py, worktree_alloc.py, run-logger.ts).
       - name: Test helper scripts
         run: bash tools/test-scripts.sh
+
+      # 2.5 Install/init smoke test: run twice against temp homes and a temp
+      #     project; the second run must be a no-op (idempotency), and the
+      #     destructive rm -rf path must stay inside the target dirs.
+      - name: Install and init smoke test
+        run: |
+          set -euo pipefail
+          CH="$(mktemp -d)"; XH="$(mktemp -d)"; PROJ="$(mktemp -d)"
+          CLAUDE_HOME="$CH" CODEX_HOME="$XH" bash scripts/install-skills.sh
+          CLAUDE_HOME="$CH" CODEX_HOME="$XH" bash scripts/install-skills.sh
+          CLAUDE_HOME="$CH" CODEX_HOME="$XH" bash scripts/install-skills.sh --platforms=android
+          test -f "$XH/skills/_shared/skill-protocol.md"
+          test -f "$CH/commands/ctx-aidlc-run.md"
+          ! grep -r "{{TEAM_AI_WORKFLOW_DIR}}" "$CH/commands" "$XH/skills"
+          cd "$PROJ" && git init -q . && bash "$GITHUB_WORKSPACE/scripts/init-project.sh" || true
+          cd "$GITHUB_WORKSPACE"
+
+      # 2.7 Translation parity: README.ko/zh must list every skill README.md lists,
+      #     and the skill table must match the skills/ directory.
+      - name: Check README parity
+        run: bash tools/check-readme-parity.sh
 
       # 3. Artifact/question/readiness-score checks against the golden baselines.
       #    Warnings are exit 0 (not a failure); only real errors exit non-zero.

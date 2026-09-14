@@ -23,8 +23,9 @@
  *                 [--detail "..."] [--artifacts a,b] [--refs a,b] \
  *                 [--confidence certain|estimated|ai-recommended|undecided] \
  *                 [--mode full|degraded]
- *   run-logger.ts append --project . --json '{"feature":"x",...}'   # or entry on stdin
- *   run-logger.ts recall --project . [--feature <slug>] [--kind <k>] [--limit N]
+ *   run-logger.ts append --project . --json '{"feature":"x",...}'
+ *   run-logger.ts append --project . --stdin        # JSON entry piped on stdin
+ *   run-logger.ts recall --project . [--feature <slug>] [--kind <k>] [--limit N]   # N=0 -> all
  *   run-logger.ts --selftest
  *
  * Exit codes:  0 = success   2 = usage / validation error
@@ -59,6 +60,14 @@ interface RunLogEntry {
 function fail(msg: string): never {
   process.stderr.write(`ERROR: ${msg}\n`);
   process.exit(2);
+}
+
+function parseJsonOrFail(raw: string, source: string): Partial<RunLogEntry> {
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    fail(`${source} is not valid JSON: ${(err as Error).message}`);
+  }
 }
 
 // --- arg parsing (stdlib only): supports "--flag value" and "--flag=value" ---
@@ -109,18 +118,21 @@ function splitList(v?: string): string[] | undefined {
 function readEntries(project: string): RunLogEntry[] {
   const p = ndjsonPath(project);
   if (!fs.existsSync(p)) return [];
-  return fs
-    .readFileSync(p, "utf8")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l, idx) => {
-      try {
-        return JSON.parse(l) as RunLogEntry;
-      } catch {
-        fail(`run-log.ndjson line ${idx + 1} is not valid JSON`);
-      }
-    });
+  // Tolerant read: a corrupt line is warned about and skipped, never fatal —
+  // otherwise one bad line would brick every subsequent append (the mirror
+  // rebuild runs after each append and would die forever).
+  const entries: RunLogEntry[] = [];
+  const lines = fs.readFileSync(p, "utf8").split("\n");
+  lines.forEach((raw, idx) => {
+    const l = raw.trim();
+    if (!l) return;
+    try {
+      entries.push(JSON.parse(l) as RunLogEntry);
+    } catch {
+      process.stderr.write(`WARN: run-log.ndjson line ${idx + 1} is not valid JSON — skipped\n`);
+    }
+  });
+  return entries;
 }
 
 function validate(e: Partial<RunLogEntry>): RunLogEntry {
@@ -170,9 +182,12 @@ function renderMirror(entries: RunLogEntry[]): string {
   for (const feat of order) {
     out.push(`## Feature: ${feat}`, "");
     for (const e of byFeature.get(feat)!) {
+      // NDJSON keeps raw text; the mirror flattens newlines so a multi-line
+      // result cannot break the bullet structure graphify ingests.
+      const oneLine = (s: string) => s.replace(/\s*\n\s*/g, " ");
       out.push(`### ${e.ts} — ${e.skill} · ${e.phase} · ${e.kind}`);
-      out.push(`- Result: ${e.result}`);
-      if (e.detail) out.push(`- Detail: ${e.detail}`);
+      out.push(`- Result: ${oneLine(e.result)}`);
+      if (e.detail) out.push(`- Detail: ${oneLine(e.detail)}`);
       if (e.artifacts?.length) out.push(`- Artifacts: ${e.artifacts.join(", ")}`);
       if (e.refs?.length) out.push(`- Refs: ${e.refs.join(", ")}`);
       const tags: string[] = [];
@@ -190,12 +205,14 @@ function cmdAppend(flags: Record<string, string>): void {
   let partial: Partial<RunLogEntry>;
 
   if (flags.json && flags.json !== "true") {
-    partial = JSON.parse(flags.json);
-  } else if (!process.stdin.isTTY && !flags.result && !flags.feature) {
-    // structured caller piped a JSON entry on stdin
+    partial = parseJsonOrFail(flags.json, "--json");
+  } else if (flags.stdin === "true") {
+    // Explicit opt-in only. Sniffing isTTY here was backwards for the real
+    // callers (agents shelling out): a forgotten --feature flag turned into a
+    // blocking read on an inherited pipe instead of a validation error.
     const raw = fs.readFileSync(0, "utf8").trim();
-    if (!raw) fail("no entry provided (use flags, --json, or pipe JSON on stdin)");
-    partial = JSON.parse(raw);
+    if (!raw) fail("no entry provided on stdin (use flags, --json, or --stdin with piped JSON)");
+    partial = parseJsonOrFail(raw, "stdin");
   } else {
     partial = {
       ts: flags.ts,
@@ -225,7 +242,11 @@ function cmdRecall(flags: Record<string, string>): void {
   let entries = readEntries(project);
   if (flags.feature) entries = entries.filter((e) => e.feature === flags.feature);
   if (flags.kind) entries = entries.filter((e) => e.kind === flags.kind);
-  const limit = flags.limit ? Math.max(0, parseInt(flags.limit, 10) || 0) : 20;
+  let limit = 20;
+  if (flags.limit !== undefined) {
+    if (!/^\d+$/.test(flags.limit)) fail(`--limit must be a non-negative integer (0 = all), got "${flags.limit}"`);
+    limit = parseInt(flags.limit, 10);
+  }
   const slice = limit > 0 ? entries.slice(-limit) : entries;
   process.stderr.write(
     `# ${slice.length} entr${slice.length === 1 ? "y" : "ies"}` +
@@ -236,6 +257,9 @@ function cmdRecall(flags: Record<string, string>): void {
 
 function selftest(): void {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "runlog-"));
+  // Track the exit code and exit AFTER the finally block: process.exit()
+  // inside try skips finally, which leaked the temp dir on every success.
+  let rc = 0;
   try {
     cmdAppend({
       project: dir,
@@ -276,14 +300,28 @@ function selftest(): void {
     }
     const recalled = captured.join("").trim().split("\n").filter(Boolean);
     assert(recalled.length === 1, `recall(kind=hallucination) expected 1, got ${recalled.length}`);
+    // corrupt-line tolerance: a bad NDJSON line must not brick appends
+    fs.appendFileSync(ndjsonPath(dir), "{not json}\n");
+    cmdAppend({
+      project: dir,
+      feature: "demo",
+      skill: "ctx-score-loop",
+      phase: "score-round-2",
+      kind: "score",
+      result: "after corrupt line",
+    });
+    assert(
+      fs.readFileSync(mirrorPath(dir), "utf8").includes("after corrupt line"),
+      "append after corrupt ndjson line did not reach the mirror",
+    );
     process.stderr.write("selftest: PASS\n");
-    process.exit(0);
   } catch (err) {
     process.stderr.write(`selftest: FAIL — ${(err as Error).message}\n`);
-    process.exit(1);
+    rc = 1;
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+  process.exit(rc);
 }
 
 function assert(cond: boolean, msg: string): void {

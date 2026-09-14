@@ -112,8 +112,11 @@ if [[ -f "$QFILE" ]]; then
       fi
     fi
 
-    # READY 판정인데 BLOCK이 있으면 오류
-    if [[ -n "${verdict:-}" && "$verdict" == "READY" ]]; then
+    # READY 판정인데 BLOCK이 있으면 오류.
+    # verdict 미추출 시(합계 행 파싱 실패) 이 핵심 교차 검증이 조용히 건너뛰어지므로 경고를 남긴다.
+    if [[ -z "${verdict:-}" ]]; then
+      warn "판정을 추출하지 못해 READY×BLOCK 교차 검증을 수행할 수 없음"
+    elif [[ "$verdict" == "READY" ]]; then
       error "READY 판정이지만 OPEN BLOCK 질문 ${block_open}건 존재"
     fi
   else

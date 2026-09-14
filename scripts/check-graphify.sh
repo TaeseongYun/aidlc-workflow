@@ -53,6 +53,11 @@ for arg in "$@"; do
   esac
 done
 
+case "$MODE" in
+  auto|greenfield|brownfield) ;;
+  *) echo "ERROR: --mode must be auto|greenfield|brownfield (got '${MODE}')" >&2; exit 1 ;;
+esac
+
 # Resolve auto mode: brownfield if the project already has non-scaffold source files.
 resolve_mode() {
   [[ "$MODE" != "auto" ]] && return

@@ -101,7 +101,9 @@ Each feature's requirements, questions, Units of Work, and technical design are 
 - **GATE-0**: Multi-feature roadmap approval
 - **GATE-1**: Initial requirements clarification approval
 - **GATE-2, 3**: Final requirements and design approval
+- **GATE-4**: Infrastructure design approval (conditional)
 - **GATE-5**: Confirmation of implementation readiness
+- Conditional half-gates **2.5 / 2.7 / 3.5** fire only when their trigger applies (personas, components, M/L technical design) — full list in [common/stage-gate-rules.md](common/stage-gate-rules.md)
 
 ### Unit of Work: The Unit of Implementation
 
@@ -109,7 +111,7 @@ Decompose requirements into work units of S/M/L size. Each UOW specifies Accepta
 
 ### Platform Guidance: Per-Platform Architecture Baseline
 
-`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp) captures the architecture baseline the agent must load before designing (`/ctx-aidlc-run` STEP 6.5) or implementing (`/ctx-domain-exec`) on that platform. Declare the platform in `ctx/project-profile.ctx.md`; precedence is project `ctx/` > platform guidance > general knowledge. Each platform also ships detailed per-platform skills — figma-to-code, a vibe-coding security guard, testing, design-system, accessibility, i18n, observability, and contract-codegen — that auto-load when you touch the relevant files. The documents are self-contained markdown, so external repos can consume them via the installed path or raw GitHub URL — see [platforms/README.md](platforms/README.md).
+`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp) captures the architecture baseline the agent must load before designing (`/ctx-aidlc-run` STEP 6.5) or implementing (`/ctx-domain-exec`) on that platform. Declare the platform in `ctx/project-profile.ctx.md`; precedence is project `ctx/` > platform guidance > general knowledge. Each platform also ships detailed per-platform skills — figma-to-code, a vibe-coding security guard, testing, design-system, accessibility, i18n, observability, and contract-codegen. Platform skills are **opt-in**: install the ones for your stack with `bash scripts/install-skills.sh --platforms=android,ios` (or `--platforms=all`). The documents are self-contained markdown, so external repos can also consume them via the installed path or raw GitHub URL — see [platforms/README.md](platforms/README.md).
 
 For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts.md).
 
@@ -131,6 +133,8 @@ For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts
 | `/ctx-commit-planner` | Design commit structure |
 | `/ctx-score-loop` | Automatic iterative scoring on dependency + 4 axes after implementation (complete when the score exceeds 85) |
 | `/ctx-hallucination-audit` | Hallucination Guard audit loop. Verify dev facts with graphify (codegraph fallback), isolate refuted claims, and repeat until the score reaches at least 87 |
+| `/ctx-aidlc-sync` | Port AWS AI-DLC upstream changes into this workflow repo (PRs only above a 90-point sync score) |
+| `/mobile-webview-bridge` | JS ↔ native WebView bridge for Android/iOS/KMP/RN/Flutter with one shared contract-first protocol (generator + guard modes) |
 
 > **Hallucination Guard (always on).** It verifies dev facts such as paths,
 > symbols, APIs, configuration keys, and versions against the code graph so AI
