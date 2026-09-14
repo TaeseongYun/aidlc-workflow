@@ -147,6 +147,7 @@ For each commit, MUST write **all 4** of the following.
 ### Step 2: Load CTX Rules
 
 - Reference `ctx/workflow/commit-workflow.ctx.md`
+- General commit-structuring reference (when project CTX is silent): `{{TEAM_AI_WORKFLOW_DIR}}/common/commit-workflow/SKILLS.md` (index: `{{TEAM_AI_WORKFLOW_DIR}}/common/reference-index.md`)
 - If this CTX does not exist, halt immediately
 
 ### Step 3: Judge Committability

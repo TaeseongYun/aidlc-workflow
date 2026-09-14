@@ -57,7 +57,7 @@ GATE-2. Requirements Review
 - GATE-2 cannot be skipped regardless of request classification (`raw-request`/`prepared-requirement`/`change-on-existing-feature`). Direct entry into STEP 6 (UOW) is not allowed.
 - Do not pass if even 1 unanswered BLOCK question remains.
 - After GATE-2 approval:
-  - If security-baseline extension is enabled, create `extensions/security-baseline.md` using the extension template.
+  - If security-baseline extension is enabled, create `extensions/security/security-baseline.md` using the extension template.
   - Evaluate STEP 5.5 condition before proceeding to STEP 6.
 
 STEP 5.5. User Stories (conditional)

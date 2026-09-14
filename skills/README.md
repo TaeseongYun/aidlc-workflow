@@ -1,6 +1,6 @@
 # Skills
 
-This directory is the source repository for the team's shared Codex skills.
+This directory is the source repository for the team's shared skills (deployed to both Codex and Claude, see Principles).
 
 ## Principles
 - The files here are the source of the team's shared skills.
@@ -10,6 +10,9 @@ This directory is the source repository for the team's shared Codex skills.
 - All skills follow the common execution protocol in `_shared/skill-protocol.md`.
 
 ## Included Skills
+- `team-ai-workflow-start`
+  - Entry point. Diagnoses the environment (install state, project init, code-graph
+    prerequisites) and routes to the right follow-up skill
 - `ctx-aidlc-roadmap`
   - For Phase 0 multi-feature roadmapping (decompose a large prepared planning document by feature)
   - Output: `aidlc-docs/_roadmap.md`. After passing GATE-0, enter `ctx-aidlc-run` per feature.
@@ -40,13 +43,17 @@ This directory is the source repository for the team's shared Codex skills.
   - One shared protocol (envelope, handshake, security, threading, lifecycle) +
     per-platform reference bindings; generator mode (scaffold from a message
     contract) and guard mode (severity-rated review checklist)
-  - Offline envelope validator: `scripts/validate_envelope.py`
+  - Offline envelope validator: `skills/mobile-webview-bridge/scripts/validate_envelope.py`
 - `ctx-hallucination-audit`
   - Hallucination Guard audit loop. Verifies dev facts with graphify (codegraph
     fallback), isolates refuted items in the ledger, repeats until the
     Hallucination-Free Score is at least 87, and pushes lessons learned to Linear.
   - Rule source: `extensions/hallucination-guard/hallucination-guard.md`.
     Prerequisite: graphify (codegraph is an optional fallback).
+- `ctx-score-loop`
+  - Post-implementation quality loop: iterates dependency + 4-axis scoring
+    autonomously until the score exceeds 85 (runs only after GATE-3; never
+    auto-passes GATEs)
 
 ## Installation
 

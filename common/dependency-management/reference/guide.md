@@ -119,7 +119,7 @@ maturity ladder. Prefer registries and publishers that support provenance attest
 A finding is not automatically a fire, and "no findings" is not automatically safe (the CVE
 may be undisclosed). Scanning is a floor, not a ceiling. Track this as the
 supply-chain/vulnerability axis of dependency scoring — see
-[`../../core/dependency-score.md`](../../../core/dependency-score.md).
+[`core/dependency-score.md`](../../../core/dependency-score.md).
 
 ---
 

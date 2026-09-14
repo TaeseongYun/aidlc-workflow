@@ -109,3 +109,11 @@ For a raw request, add:
         └── <feature-slug>/
             └── status.md
 ```
+
+## Common Engineering Reference
+
+Stack-independent engineering guides (architecture, testing, commit/branch workflow,
+code review, CI/CD, releases, dependency management, incident postmortems) live under
+`common/<topic>/` — a deep `reference/guide.md` plus an actionable `SKILLS.md` per topic.
+Index: [common/reference-index.md](../common/reference-index.md).
+Precedence stays: project `ctx/` > platform guidance > common guides > general knowledge.

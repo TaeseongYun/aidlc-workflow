@@ -101,7 +101,9 @@ ctx/
 - **GATE-0**：多功能路线图审批
 - **GATE-1**：初始需求澄清审批
 - **GATE-2、3**：最终需求与设计审批
+- **GATE-4**：基础设施设计审批（条件性）
 - **GATE-5**：实现就绪确认
+- 条件性半门控 **2.5 / 2.7 / 3.5** 仅在各自的触发条件满足时启用（人物角色、组件、M/L 技术设计）——完整列表见 [common/stage-gate-rules.md](common/stage-gate-rules.md)
 
 ### Unit of Work：实现的基本单元
 
@@ -109,7 +111,7 @@ ctx/
 
 ### Platform Guidance：各平台架构基准
 
-`platforms/<platform>/guidance.md`（android、ios、backend、frontend、flutter、rn、kmp）记录了 agent 在该平台进行设计（`/ctx-aidlc-run` STEP 6.5）或实现（`/ctx-domain-exec`）之前必须加载的架构基准。在 `ctx/project-profile.ctx.md` 中声明平台；优先级为：项目 `ctx/` > platform guidance > 通用知识。每个平台还附带详细的各平台专属技能——figma-to-code、vibe-coding 安全守卫、测试、设计系统、无障碍、i18n、可观测性和 contract-codegen——在你触及相关文件时自动加载。这些文档为自包含的 Markdown 文件，外部仓库可通过已安装路径或原始 GitHub URL 使用它们——参见 [platforms/README.md](platforms/README.md)。
+`platforms/<platform>/guidance.md`（android、ios、backend、frontend、flutter、rn、kmp）记录了 agent 在该平台进行设计（`/ctx-aidlc-run` STEP 6.5）或实现（`/ctx-domain-exec`）之前必须加载的架构基准。在 `ctx/project-profile.ctx.md` 中声明平台；优先级为：项目 `ctx/` > platform guidance > 通用知识。每个平台还附带详细的各平台专属技能——figma-to-code、vibe-coding 安全守卫、测试、设计系统、无障碍、i18n、可观测性和 contract-codegen。平台技能为**按需安装（opt-in）**：使用 `bash scripts/install-skills.sh --platforms=android,ios`（或 `--platforms=all`）安装你的技术栈所需的技能。这些文档为自包含的 Markdown 文件，因此外部仓库也可通过已安装路径或原始 GitHub URL 使用它们——参见 [platforms/README.md](platforms/README.md)。
 
 有关概念的详细说明，请参见 [docs/concepts.md](docs/concepts.md)。
 
@@ -131,6 +133,8 @@ ctx/
 | `/ctx-commit-planner` | 设计提交结构 |
 | `/ctx-score-loop` | 实现后在依赖项 + 4 个维度上自动迭代评分（分数超过 85 时完成） |
 | `/ctx-hallucination-audit` | Hallucination Guard 审计循环。使用 graphify（codegraph 兜底）验证开发事实，隔离被反驳的声明，重复执行直到分数达到至少 87 |
+| `/ctx-aidlc-sync` | 将 AWS AI-DLC 上游变更移植到本工作流仓库（同步分数超过 90 分才提交 PR） |
+| `/mobile-webview-bridge` | 面向 Android/iOS/KMP/RN/Flutter 的 JS ↔ 原生 WebView 桥接，共享同一套契约优先协议（generator + guard 模式） |
 
 > **Hallucination Guard（始终开启）。** 它通过代码图验证路径、符号、API、配置键和版本等开发事实，防止 AI 猜测以事实形式泄漏。`graphify`（`graphifyy[mcp]`）在初始设置中**强烈推荐**但并非必需（codegraph 为可选兜底）。如果缺少 `graphify`，`/team-ai-workflow-start` 会通过对话框询问：安装 / 以降级（degraded）模式继续 / 取消；降级模式下 VERIFY 回退到 grep/Read。规则位于：`extensions/hallucination-guard/`；指南：`docs/hallucination-guard.md`。
 
@@ -267,6 +271,9 @@ aidlc-docs/
 各版本详细变更：[docs/changelog/](docs/changelog/)
 
 主要更新：
+- **2026-09-14**：`mobile-webview-bridge` 技能——面向 Android/iOS/KMP/RN/Flutter 的 JS ↔ 原生 WebView 桥接，共享同一套契约优先协议（信封、握手、安全、线程、生命周期），附各平台参考绑定、generator/guard 两种模式以及离线信封验证器（[详情](docs/changelog/2026-09-14-mobile-webview-bridge-skill.md)）
+- **2026-09-06**：运行结果日志器——`scripts/run-logger.ts` 将类型化结果记录到 `aidlc-docs/run-log.ndjson` 以及可供 graphify 摄取的 `run-log.md` 镜像，使历史结果可通过 `graphify query`（降级模式下用本地 `recall`）检索；已接入 score-loop、hallucination-audit、aidlc-run 和会话入口（[详情](docs/changelog/2026-09-06-run-logger-and-graphify-rag.md)）
+- **2026-09-03**：`graphify` 改为软依赖——缺少该工具时降级为 grep/Read 验证，不再阻塞设置；新增 CI（`validate-skills.sh` + golden baselines），并让 `validate-questions.sh` 接受英文字段标签（[详情](docs/changelog/2026-09-03-graphify-soft-dependency-and-ci.md)）
 - **2026-08-27**：新增 KMP（Kotlin Multiplatform）作为第 7 个平台——guidance + 13 个技能（figma-to-kmp、vibe-coding 安全守卫、测试等）
 - **2026-08-26**：跨平台每平台技能家族（测试、设计系统、无障碍、contract-codegen、可观测性、i18n）
 - **2026-04-29**：新增 Phase 0 路线图规划技能，正式化多功能协作工作流

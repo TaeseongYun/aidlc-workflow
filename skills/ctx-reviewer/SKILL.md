@@ -76,6 +76,7 @@ This Skill must judge only in the following order.
 ### Step 0: Judge whether there is a CTX violation first (required)
 
 - First judge whether any one of the referenced Global CTX or Local CTX has been violated.
+- General review-dimension reference (when project CTX is silent): `{{TEAM_AI_WORKFLOW_DIR}}/common/code-review/SKILLS.md` (index: `{{TEAM_AI_WORKFLOW_DIR}}/common/reference-index.md`)
 - If there is a violation:
   - Quote the violated CTX rule sentence verbatim
   - State only in which code the violation occurred
