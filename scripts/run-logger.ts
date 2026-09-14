@@ -28,7 +28,7 @@
  *   run-logger.ts recall --project . [--feature <slug>] [--kind <k>] [--limit N]   # N=0 -> all
  *   run-logger.ts --selftest
  *
- * Exit codes:  0 = success   2 = usage / validation error
+ * Exit codes:  0 = success   2 = usage / validation error   1 = unexpected failure (I/O)
  * Run with `npx tsx` (or bun). Node stdlib only — no package.json / tsconfig.
  */
 
@@ -71,6 +71,9 @@ function parseJsonOrFail(raw: string, source: string): Partial<RunLogEntry> {
 }
 
 // --- arg parsing (stdlib only): supports "--flag value" and "--flag=value" ---
+// Every flag except these takes a value; a value-flag followed by another
+// "--token" used to silently become "true" (data corruption in the log).
+const BOOLEAN_FLAGS = new Set(["stdin", "selftest"]);
 function parseArgs(argv: string[]): { _: string[]; flags: Record<string, string> } {
   const _: string[] = [];
   const flags: Record<string, string> = {};
@@ -81,12 +84,16 @@ function parseArgs(argv: string[]): { _: string[]; flags: Record<string, string>
       if (eq !== -1) {
         flags[a.slice(2, eq)] = a.slice(eq + 1);
       } else {
-        const next = argv[i + 1];
-        if (next !== undefined && !next.startsWith("--")) {
-          flags[a.slice(2)] = next;
-          i++;
+        const name = a.slice(2);
+        if (BOOLEAN_FLAGS.has(name)) {
+          flags[name] = "true";
         } else {
-          flags[a.slice(2)] = "true"; // bare flag
+          const next = argv[i + 1];
+          if (next === undefined || next.startsWith("--")) {
+            fail(`flag --${name} requires a value (use --${name}=<value> if the value starts with "-")`);
+          }
+          flags[name] = next;
+          i++;
         }
       }
     } else {
@@ -343,4 +350,10 @@ function main(): void {
   }
 }
 
-main();
+try {
+  main();
+} catch (err) {
+  // I/O faults (permissions, missing mount) get a clean message, not a stack dump.
+  process.stderr.write(`ERROR: ${(err as Error).message}\n`);
+  process.exit(1);
+}

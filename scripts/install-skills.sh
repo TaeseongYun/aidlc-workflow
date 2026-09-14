@@ -19,8 +19,11 @@ CODEX_HOME="${CODEX_HOME:-${HOME}/.codex}"
 CODEX_TARGET_DIR="${CODEX_HOME}/skills"
 CLAUDE_COMMANDS_TARGET_DIR="${CLAUDE_HOME}/commands"
 
-# team-ai-workflow root path to inject into skill files
+# team-ai-workflow root path to inject into skill files.
+# Escaped for use in the sed replacement below — a checkout path containing
+# '|', '&', or '\' would otherwise silently corrupt every installed skill.
 WORKFLOW_DIR="${ROOT_DIR}"
+WORKFLOW_DIR_SED=$(printf '%s' "${WORKFLOW_DIR}" | sed 's/[&|\\]/\\&/g')
 
 PLATFORMS=""
 for arg in "$@"; do
@@ -62,12 +65,13 @@ install_skill_dir() {
   find "${codex_dst}" -name ".DS_Store" -delete
 
   # Replace placeholder with actual workflow path in installed copies
-  find "${codex_dst}" -name "*.md" -exec "${SED_INPLACE[@]}" "s|{{TEAM_AI_WORKFLOW_DIR}}|${WORKFLOW_DIR}|g" {} +
+  find "${codex_dst}" -name "*.md" -exec "${SED_INPLACE[@]}" "s|{{TEAM_AI_WORKFLOW_DIR}}|${WORKFLOW_DIR_SED}|g" {} +
 
   # SKILL.md is the single entrypoint for both Codex and Claude.
   cp "${src}/SKILL.md" "${claude_command_dst}"
-  "${SED_INPLACE[@]}" "s|{{TEAM_AI_WORKFLOW_DIR}}|${WORKFLOW_DIR}|g" "${claude_command_dst}"
+  "${SED_INPLACE[@]}" "s|{{TEAM_AI_WORKFLOW_DIR}}|${WORKFLOW_DIR_SED}|g" "${claude_command_dst}"
 
+  INSTALLED_NAMES+=("$skill")
   echo "Installed ${skill} -> Codex skills, Claude commands"
 }
 
@@ -76,6 +80,33 @@ install_skill_dir() {
 rm -rf "${CODEX_TARGET_DIR}/_shared"
 cp -R "${SOURCE_DIR}/_shared" "${CODEX_TARGET_DIR}/_shared"
 echo "Installed _shared (skill protocol)"
+
+# Track what THIS installer owns so removed skills get pruned on the next run.
+# Pruning only ever touches names recorded in the manifest (or the known legacy
+# list below) — user-authored commands/skills in the same directories are never removed.
+MANIFEST="${CODEX_TARGET_DIR}/.aidlc-manifest"
+LEGACY_REMOVED=("ctx-run")
+INSTALLED_NAMES=()
+
+prune_stale() {
+  # Seed with the legacy list so prev is never an empty array
+  # (bash 3.2 + set -u treats expanding an empty array as unbound).
+  local prev=("${LEGACY_REMOVED[@]}")
+  [[ -f "$MANIFEST" ]] && while IFS= read -r n; do [[ -n "$n" ]] && prev+=("$n"); done < "$MANIFEST"
+  local name keep
+  for name in "${prev[@]}"; do
+    keep=0
+    for cur in "${INSTALLED_NAMES[@]}"; do [[ "$cur" == "$name" ]] && keep=1 && break; done
+    if [[ $keep -eq 0 ]]; then
+      if [[ -d "${CODEX_TARGET_DIR}/${name}" || -f "${CLAUDE_COMMANDS_TARGET_DIR}/${name}.md" ]]; then
+        rm -rf "${CODEX_TARGET_DIR:?}/${name}"
+        rm -f "${CLAUDE_COMMANDS_TARGET_DIR}/${name}.md"
+        echo "Pruned removed skill: ${name}"
+      fi
+    fi
+  done
+  printf '%s\n' "${INSTALLED_NAMES[@]}" > "$MANIFEST"
+}
 
 # Workflow skills: every directory under skills/ with a SKILL.md.
 # Derived from the filesystem so a new or removed skill cannot drift from this list.
@@ -96,19 +127,29 @@ if [[ -n "$PLATFORMS" ]]; then
     IFS=',' read -r -a platform_list <<< "$PLATFORMS"
   fi
 
-  for p in "${platform_list[@]}"; do
+  # ${arr[@]+...} guard: bash 3.2 + set -u treats expanding an empty array as unbound.
+  if [[ ${#platform_list[@]} -eq 0 ]]; then
+    echo "No platforms found for --platforms=${PLATFORMS}" >&2
+    exit 2
+  fi
+  for p in ${platform_list[@]+"${platform_list[@]}"}; do
+    [[ -n "$p" ]] || continue
     pdir="${PLATFORMS_DIR}/${p}/skills"
     if [[ ! -d "$pdir" ]]; then
       echo "Unknown platform: ${p} (no ${pdir})" >&2
       exit 2
     fi
+    count=0
     for src in "$pdir"/*/; do
       [[ -d "$src" ]] || continue
       install_skill_dir "$src"
+      count=$((count+1))
     done
-    echo "Platform ${p}: skills installed"
+    echo "Platform ${p}: ${count} skill(s) installed"
   done
 fi
+
+prune_stale
 
 echo
 echo "Skill installation complete."

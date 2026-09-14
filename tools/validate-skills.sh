@@ -191,6 +191,18 @@ for skill_dir in "$ROOT_DIR/platforms"/*/skills/*/; do
   check_skill_dir "$skill_dir" "platform"
 done
 
+# DUP-01: skill names must be globally unique across families — workflow and
+# platform skills all install into the same flat commands/skills namespaces,
+# and the installer's rm -rf + cp means a collision silently clobbers.
+echo "--- Cross-family checks ---"
+dups=$( { for d in "$ROOT_DIR/skills"/*/; do n=$(basename "$d"); [[ "$n" == "_shared" ]] || echo "$n"; done
+          for d in "$ROOT_DIR/platforms"/*/skills/*/; do [[ -d "$d" ]] && basename "$d"; done; } | sort | uniq -d)
+if [[ -z "$dups" ]]; then
+  pass "DUP-01: all skill names unique across workflow + platform families"
+else
+  fail "DUP-01: duplicate skill name(s) would clobber on install: $(echo "$dups" | tr '\n' ' ')"
+fi
+
 # Inference checks reminder
 echo "--- Inference Checks (AI Review Required) ---"
 skip "PROTO-01: Full 8-section protocol compliance — requires AI review"

@@ -32,20 +32,39 @@ jobs:
         run: bash tools/test-scripts.sh
 
       # 2.5 Install/init smoke test: run twice against temp homes and a temp
-      #     project; the second run must be a no-op (idempotency), and the
-      #     destructive rm -rf path must stay inside the target dirs.
+      #     project; assert idempotency and that pruning removes stale skills
+      #     without touching user files.
       - name: Install and init smoke test
         run: |
           set -euo pipefail
           CH="$(mktemp -d)"; XH="$(mktemp -d)"; PROJ="$(mktemp -d)"
+          # seed a stale legacy skill and a user-owned command to verify pruning boundaries
+          mkdir -p "$XH/skills/ctx-run" "$CH/commands"
+          echo stale > "$XH/skills/ctx-run/SKILL.md"; echo stale > "$CH/commands/ctx-run.md"
+          echo mine > "$CH/commands/user-own-command.md"
           CLAUDE_HOME="$CH" CODEX_HOME="$XH" bash scripts/install-skills.sh
           CLAUDE_HOME="$CH" CODEX_HOME="$XH" bash scripts/install-skills.sh
           CLAUDE_HOME="$CH" CODEX_HOME="$XH" bash scripts/install-skills.sh --platforms=android
           test -f "$XH/skills/_shared/skill-protocol.md"
           test -f "$CH/commands/ctx-aidlc-run.md"
+          test -f "$CH/commands/android-testing.md"        # platform opt-in installed
+          test ! -e "$XH/skills/ctx-run"                   # legacy skill pruned
+          test ! -e "$CH/commands/ctx-run.md"
+          test -f "$CH/commands/user-own-command.md"       # user files untouched
           ! grep -r "{{TEAM_AI_WORKFLOW_DIR}}" "$CH/commands" "$XH/skills"
-          cd "$PROJ" && git init -q . && bash "$GITHUB_WORKSPACE/scripts/init-project.sh" || true
-          cd "$GITHUB_WORKSPACE"
+          # init-project: must succeed, create the scaffold, and be idempotent
+          ( cd "$PROJ" && git init -q . && bash "$GITHUB_WORKSPACE/scripts/init-project.sh" )
+          test -f "$PROJ/ctx/INDEX.md"
+          test -f "$PROJ/aidlc-docs/aidlc-state.md"
+          ( cd "$PROJ" && bash "$GITHUB_WORKSPACE/scripts/init-project.sh" )
+          [ "$(grep -c '^aidlc-docs/$' "$PROJ/.gitignore" || true)" -le 1 ]
+
+      # 2.6 Shell static analysis (errors only — the class of bug that has
+      #     already shipped twice: dead grep -P, ((VAR++)) under set -e).
+      - name: Shellcheck (errors)
+        run: |
+          command -v shellcheck >/dev/null || { echo "shellcheck unavailable, skipping"; exit 0; }
+          shellcheck -S error scripts/*.sh tools/*.sh tools/evaluator/*.sh
 
       # 2.7 Translation parity: README.ko/zh must list every skill README.md lists,
       #     and the skill table must match the skills/ directory.
