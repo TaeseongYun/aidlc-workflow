@@ -184,98 +184,31 @@ CASE 9: Implementation complete, automatic iterative quality scoring needed
 EXTERNAL ORCHESTRATION (OMC / Ouroboros)
 ────────────────────────────────────
 
-team-ai-workflow handles the "What" of requirements analysis/design.
-The "How" of execution automation/iteration loops is handled by OMC or Ouroboros.
-The two do not conflict. Connect them with the following patterns.
+team-ai-workflow handles the "What" of requirements analysis/design; OMC or
+Ouroboros handles the "How" of automated execution. Three handoff patterns
+(details, configuration, and diagrams: `{{TEAM_AI_WORKFLOW_DIR}}/docs/omc-ouroboros-integration.md`):
 
-### Pattern 1 — Full automation to the end with OMC autopilot
+| Pattern | When | Handoff (after human GATEs) |
+|---|---|---|
+| 1. OMC autopilot | full implementation automation | GATE-2/3 passed → `/oh-my-claudecode:autopilot` on `requirements.md` + `unit-of-work.md` |
+| 2. Ouroboros evolve | measurable goal (tests, metrics) | `/ouroboros:seed` from requirements → `/ouroboros:evolve`; UOW Acceptance Criteria = Seed verification |
+| 3. OMC ralph | small (S size) single feature | GATE-3 passed → `/oh-my-claudecode:ralph`; UOW verification = termination condition |
 
-```text
-User request
-  ↓
-/team-ai-workflow-start   ← diagnosis + routing
-  ↓
-/ctx-aidlc-run            ← requirements/design (human GATEs)
-  ↓ (GATE-2/3 passed)
-/oh-my-claudecode:autopilot ← automated implement/test/verify loop
-```
-
-OMC autopilot takes `aidlc-docs/features/<slug>/requirements.md` and
-`unit-of-work.md` as input and performs the implementation.
-
-### Pattern 2 — Evolutionary implementation with Ouroboros evolve
-
-```text
-/ctx-aidlc-run            ← generate the requirements that become the Seed
-  ↓
-/ouroboros:seed            ← requirements.md → Seed spec
-  ↓
-/ouroboros:evolve          ← evolutionary loop
-```
-
-Ouroboros is most effective when there is a measurable goal (test pass rate,
-performance metrics, etc.). It uses the Acceptance Criteria of `unit-of-work.md`
-as the Seed's verification.
-
-### Pattern 3 — Complete a single feature with the ralph loop
-
-```text
-/ctx-aidlc-run            ← finalize requirements + UOW
-  ↓ (GATE-3 passed)
-/oh-my-claudecode:ralph   ← loop until verification passes
-```
-
-Suitable for small (S size) features. Use the UOW's verification method as ralph's
-termination condition.
-
-### Precautions when connecting
-
-- GATE approval is always done by a human. OMC/Ouroboros does not auto-pass GATEs.
-- `audit.md` is respected as append-only by both systems. In case of conflict,
-  team-ai-workflow's audit rule takes precedence.
-- OMC's `.omc/state/` and Ouroboros's session state are kept in a space separate
-  from `aidlc-docs/`. They do not overwrite each other.
+Precautions: GATE approval is always human — OMC/Ouroboros never auto-pass one.
+`audit.md` stays append-only for both systems (team-ai-workflow's rule wins on
+conflict). `.omc/state/` and Ouroboros session state live outside `aidlc-docs/`.
 
 ────────────────────────────────────
 CROSS-ACCOUNT / CROSS-REPO PORTABILITY
 ────────────────────────────────────
 
-Checklist for operating identically across different accounts and different repositories.
+Same commands on any account/repo — full checklist in the README ("Using It on
+Other Accounts/Repos") and `{{TEAM_AI_WORKFLOW_DIR}}/docs/omc-ouroboros-integration.md`:
 
-1. **Unify the core clone location.** Recommended: `~/workspace/team-ai-workflow`.
-   If using a different location, specify it with the `TEAM_AI_WORKFLOW_DIR` environment variable.
-
-   ```bash
-   echo 'export TEAM_AI_WORKFLOW_DIR="$HOME/work/team-ai-workflow"' >> ~/.zshrc
-   ```
-
-2. **Skills must be installed globally.**
-
-   ```bash
-   bash "$TEAM_AI_WORKFLOW_DIR/scripts/install-skills.sh"
-   ```
-
-   After installation, `ctx-*.md` files are created in `~/.claude/commands/`.
-
-3. **When switching accounts**, global skills are based on the user's home directory, so they are retained as-is.
-   However, if using Claude Code multi-account, you must install identically under `~/.claude-personal/` or
-   a separate home path.
-
-4. **When switching repositories**, run `init-project.sh` once in each repo.
-
-   ```bash
-   cd /path/to/new-repo
-   bash "$TEAM_AI_WORKFLOW_DIR/scripts/init-project.sh"
-   ```
-
-5. **To update the core**, reinstall after `git pull`.
-
-   ```bash
-   cd "$TEAM_AI_WORKFLOW_DIR" && git pull
-   bash scripts/install-skills.sh
-   ```
-
-   `install-skills.sh` is idempotent, so it is safe to run multiple times.
+1. One core clone location, pointed to by `TEAM_AI_WORKFLOW_DIR` in the shell rc.
+2. Global install per account home: `CLAUDE_HOME=... CODEX_HOME=... bash "$TEAM_AI_WORKFLOW_DIR/scripts/install-skills.sh"` (idempotent; prunes removed skills).
+3. Per repo, once: `bash "$TEAM_AI_WORKFLOW_DIR/scripts/init-project.sh"`.
+4. To update: `git pull` in the core, then re-run the install script.
 
 ────────────────────────────────────
 EXECUTION FLOW

@@ -131,32 +131,9 @@ On Phase transition:
 - The new session reads aidlc-state.md first, and references only the previous Phase's outputs.
 - Do not reference the previous session's conversation content.
 
-Session-separation notice message format (appended after the GATE approval message):
-
-```markdown
----
-### Session Separation Notice
-
-Phase {current} work is complete. The current depth level is **{depth}**.
-
-> {comprehensive: "Please start a new session (required)." / standard: "Starting a new session is recommended." / minimal: "You may continue in this session."}
-
-Enter the following in the next session to continue with Phase {next}:
-
-\`\`\`
-/ctx-aidlc-run
-
-Start Phase {next}.
-Read aidlc-state.md first and check the current state.
-
-Related outputs:
-- {list of the previous Phase's key output paths}
-\`\`\`
-```
-
-- comprehensive depth: after the notice, **stop responding and wait for the user's next session**.
-- standard depth: after the notice, if the user says "continue", work may proceed in the same session.
-- minimal depth: output only the notice and automatically continue with the next Phase.
+Notice format + post-notice behavior by depth: read
+`{{TEAM_AI_WORKFLOW_DIR}}/templates/session-notice.md` at the moment a
+Phase-ending GATE passes (lazy — do not preload), then emit it filled in.
 
 ────────────────────────────────────
 EXECUTION FLOW

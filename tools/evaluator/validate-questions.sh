@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# 질문 거버넌스 태그 검증
-# 사용법: bash validate-questions.sh <feature-dir>
+# Question governance tag validation
+# Usage: bash validate-questions.sh <feature-dir>
 
 set -uo pipefail
 
@@ -18,48 +18,48 @@ error() { echo -e "${RED}[ERROR]${NC} $1"; ((ERRORS++)); }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; ((WARNINGS++)); }
 pass()  { echo -e "${GREEN}[PASS]${NC} $1"; }
 
-echo "=== 질문 거버넌스 태그 검증 ==="
+echo "=== Question Governance Tag Validation ==="
 
 if [[ ! -f "$QFILE" ]]; then
-  error "requirement-verification-questions.md 파일 없음"
+  error "requirement-verification-questions.md missing"
   exit 1
 fi
 
-echo "대상: $QFILE"
+echo "Target: $QFILE"
 echo ""
 
 # --- 1. Request Anchor 존재 ---
 echo "--- 1. Request Anchor ---"
 if grep -q 'Request Anchor' "$QFILE" 2>/dev/null; then
-  pass "Request Anchor 존재"
+  pass "Request Anchor present"
 else
-  error "Request Anchor 누락 (question-governance.md 규칙 위반)"
+  error "Request Anchor missing (violates question-governance.md rules)"
 fi
 
-# --- 2. Summary 테이블 존재 ---
+# --- 2. Summary table ---
 echo ""
-echo "--- 2. Summary 테이블 ---"
+echo "--- 2. Summary table ---"
 if grep -q '## Summary' "$QFILE" 2>/dev/null; then
-  pass "Summary 섹션 존재"
+  pass "Summary section present"
 else
-  error "Summary 섹션 누락"
+  error "Summary section missing"
 fi
 
-# --- 3. 각 질문의 필수 필드 검증 ---
+# --- 3. Required fields per question ---
 echo ""
-echo "--- 3. 질문별 필수 필드 ---"
+echo "--- 3. Required fields per question ---"
 
 question_ids=$(grep -oE 'Q[0-9]+\.' "$QFILE" 2>/dev/null | sort -u)
 question_count=$(echo "$question_ids" | grep -c 'Q' || true)
-echo "발견된 질문: ${question_count}개"
+echo "Questions found: ${question_count}"
 
-# 필수 필드: 분류, 영향도, 미응답 시
+# Required fields: type, impact, if-unanswered
 for qid in $question_ids; do
   qnum="${qid%.}"
 
-  # 해당 질문 블록 추출 (시작 헤더부터 다음 ### Q / ## 헤더 직전까지).
-  # 주의: sed 주소 범위에서 '\|'는 alternation이 아니라 리터럴이므로
-  # 종료 패턴이 매치되지 않아 블록이 EOF까지 흘러간다. awk로 명시 처리한다.
+  # Extract the question block (from its header up to the next ### Q / ## header).
+  # Note: in a sed address range '\|' is a literal, not alternation, so the end
+  # pattern never matches and the block runs to EOF. Handle explicitly with awk.
   block=$(awk -v hdr="### ${qid}" '
     index($0, hdr) == 1 {grab=1; print; next}
     grab && (/^### Q[0-9]/ || /^## /) {exit}
