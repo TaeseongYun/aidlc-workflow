@@ -248,7 +248,7 @@ Required before merge:
 - Team baseline: [../../guidance.md](../../guidance.md)
 - Umbrella: [ios-architecture](../ios-architecture/SKILL.md)
 - Adjacent: [ios-module-structure](../ios-module-structure/SKILL.md) (DesignSystem package layout), [ios-accessibility](../ios-accessibility/SKILL.md) (a11y), [ios-security](../ios-security/SKILL.md) (safety floor)
-- Skill protocol: [skills/_shared/skill-protocol.md](../../../../skills/_shared/skill-protocol.md)
+- Skill protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`
 - Apple — Asset catalogs / color sets: https://developer.apple.com/documentation/xcode/asset_catalog_format
 - Apple — EnvironmentValues: https://developer.apple.com/documentation/swiftui/environmentvalues
 - W3C DTCG token format: https://tr.designtokens.org/format/

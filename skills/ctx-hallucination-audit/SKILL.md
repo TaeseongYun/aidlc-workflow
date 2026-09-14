@@ -110,6 +110,13 @@ STEP 8 — LOOP DECISION
   → **STOP AND ASK the user**. Do NOT proceed past the gate on your own judgment.
 
 ────────────────────────────────────
+OUTPUT FORMAT
+────────────────────────────────────
+- Per round: the STEP 7 report — Cause / What / Fix per finding, then the round row
+  (Harvested / Refuted / Corrected / Unresolved / Score / Result).
+- On STOP: final summary + ledger/knowledge-log deltas (STEP 8).
+
+────────────────────────────────────
 HARD RULES
 ────────────────────────────────────
 - Do NOT decide on your own to move on / hand off / declare done while Score < 87.

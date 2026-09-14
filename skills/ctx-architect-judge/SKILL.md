@@ -69,7 +69,7 @@ This Skill must accept only input with the structure below.
 
 ---
 
-Input format validation follows the `skills/_shared/skill-protocol.md` standard.
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
 
 ## Input Validation Rules
 
@@ -142,10 +142,10 @@ The output must follow the format and order below.
 - There is a possibility of conflict between CTX but their priority cannot be determined
 - Judgment is impossible without rules beyond the provided CTX
 
-On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
 
 ---
 
 ## Execution Guidelines
 
-Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. For the unique procedure, use "Judgment Procedure".
+Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. For the unique procedure, use "Judgment Procedure".

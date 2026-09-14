@@ -2,90 +2,114 @@
 # Skill Validator - Deterministic checks for team-ai-workflow skills
 # Usage: bash tools/validate-skills.sh
 # Rules reference: tools/skill-validator.md
+#
+# Covers two skill families:
+#   - workflow skills:  skills/*/            (must follow skills/_shared/skill-protocol.md)
+#   - platform skills:  platforms/*/skills/*/ (structural checks + token budget)
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-SKILLS_DIR="$ROOT_DIR/skills"
 
 PASS=0
 FAIL=0
 SKIP=0
 TOTAL=0
 
+# Note: use VAR=$((VAR+1)), never ((VAR++)) — the latter returns exit 1 when the
+# pre-increment value is 0, which kills the script under `set -e`.
 pass() {
   echo "[PASS] $1"
-  ((PASS++))
-  ((TOTAL++))
+  PASS=$((PASS+1))
+  TOTAL=$((TOTAL+1))
 }
 
 fail() {
   echo "[FAIL] $1"
-  ((FAIL++))
-  ((TOTAL++))
+  FAIL=$((FAIL+1))
+  TOTAL=$((TOTAL+1))
 }
 
 skip() {
   echo "[SKIP] $1"
-  ((SKIP++))
-  ((TOTAL++))
+  SKIP=$((SKIP+1))
+  TOTAL=$((TOTAL+1))
 }
 
 echo "=== team-ai-workflow Skill Validator ==="
 echo "Root: $ROOT_DIR"
 echo ""
 
-# Find all skill directories (exclude _shared, common)
-for skill_dir in "$SKILLS_DIR"/*/; do
+# $1 = skill dir, $2 = family (workflow|platform)
+check_skill_dir() {
+  local skill_dir="$1"
+  local family="$2"
+  local skill_name
   skill_name=$(basename "$skill_dir")
 
-  # Skip non-skill directories
-  if [[ "$skill_name" == "_shared" || "$skill_name" == "common" ]]; then
-    continue
+  echo "--- $skill_name ($family) ---"
+
+  # SKILL-01: SKILL.md is the single entrypoint. CLAUDE_COMMAND.md is forbidden:
+  # dual entrypoints drifted apart twice (2026-03-24, 2026-09 audit) and were removed.
+  if [[ ! -f "$skill_dir/SKILL.md" ]]; then
+    fail "SKILL-01: $skill_name — no SKILL.md found"
+    return
   fi
-
-  echo "--- $skill_name ---"
-
-  # SKILL-01: Entrypoint exists
-  if [[ -f "$skill_dir/SKILL.md" || -f "$skill_dir/CLAUDE_COMMAND.md" ]]; then
-    entrypoint=""
-    [[ -f "$skill_dir/SKILL.md" ]] && entrypoint="SKILL.md"
-    [[ -f "$skill_dir/CLAUDE_COMMAND.md" ]] && entrypoint="${entrypoint:+$entrypoint + }CLAUDE_COMMAND.md"
-    pass "SKILL-01: $skill_name — entrypoint exists ($entrypoint)"
+  if [[ -f "$skill_dir/CLAUDE_COMMAND.md" ]]; then
+    fail "SKILL-01: $skill_name — CLAUDE_COMMAND.md present (dual entrypoint forbidden; merge into SKILL.md)"
   else
-    fail "SKILL-01: $skill_name — no SKILL.md or CLAUDE_COMMAND.md found"
-    continue  # Skip remaining checks if no entrypoint
+    pass "SKILL-01: $skill_name — single SKILL.md entrypoint"
   fi
+
+  local entry_file="$skill_dir/SKILL.md"
 
   # SKILL-02: Frontmatter description field
-  for entry_file in "$skill_dir/SKILL.md" "$skill_dir/CLAUDE_COMMAND.md"; do
-    if [[ -f "$entry_file" ]]; then
-      entry_name=$(basename "$entry_file")
-      # Check for YAML frontmatter with description
-      if head -20 "$entry_file" | grep -q "^description:"; then
-        pass "SKILL-02: $skill_name/$entry_name — description field exists"
-      elif head -5 "$entry_file" | grep -q "^---"; then
-        # Has frontmatter but maybe no description
-        if sed -n '/^---$/,/^---$/p' "$entry_file" | grep -q "description:"; then
-          pass "SKILL-02: $skill_name/$entry_name — description field exists"
-        else
-          fail "SKILL-02: $skill_name/$entry_name — missing description in frontmatter"
-        fi
-      else
-        skip "SKILL-02: $skill_name/$entry_name — no frontmatter found (inference check needed)"
-      fi
-    fi
-  done
+  if sed -n '/^---$/,/^---$/p' "$entry_file" | grep -q "^description:"; then
+    pass "SKILL-02: $skill_name — description field exists"
+  else
+    fail "SKILL-02: $skill_name — missing description in frontmatter"
+  fi
 
-  # SCOPE-01: No cross-skill references
-  # Repo-relative "skills/<other>/" 참조만 위반으로 본다.
-  # 설치 경로 진단(~/.claude/..., ~/.codex/skills/...)이나 글로벌 commands 경로는
-  # 다른 스킬의 소스를 의존하는 것이 아니라 "설치 여부 확인"이므로 제외한다.
-  cross_refs=$(grep -rn "skills/[a-z]" "$skill_dir" --include="*.md" 2>/dev/null \
-    | grep -v "_shared" | grep -v "common" | grep -v "skills/${skill_name}/" \
-    | grep -vE '~?/?\.(claude|codex)[^ ]*skills/' \
-    | grep -vE '\.claude/|\.codex/' || true)
+  if [[ "$family" == "workflow" ]]; then
+    # SKILL-03: references the shared skill protocol
+    if grep -q "skill-protocol" "$entry_file"; then
+      pass "SKILL-03: $skill_name — references skill-protocol"
+    else
+      fail "SKILL-03: $skill_name — SKILL.md never references skills/_shared/skill-protocol.md"
+    fi
+
+    # SKILL-04: has a guardrail / prohibition / halt section
+    if grep -qiE '^(#+ .*)?(prohibition|guardrail|hard (stop|rules|preconditions)|halt conditions|stop conditions)|^(HARD RULES|CORE RULES|WHEN TO STOP)' "$entry_file"; then
+      pass "SKILL-04: $skill_name — guardrail/halt section present"
+    else
+      fail "SKILL-04: $skill_name — no guardrail/prohibition/halt section found"
+    fi
+
+    # SKILL-05: has an output contract / format section
+    if grep -qiE '^#+ .*(output|report format|required outputs)|^(OUTPUT CONTRACT|OUTPUT FORMAT|REPORT FORMAT|FINAL RESPONSE RULE)' "$entry_file"; then
+      pass "SKILL-05: $skill_name — output format section present"
+    else
+      fail "SKILL-05: $skill_name — no output format section found"
+    fi
+  fi
+
+  # SCOPE-01: No cross-skill references.
+  # Workflow family: no reference to another workflow skill's sources.
+  # Platform family: no reference to ANOTHER platform's skills (same-platform links allowed).
+  local cross_refs=""
+  if [[ "$family" == "workflow" ]]; then
+    cross_refs=$(grep -rn "skills/[a-z]" "$skill_dir" --include="*.md" 2>/dev/null \
+      | grep -v "_shared" | grep -v "common" | grep -v "skills/${skill_name}/" \
+      | grep -v "platforms/" \
+      | grep -vE '~?/?\.(claude|codex)[^ ]*skills/' \
+      | grep -vE '\.claude/|\.codex/' || true)
+  else
+    local platform_name
+    platform_name=$(basename "$(cd "$skill_dir/../.." && pwd)")
+    cross_refs=$(grep -rn "platforms/[a-z]*/skills/" "$skill_dir" --include="*.md" 2>/dev/null \
+      | grep -v "platforms/${platform_name}/skills/" || true)
+  fi
   if [[ -z "$cross_refs" ]]; then
     pass "SCOPE-01: $skill_name — no cross-skill references"
   else
@@ -94,7 +118,9 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # PATH-02: No hardcoded absolute paths to team-ai-workflow
-  hardcoded=$(grep -rn "/Users/\|/home/" "$skill_dir" --include="*.md" 2>/dev/null || true)
+  local hardcoded
+  # Only flag /Users/ or /home/ as a filesystem root (not e.g. feature/home/ module paths).
+  hardcoded=$(grep -rnE '(^|[^A-Za-z0-9_./-])/(Users|home)/' "$skill_dir" --include="*.md" 2>/dev/null || true)
   if [[ -z "$hardcoded" ]]; then
     pass "PATH-02: $skill_name — no hardcoded absolute paths"
   else
@@ -102,25 +128,21 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     echo "         $hardcoded" | head -3
   fi
 
-  # REF-01: Referenced files exist (check common references)
-  ref_failures=0
-  while IFS= read -r ref_line; do
-    # Extract relative path references like ./file.md or ../file.md
-    ref_path=$(echo "$ref_line" | grep -oE '\./[a-zA-Z0-9_./-]+\.md' || true)
-    if [[ -n "$ref_path" ]]; then
-      full_path="$skill_dir/$ref_path"
-      if [[ ! -f "$full_path" ]]; then
-        if [[ $ref_failures -eq 0 ]]; then
-          fail "REF-01: $skill_name — missing referenced file: $ref_path"
-        fi
-        ((ref_failures++))
+  # REF-01: Relative .md references (./x.md, ../x.md, ../../x.md ...) resolve,
+  # relative to the directory of the file that contains the reference.
+  local ref_failures=0 ref_count=0
+  while IFS=: read -r src_file ref_path; do
+    [[ -n "$ref_path" ]] || continue
+    ref_count=$((ref_count+1))
+    if [[ ! -f "$(dirname "$src_file")/$ref_path" ]]; then
+      if [[ $ref_failures -eq 0 ]]; then
+        fail "REF-01: $skill_name — missing referenced file: $ref_path (from $(basename "$src_file"))"
       fi
+      ref_failures=$((ref_failures+1))
     fi
-  done < <(grep -rn '\./.*\.md' "$skill_dir" --include="*.md" 2>/dev/null || true)
+  done < <(grep -roE '\.\.?(/[A-Za-z0-9_.-]+)+\.md' "$skill_dir" --include="*.md" 2>/dev/null || true)
 
   if [[ $ref_failures -eq 0 ]]; then
-    # Only count as pass if there were references to check
-    ref_count=$(grep -rc '\./.*\.md' "$skill_dir" --include="*.md" 2>/dev/null | awk -F: '{s+=$2} END {print s+0}')
     if [[ $ref_count -gt 0 ]]; then
       pass "REF-01: $skill_name — all $ref_count internal references valid"
     else
@@ -129,9 +151,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # REF-02: {{TEAM_AI_WORKFLOW_DIR}}/<path> references resolve inside this repo
+  local ref2_missing
   ref2_missing=$(grep -rhoE '\{\{TEAM_AI_WORKFLOW_DIR\}\}/[A-Za-z0-9_./-]+' "$skill_dir" --include="*.md" 2>/dev/null \
     | sort -u | sed -e 's#{{TEAM_AI_WORKFLOW_DIR}}/##' -e 's#[.,)]*$##' \
-    | while IFS= read -r p; do [[ -e "$ROOT_DIR/$p" ]] || echo "$p"; done)
+    | while IFS= read -r p; do [[ -e "$ROOT_DIR/$p" ]] || echo "$p"; done || true)
   if [[ -z "$ref2_missing" ]]; then
     pass "REF-02: $skill_name — all workflow-dir references resolve"
   else
@@ -139,9 +162,11 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 
   # TOKEN-01: prompt-weight budget. Rough estimate: printable-ASCII bytes / 3.3 + other bytes / 3.
-  for f in "$skill_dir/SKILL.md" "$skill_dir/CLAUDE_COMMAND.md" "$skill_dir"/phases/*.md; do
+  # reference.md is tier-2 (loaded on demand, one platform at a time) and carries no budget.
+  local f est budget
+  for f in "$skill_dir/SKILL.md" "$skill_dir"/phases/*.md; do
     [[ -f "$f" ]] || continue
-    case "$(basename "$f")" in SKILL.md) budget=5000 ;; CLAUDE_COMMAND.md) budget=4000 ;; *) budget=3000 ;; esac
+    case "$(basename "$f")" in SKILL.md) budget=5000 ;; *) budget=3000 ;; esac
     est=$(LC_ALL=C awk '{ n = length($0); for (i = 1; i <= n; i++) { if (substr($0, i, 1) ~ /[ -~]/) a++; else o++ } } END { printf "%d", a / 3.3 + o / 3 }' "$f")
     if (( est <= budget )); then
       pass "TOKEN-01: $skill_name/$(basename "$f") — ~${est} tokens (budget ${budget})"
@@ -151,14 +176,24 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   done
 
   echo ""
+}
+
+# Workflow skills
+for skill_dir in "$ROOT_DIR/skills"/*/; do
+  skill_name=$(basename "$skill_dir")
+  [[ "$skill_name" == "_shared" || "$skill_name" == "common" ]] && continue
+  check_skill_dir "$skill_dir" "workflow"
+done
+
+# Platform skills
+for skill_dir in "$ROOT_DIR/platforms"/*/skills/*/; do
+  [[ -d "$skill_dir" ]] || continue
+  check_skill_dir "$skill_dir" "platform"
 done
 
 # Inference checks reminder
 echo "--- Inference Checks (AI Review Required) ---"
-skip "SKILL-03: Protocol reference — requires AI review"
-skip "SKILL-04: Guardrail section — requires AI review"
-skip "SKILL-05: Output format section — requires AI review"
-skip "PROTO-01: Protocol compliance — requires AI review"
+skip "PROTO-01: Full 8-section protocol compliance — requires AI review"
 
 echo ""
 echo "=== Summary ==="

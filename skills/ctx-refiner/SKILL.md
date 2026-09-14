@@ -70,7 +70,7 @@ This Skill **never performs** the following.
 - Global CTX | Local CTX | 혼합
 ```
 
-Input format validation follows the `skills/_shared/skill-protocol.md` standard.
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
 
 ### Input Validation (required)
 
@@ -272,13 +272,13 @@ If **even one** of the following applies, refinement fails.
 - The refinement purpose is not specified
 - The application scope is not specified
 
-On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
 
 ---
 
 ## Execution Guidelines
 
-Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. Additional rules:
+Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - Apply Q1, Q2, Q3 to each rule to judge deletion/retention
 - Apply the merge rules strictly
 - Verify the failure conditions

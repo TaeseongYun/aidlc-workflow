@@ -62,7 +62,7 @@ This Skill must operate in only **one of the following execution modes**.
 
 ---
 
-Input format validation follows the `skills/_shared/skill-protocol.md` standard.
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
 
 ## Input Format - Mode A: ARCHITECT_CONFIRMED
 
@@ -190,12 +190,12 @@ In EXECUTOR_ONLY mode, the following section must be added.
 - Rules beyond the input CTX appear to be needed
 - In EXECUTOR_ONLY mode, a possibility of multiple domains is detected
 
-On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
 
 ---
 
 ## Execution Guidelines
 
-Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. Additional rules:
+Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - Check the input validation rules according to the execution mode
 - EXECUTOR_ONLY mode must include the judgment-omitted notice

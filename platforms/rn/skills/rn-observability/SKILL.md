@@ -193,7 +193,7 @@ For RN code that AI generated or was pasted in quickly, before merge:
 
 ## Halt Conditions
 
-Halt and output the halt notice (per [skill-protocol.md](../../../../skills/_shared/skill-protocol.md)) if:
+Halt and output the halt notice (per `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`) if:
 
 - The input contains no logging, error-handling, metrics, or telemetry code to review.
 - The request is to **lower** any guard rule (e.g., "it's fine to log the full user object here").

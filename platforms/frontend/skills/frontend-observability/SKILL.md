@@ -189,7 +189,7 @@ For frontend code that AI generated or was pasted in quickly, before merge:
 
 ## Halt conditions
 
-Halt review and output the standard halt block (per [skill-protocol.md](../../../_shared/skill-protocol.md)) when:
+Halt review and output the standard halt block (per [skill-protocol.md]({{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md)) when:
 
 - The logging wrapper module does not exist and the codebase uses raw `console.*` everywhere — the
   architectural seam must be established before a rule-by-rule review is meaningful.

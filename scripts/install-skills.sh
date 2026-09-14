@@ -4,11 +4,16 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SOURCE_DIR="${ROOT_DIR}/skills"
+PLATFORMS_DIR="${ROOT_DIR}/platforms"
 
 # Override target homes via env vars to support multi-account setups.
 # Examples:
 #   CLAUDE_HOME=$HOME/.claude-personal bash scripts/install-skills.sh
 #   CODEX_HOME=$HOME/.codex-work bash scripts/install-skills.sh
+#
+# Platform skills (platforms/<p>/skills/*) are opt-in:
+#   bash scripts/install-skills.sh --platforms=android,ios
+#   bash scripts/install-skills.sh --platforms=all
 CLAUDE_HOME="${CLAUDE_HOME:-${HOME}/.claude}"
 CODEX_HOME="${CODEX_HOME:-${HOME}/.codex}"
 CODEX_TARGET_DIR="${CODEX_HOME}/skills"
@@ -16,6 +21,14 @@ CLAUDE_COMMANDS_TARGET_DIR="${CLAUDE_HOME}/commands"
 
 # team-ai-workflow root path to inject into skill files
 WORKFLOW_DIR="${ROOT_DIR}"
+
+PLATFORMS=""
+for arg in "$@"; do
+  case "$arg" in
+    --platforms=*) PLATFORMS="${arg#--platforms=}" ;;
+    *) echo "Unknown argument: $arg" >&2; echo "Usage: install-skills.sh [--platforms=android,ios|all]" >&2; exit 2 ;;
+  esac
+done
 
 # Detect sed in-place flavor (BSD on macOS, GNU on Linux)
 case "$(uname -s)" in
@@ -31,31 +44,17 @@ fi
 mkdir -p "${CODEX_TARGET_DIR}"
 mkdir -p "${CLAUDE_COMMANDS_TARGET_DIR}"
 
-SKILLS=(
-  "team-ai-workflow-start"
-  "ctx-aidlc-roadmap"
-  "ctx-aidlc-run"
-  "ctx-architect-judge"
-  "ctx-commit-planner"
-  "ctx-domain-exec"
-  "ctx-refiner"
-  "ctx-reviewer"
-  "ctx-updater"
-  "ctx-score-loop"
-  "ctx-worktree"
-  "ctx-hallucination-audit"
-  "ctx-aidlc-sync"
-  "mobile-webview-bridge"
-)
+install_skill_dir() {
+  # $1 = source skill directory (must contain SKILL.md)
+  local src="$1"
+  local skill
+  skill="$(basename "$src")"
+  local codex_dst="${CODEX_TARGET_DIR}/${skill}"
+  local claude_command_dst="${CLAUDE_COMMANDS_TARGET_DIR}/${skill}.md"
 
-for skill in "${SKILLS[@]}"; do
-  src="${SOURCE_DIR}/${skill}"
-  codex_dst="${CODEX_TARGET_DIR}/${skill}"
-  claude_command_dst="${CLAUDE_COMMANDS_TARGET_DIR}/${skill}.md"
-
-  if [[ ! -d "${src}" ]]; then
-    echo "Skipping missing skill: ${skill}"
-    continue
+  if [[ ! -f "${src}/SKILL.md" ]]; then
+    echo "Skipping ${skill}: no SKILL.md" >&2
+    return 0
   fi
 
   rm -rf "${codex_dst}"
@@ -65,25 +64,60 @@ for skill in "${SKILLS[@]}"; do
   # Replace placeholder with actual workflow path in installed copies
   find "${codex_dst}" -name "*.md" -exec "${SED_INPLACE[@]}" "s|{{TEAM_AI_WORKFLOW_DIR}}|${WORKFLOW_DIR}|g" {} +
 
-  if [[ -f "${src}/CLAUDE_COMMAND.md" ]]; then
-    cp "${src}/CLAUDE_COMMAND.md" "${claude_command_dst}"
-  elif [[ -f "${src}/SKILL.md" ]]; then
-    cp "${src}/SKILL.md" "${claude_command_dst}"
-  fi
-
-  # Replace placeholder in Claude command file
-  if [[ -f "${claude_command_dst}" ]]; then
-    "${SED_INPLACE[@]}" "s|{{TEAM_AI_WORKFLOW_DIR}}|${WORKFLOW_DIR}|g" "${claude_command_dst}"
-  fi
+  # SKILL.md is the single entrypoint for both Codex and Claude.
+  cp "${src}/SKILL.md" "${claude_command_dst}"
+  "${SED_INPLACE[@]}" "s|{{TEAM_AI_WORKFLOW_DIR}}|${WORKFLOW_DIR}|g" "${claude_command_dst}"
 
   echo "Installed ${skill} -> Codex skills, Claude commands"
+}
+
+# Shared protocol referenced by installed skills — keep a copy next to them so
+# Codex-side relative reads also work even without the workflow repo path.
+rm -rf "${CODEX_TARGET_DIR}/_shared"
+cp -R "${SOURCE_DIR}/_shared" "${CODEX_TARGET_DIR}/_shared"
+echo "Installed _shared (skill protocol)"
+
+# Workflow skills: every directory under skills/ with a SKILL.md.
+# Derived from the filesystem so a new or removed skill cannot drift from this list.
+for src in "${SOURCE_DIR}"/*/; do
+  skill="$(basename "$src")"
+  [[ "$skill" == "_shared" ]] && continue
+  install_skill_dir "$src"
 done
+
+# Platform skills (opt-in via --platforms=)
+if [[ -n "$PLATFORMS" ]]; then
+  if [[ "$PLATFORMS" == "all" ]]; then
+    platform_list=()
+    for d in "${PLATFORMS_DIR}"/*/; do
+      [[ -d "${d}skills" ]] && platform_list+=("$(basename "$d")")
+    done
+  else
+    IFS=',' read -r -a platform_list <<< "$PLATFORMS"
+  fi
+
+  for p in "${platform_list[@]}"; do
+    pdir="${PLATFORMS_DIR}/${p}/skills"
+    if [[ ! -d "$pdir" ]]; then
+      echo "Unknown platform: ${p} (no ${pdir})" >&2
+      exit 2
+    fi
+    for src in "$pdir"/*/; do
+      [[ -d "$src" ]] || continue
+      install_skill_dir "$src"
+    done
+    echo "Platform ${p}: skills installed"
+  done
+fi
 
 echo
 echo "Skill installation complete."
 echo "Workflow root: ${WORKFLOW_DIR}"
 echo "Codex target: ${CODEX_TARGET_DIR}"
 echo "Claude commands target: ${CLAUDE_COMMANDS_TARGET_DIR}"
+if [[ -z "$PLATFORMS" ]]; then
+  echo "Platform skills not installed (opt-in): rerun with --platforms=android,ios,... or --platforms=all"
+fi
 echo
 echo "Tip: set TEAM_AI_WORKFLOW_DIR in your shell rc so other tools can locate the workflow:"
 echo "  export TEAM_AI_WORKFLOW_DIR=\"${WORKFLOW_DIR}\""

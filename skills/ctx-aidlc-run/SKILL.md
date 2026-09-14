@@ -83,6 +83,7 @@ Skip when no graph is available (greenfield before first implementation); VERIFY
 CORE RULES
 ────────────────────────────────────
 
+- Shared execution protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` (halt format, execution boundary).
 - `team-ai-workflow/` defines HOW to think.
 - Project `ctx/` defines WHAT is already true in this project.
 - `aidlc-docs/aidlc-state.md` and `aidlc-docs/audit.md` are shared project-level files.

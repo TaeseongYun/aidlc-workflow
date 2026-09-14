@@ -55,7 +55,7 @@ This Skill **never performs** the following.
 ```java
 // 구현된 코드
 ```
-Input format validation follows the `skills/_shared/skill-protocol.md` standard.
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
 
 ## Executor execution mode
 - ARCHITECT_CONFIRMED | EXECUTOR_ONLY
@@ -176,11 +176,11 @@ When the Executor execution mode is EXECUTOR_ONLY, the following section must be
 - The review target code is only partially provided
 - The Executor execution mode is not specified
 
-On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
 
 ---
 
 ## Execution Guidelines
 
-Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. Additional rules:
+Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - EXECUTOR_ONLY mode must include the warning mark section

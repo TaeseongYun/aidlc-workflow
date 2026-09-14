@@ -268,4 +268,4 @@ halt reason.
 - [reference.md](reference.md) — Kotlin code pairs (bad → good) for all 10 rules
 - [../android-security/SKILL.md](../android-security/SKILL.md) — PII taxonomy, secrets
 - [../../guidance.md](../../guidance.md) — team Android baseline
-- [../../_shared/skill-protocol.md](../../_shared/skill-protocol.md) — execution protocol
+- `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` — execution protocol

@@ -34,6 +34,7 @@ than the workflow repo.
 
 ## Guardrails
 
+- Shared execution protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` (halt format, execution boundary).
 - **Never git-merge or copy upstream files verbatim.** Port the pattern,
   re-expressed in this repo's terminology, structure, and English-canonical
   docs. Wholesale file copies are a halt condition.

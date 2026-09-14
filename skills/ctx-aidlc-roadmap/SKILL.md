@@ -71,6 +71,7 @@ Skipped steps do not load their files.
 CORE RULES
 ────────────────────────────────────
 
+- Shared execution protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` (halt format, execution boundary).
 - `team-ai-workflow/` defines HOW to think.
 - Project `ctx/` defines WHAT is already true.
 - `aidlc-docs/_roadmap.md` is the **single source of truth** for cross-feature coordination. Per-feature `ctx-aidlc-run` runs MUST read it.

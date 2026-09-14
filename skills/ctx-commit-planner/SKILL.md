@@ -80,7 +80,7 @@ If this CTX does not exist, do NOT proceed with default rules; halt immediately.
 - (파일 경로 목록 또는 diff 요약)
 ```
 
-Input format validation follows the criteria in `skills/_shared/skill-protocol.md`.
+Input format validation follows the criteria in `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
 
 ### Input Validation (required)
 
@@ -297,7 +297,7 @@ The example above is not an explanatory sentence but an example of the output fo
 
 ## Execution Guidelines
 
-Follow the standard execution guidelines in `skills/_shared/skill-protocol.md`. Additional rules:
+Follow the standard execution guidelines in `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - Load the referenced CTX and check the rules
 - Check whether any halt condition applies
 - Separate by meaningful unit according to the commit separation rules

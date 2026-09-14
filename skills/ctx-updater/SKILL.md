@@ -59,7 +59,7 @@ This Skill **never performs** the following.
 - 추가할 문장:
 - 이 규칙이 없으면 발생하는 오작동:
 ```
-Input format validation follows the `skills/_shared/skill-protocol.md` standard.
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
 
 ### Input Validation (required)
 
@@ -163,4 +163,4 @@ Stopped proposal:
 
 ## Execution Guidelines
 
-Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`.
+Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
