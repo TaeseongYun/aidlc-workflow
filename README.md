@@ -115,6 +115,8 @@ Decompose requirements into work units of S/M/L size. Each UOW specifies Accepta
 
 For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts.md).
 
+Worked examples: a fully-filled artifact set in [examples/filled-outputs/](examples/filled-outputs/), and a complete project layout in [examples/project-layout-example.md](examples/project-layout-example.md).
+
 ---
 
 ## Skill List
@@ -228,7 +230,7 @@ aidlc-workflow/
 │   ├── brownfield-guide.md
 │   ├── faq.md
 │   └── changelog/              # Per-version change history
-├── examples/                   # References (golden baselines, multi-feature coordination)
+├── examples/                   # Golden baselines (CI-validated), filled outputs, score-loop walkthrough
 ├── QUICKSTART.md               # Quick start guide
 └── README.md                   # This file
 ```

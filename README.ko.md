@@ -227,7 +227,7 @@ aidlc-workflow/
 │   ├── brownfield-guide.md
 │   ├── faq.md
 │   └── changelog/              # Per-version change history
-├── examples/                   # References (golden baselines, multi-feature coordination)
+├── examples/                   # Golden baselines (CI 검증), filled outputs, score-loop walkthrough
 ├── QUICKSTART.md               # Korean quick start
 └── README.md                   # This file
 ```
@@ -251,6 +251,8 @@ aidlc-docs/
     ├── technical-design.md    # Technical design (M/L only)
     └── infrastructure-design.md (conditional)
 ```
+
+작성 예시: 완성된 산출물 세트는 [examples/filled-outputs/](examples/filled-outputs/), 전체 프로젝트 레이아웃은 [examples/project-layout-example.md](examples/project-layout-example.md) 참고.
 
 ---
 

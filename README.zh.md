@@ -222,7 +222,7 @@ aidlc-workflow/
 │   ├── brownfield-guide.md
 │   ├── faq.md
 │   └── changelog/              # Per-version change history
-├── examples/                   # References (golden baselines, multi-feature coordination)
+├── examples/                   # Golden baselines（CI 验证）、filled outputs、score-loop walkthrough
 ├── QUICKSTART.md               # Korean quick start
 └── README.md                   # This file
 ```
@@ -246,6 +246,8 @@ aidlc-docs/
     ├── technical-design.md    # Technical design (M/L only)
     └── infrastructure-design.md (conditional)
 ```
+
+完整示例：填写完成的产物集见 [examples/filled-outputs/](examples/filled-outputs/)，完整项目布局见 [examples/project-layout-example.md](examples/project-layout-example.md)。
 
 ---
 
