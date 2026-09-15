@@ -115,7 +115,6 @@ Decompose requirements into work units of S/M/L size. Each UOW specifies Accepta
 
 For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts.md).
 
-Worked examples: a fully-filled artifact set in [examples/filled-outputs/](examples/filled-outputs/), and a complete project layout in [examples/project-layout-example.md](examples/project-layout-example.md).
 
 ---
 
@@ -254,6 +253,8 @@ aidlc-docs/
     ├── technical-design.md    # Technical design (M/L only)
     └── infrastructure-design.md (conditional)
 ```
+
+Worked examples: a fully-filled artifact set in [examples/filled-outputs/](examples/filled-outputs/), and a complete project layout in [examples/project-layout-example.md](examples/project-layout-example.md).
 
 ---
 

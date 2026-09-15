@@ -223,7 +223,7 @@ aidlc-workflow/
 │   ├── faq.md
 │   └── changelog/              # Per-version change history
 ├── examples/                   # Golden baselines（CI 验证）、filled outputs、score-loop walkthrough
-├── QUICKSTART.md               # Korean quick start
+├── QUICKSTART.md               # 快速上手指南
 └── README.md                   # This file
 ```
 
