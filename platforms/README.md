@@ -17,6 +17,13 @@ signals.
 | React Native | [rn/guidance.md](rn/guidance.md) |
 | KMP (Kotlin Multiplatform) | [kmp/guidance.md](kmp/guidance.md) |
 
+## Per-platform skills
+
+Each platform also ships detailed skills under `platforms/<platform>/skills/` —
+reference-knowledge expansions of its `guidance.md` (see each platform's
+`skills/README.md` for the full index). Install them with
+`bash scripts/install-skills.sh --platforms=<p1,p2|all>`.
+
 ## Precedence
 
 ```

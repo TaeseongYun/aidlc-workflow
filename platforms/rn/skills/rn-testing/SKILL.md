@@ -274,4 +274,4 @@ Do NOT propose alternatives on halt. Output only the halt reason.
 - MSW: https://mswjs.io/docs/integrations/react-native
 - Detox: https://wix.github.io/Detox/
 - Maestro: https://maestro.mobile.dev/
-- Skill protocol: [../../../skills/_shared/skill-protocol.md](../../../skills/_shared/skill-protocol.md)
+- Skill protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`

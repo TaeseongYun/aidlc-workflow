@@ -262,7 +262,7 @@ For Flutter UI code that AI generated or was Figma-derived, before merge:
 
 ## Halt conditions
 
-Halt and report (per [skill-protocol.md](../../../_shared/skill-protocol.md)) when:
+Halt and report (per `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`) when:
 
 - The codebase has no `ThemeData` definition — cannot evaluate token usage without a theme source of truth.
 - The project uses a non-standard theming system not described in project `ctx/` — skip rather than misdiagnose.
@@ -274,7 +274,7 @@ Halt and report (per [skill-protocol.md](../../../_shared/skill-protocol.md)) wh
 - Generation counterpart this skill enforces: [flutter-figma-to-code](../flutter-figma-to-code/SKILL.md)
 - Umbrella: [flutter-architecture](../flutter-architecture/SKILL.md)
 - Adjacent: [flutter-security](../flutter-security/SKILL.md) (security floor, also applies to generated code), [flutter-widget-performance](../flutter-widget-performance/SKILL.md) (const, no literals), [flutter-module-structure](../flutter-module-structure/SKILL.md) (where design_system widgets live)
-- Skill protocol: [skill-protocol.md](../../../_shared/skill-protocol.md)
+- Skill protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`
 - Bad → good Dart pairs for all 10 rules: [reference.md](./reference.md)
 - Flutter ThemeData: https://api.flutter.dev/flutter/material/ThemeData-class.html
 - Flutter ColorScheme: https://api.flutter.dev/flutter/material/ColorScheme-class.html

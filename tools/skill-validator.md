@@ -67,6 +67,6 @@ Ask the AI to review a specific skill with reference to this document:
 
 ```
 [PASS] SKILL-01: skills/ctx-aidlc-run — entry point exists (SKILL.md + CLAUDE_COMMAND.md)
-[FAIL] PATH-02: skills/ctx-run — hardcoded path found: /Users/nhn/workspace/...
+[FAIL] PATH-02: skills/ctx-refiner — hardcoded path found: /Users/nhn/workspace/...
 [SKIP] SKILL-03: inferential validation — cannot be validated by a script
 ```

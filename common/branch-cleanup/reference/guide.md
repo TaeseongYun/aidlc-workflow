@@ -114,7 +114,7 @@ directory by hand leaves a dangling administrative entry; use the porcelain, the
 
 A worktree's branch cannot be deleted while it is checked out somewhere. Remove or switch
 the worktree first, then delete the branch. In this repo, `scripts/worktree_alloc.py prune`
-wraps `git worktree prune -v`; see [`/ctx-worktree`](../SKILLS.md#related-aidlc-skills).
+wraps `git worktree prune -v`; see [`/ctx-worktree`](../SKILLS.md).
 
 ---
 

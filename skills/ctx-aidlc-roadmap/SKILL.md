@@ -1,4 +1,5 @@
 ---
+name: ctx-aidlc-roadmap
 description: Multi-feature roadmapping (Phase 0) for prepared planning documents. Decomposes a large prepared requirement into feature slugs, resource matrix, dependency graph, and allocation plan, then stops at GATE-0.
 model: opus
 allowed-tools: Read, Write, Edit, Bash
@@ -71,6 +72,7 @@ Skipped steps do not load their files.
 CORE RULES
 ────────────────────────────────────
 
+- Shared execution protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` (halt format, execution boundary).
 - `team-ai-workflow/` defines HOW to think.
 - Project `ctx/` defines WHAT is already true.
 - `aidlc-docs/_roadmap.md` is the **single source of truth** for cross-feature coordination. Per-feature `ctx-aidlc-run` runs MUST read it.
@@ -188,18 +190,18 @@ HANDOFF MESSAGES
 After GATE-0 approval, output exactly this structure (one block per feature):
 
 ```markdown
-### Phase 0 완료 — 피처별 진행 안내
+### Phase 0 complete — per-feature next steps
 
-다음 명령으로 각 피처를 진행하세요:
+Proceed with each feature using the following command:
 
 #### F-1: <slug>
 \`\`\`
 /ctx-aidlc-run
 
-Phase 0 로드맵 기준으로 F-1(<slug>) 작업을 시작한다.
-- 입력: prepared-requirement (원본 §<범위>)
-- 의존: <선행 피처 산출물 경로 또는 "없음">
-- aidlc-docs/_roadmap.md를 먼저 읽어라.
+Start work on F-1 (<slug>) based on the Phase 0 roadmap.
+- Input: prepared-requirement (source §<range>)
+- Depends on: <predecessor feature output paths, or "none">
+- Read aidlc-docs/_roadmap.md first.
 \`\`\`
 
 #### F-2: <slug>

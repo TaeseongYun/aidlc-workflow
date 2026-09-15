@@ -101,7 +101,9 @@ ctx/
 - **GATE-0**: 멀티 피처 로드맵 승인
 - **GATE-1**: 초기 요구사항 명확화 승인
 - **GATE-2, 3**: 최종 요구사항 및 설계 승인
+- **GATE-4**: 인프라 설계 승인 (조건부)
 - **GATE-5**: 구현 준비 완료 확인
+- 조건부 하프 게이트 **2.5 / 2.7 / 3.5**는 트리거 조건(페르소나, 컴포넌트, M/L 기술 설계)이 해당될 때만 발동한다 — 전체 목록은 [common/stage-gate-rules.md](common/stage-gate-rules.md) 참고
 
 ### Unit of Work: 구현의 단위
 
@@ -109,7 +111,7 @@ ctx/
 
 ### Platform Guidance: 플랫폼별 아키텍처 베이스라인
 
-`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp)는 해당 플랫폼에서 설계(`/ctx-aidlc-run` STEP 6.5) 또는 구현(`/ctx-domain-exec`) 전에 에이전트가 로드해야 할 아키텍처 베이스라인을 담고 있다. 플랫폼은 `ctx/project-profile.ctx.md`에 선언하며, 우선순위는 프로젝트 `ctx/` > platform guidance > 일반 지식 순이다. 각 플랫폼에는 figma-to-code, vibe-coding security guard, testing, design-system, accessibility, i18n, observability, contract-codegen 등 상세한 플랫폼별 스킬이 함께 제공되며, 관련 파일을 건드리면 자동으로 로드된다. 문서는 독립적인 마크다운 형식이므로 외부 레포에서도 설치 경로 또는 raw GitHub URL로 사용할 수 있다 — [platforms/README.md](platforms/README.md) 참고.
+`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp)는 해당 플랫폼에서 설계(`/ctx-aidlc-run` STEP 6.5) 또는 구현(`/ctx-domain-exec`) 전에 에이전트가 로드해야 할 아키텍처 베이스라인을 담고 있다. 플랫폼은 `ctx/project-profile.ctx.md`에 선언하며, 우선순위는 프로젝트 `ctx/` > platform guidance > 일반 지식 순이다. 각 플랫폼에는 figma-to-code, vibe-coding security guard, testing, design-system, accessibility, i18n, observability, contract-codegen 등 상세한 플랫폼별 스킬이 함께 제공된다. 플랫폼 스킬은 **옵트인(opt-in)** 방식이다: `bash scripts/install-skills.sh --platforms=android,ios` (또는 `--platforms=all`)로 자신의 스택에 맞는 스킬만 설치한다. 문서는 독립적인 마크다운 형식이므로 외부 레포에서도 설치 경로 또는 raw GitHub URL로 사용할 수 있다 — [platforms/README.md](platforms/README.md) 참고.
 
 개념에 대한 자세한 설명은 [docs/concepts.md](docs/concepts.md)를 참고하라.
 
@@ -131,6 +133,8 @@ ctx/
 | `/ctx-commit-planner` | 커밋 구조 설계 |
 | `/ctx-score-loop` | 구현 후 의존성 + 4개 축에 대한 자동 반복 채점 (85점 초과 시 완료) |
 | `/ctx-hallucination-audit` | Hallucination Guard 감사 루프. graphify(codegraph 폴백)로 개발 사실을 검증하고, 반박된 주장을 격리한 뒤 점수가 87 이상이 될 때까지 반복 |
+| `/ctx-aidlc-sync` | AWS AI-DLC 업스트림 변경을 이 워크플로우 레포에 이식 (동기화 점수 90점 초과 시에만 PR) |
+| `/mobile-webview-bridge` | 하나의 공유 contract-first 프로토콜로 Android/iOS/KMP/RN/Flutter를 지원하는 JS ↔ 네이티브 WebView 브리지 (generator + guard 모드) |
 
 > **Hallucination Guard (항상 활성).** 경로·심볼·API·설정 키·버전 등 개발
 > 사실을 코드 그래프와 대조 검증하여 AI의 추측이 사실로 누출되지 않도록 한다.
@@ -208,7 +212,7 @@ aidlc-workflow/
 │   ├── ctx-aidlc-run/
 │   ├── ctx-score-loop/
 │   ├── ctx-hallucination-audit/
-│   └── ... (12 skills)
+│   └── ... (one directory per skill — see the Skill List table)
 ├── tools/                      # Validation tools (evaluator, skill-validator)
 ├── scripts/                    # Installation and initialization
 │   ├── install-skills.sh       # Global skill installation
@@ -223,8 +227,8 @@ aidlc-workflow/
 │   ├── brownfield-guide.md
 │   ├── faq.md
 │   └── changelog/              # Per-version change history
-├── examples/                   # References (golden baselines, multi-feature coordination)
-├── QUICKSTART.md               # Korean quick start
+├── examples/                   # Golden baselines (CI 검증), filled outputs, score-loop walkthrough
+├── QUICKSTART.md               # 빠른 시작 가이드
 └── README.md                   # This file
 ```
 
@@ -247,6 +251,8 @@ aidlc-docs/
     ├── technical-design.md    # Technical design (M/L only)
     └── infrastructure-design.md (conditional)
 ```
+
+작성 예시: 완성된 산출물 세트는 [examples/filled-outputs/](examples/filled-outputs/), 전체 프로젝트 레이아웃은 [examples/project-layout-example.md](examples/project-layout-example.md) 참고.
 
 ---
 
@@ -272,8 +278,11 @@ aidlc-docs/
 릴리스별 상세 변경사항: [docs/changelog/](docs/changelog/)
 
 주요 업데이트:
-- **2026-08-27**: KMP (Kotlin Multiplatform)를 7번째 플랫폼으로 추가 — guidance + 13개 스킬 (figma-to-kmp, vibe-coding security guard, testing 등)
-- **2026-08-26**: 전 플랫폼 대상 플랫폼별 스킬 패밀리 (testing, design-system, accessibility, contract-codegen, observability, i18n)
+- **2026-09-14**: `mobile-webview-bridge` 스킬 — 하나의 공유 contract-first 프로토콜(envelope, handshake, 보안, 스레딩, 라이프사이클)로 Android/iOS/KMP/RN/Flutter를 지원하는 JS ↔ 네이티브 WebView 브리지. 플랫폼별 레퍼런스 바인딩, generator/guard 모드, 오프라인 envelope 검증기 포함 ([상세](docs/changelog/2026-09-14-mobile-webview-bridge-skill.md))
+- **2026-09-06**: 실행 결과 로거 — `scripts/run-logger.ts`가 타입이 지정된 결과를 `aidlc-docs/run-log.ndjson`과 graphify가 수집 가능한 `run-log.md` 미러에 기록하여, 과거 결과를 `graphify query`(degraded 모드에서는 로컬 `recall`)로 조회할 수 있게 함. score-loop, hallucination-audit, aidlc-run, 세션 진입에 연결 ([상세](docs/changelog/2026-09-06-run-logger-and-graphify-rag.md))
+- **2026-09-03**: `graphify`를 소프트 의존성으로 전환 — 도구가 없어도 설정을 차단하지 않고 grep/Read 검증으로 degrade. CI(`validate-skills.sh` + golden baselines) 추가, `validate-questions.sh`가 영어 필드 라벨을 허용하도록 수정 ([상세](docs/changelog/2026-09-03-graphify-soft-dependency-and-ci.md))
+- **2026-08-27**: KMP (Kotlin Multiplatform)를 7번째 플랫폼으로 추가 — guidance + 13개 스킬 (figma-to-kmp, vibe-coding security guard, testing 등) ([상세](docs/changelog/2026-08-27-kmp-platform.md))
+- **2026-08-26**: 전 플랫폼 대상 플랫폼별 스킬 패밀리 (testing, design-system, accessibility, contract-codegen, observability, i18n) ([상세](docs/changelog/2026-08-26-platform-skill-families.md))
 - **2026-04-29**: Phase 0 Roadmapping 스킬 추가, 멀티 피처 협업 워크플로우 공식화
 - **2026-04-22**: 과신 방지, 강화된 검증, 평가 프레임워크
 - **2026-04-14**: Lazy Loading + 세션 분리를 기본 모델로 채택, 토큰 절감

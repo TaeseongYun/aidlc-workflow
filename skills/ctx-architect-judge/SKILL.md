@@ -1,8 +1,7 @@
 ---
 name: ctx-architect-judge
 description: Decide domain scope and CTX references before execution
-version: 1.0.0
-command: /ctx-architect-judge
+allowed-tools: Read, Grep, Glob
 ---
 
 # ctx-architect-judge
@@ -57,19 +56,20 @@ but the **judgment material** to be used in the next step.
 This Skill must accept only input with the structure below.
 
 ```markdown
-## 작업 요구사항
-- (자연어 요구사항)
+## Task Requirements
+- (natural-language requirements)
 
-## 제공된 Global CTX
-- (CTX 파일 경로 목록)
+## Provided Global CTX
+- (CTX file path list)
 
-## 제공된 Local CTX
-- (CTX 파일 경로 목록)
+## Provided Local CTX
+- (CTX file path list)
 ```
 
 ---
 
-Input format validation follows the `skills/_shared/skill-protocol.md` standard.
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
+Backward compatibility: the pre-migration Korean headings (`## 작업 요구사항`, `## 제공된 Global CTX`, `## 제공된 Local CTX`) are accepted as equivalents.
 
 ## Input Validation Rules
 
@@ -142,10 +142,12 @@ The output must follow the format and order below.
 - There is a possibility of conflict between CTX but their priority cannot be determined
 - Judgment is impossible without rules beyond the provided CTX
 
-On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
 
 ---
 
 ## Execution Guidelines
 
-Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. For the unique procedure, use "Judgment Procedure".
+Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. For the unique procedure, use "Judgment Procedure".
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-architect-judge/USAGE.md`

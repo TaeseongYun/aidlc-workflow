@@ -11,17 +11,17 @@
 
 ## Normal Review Invocation Example (ARCHITECT_CONFIRMED)
 
-```
+````
 /ctx-reviewer
 
-## 참조된 Global CTX
+## Referenced Global CTX
 - ctx/back-end/api/api-response.ctx.md
 - ctx/back-end/api/error-handling.ctx.md
 
-## 참조된 Local CTX
+## Referenced Local CTX
 - ctx/back-end/domain/notification.ctx.md
 
-## 리뷰 대상 코드
+## Review Target Code
 ```java
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class NotificationService {
     @Transactional
     public void markAsRead(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
-            .orElseThrow(() -> new NotFoundException("알림을 찾을 수 없습니다."));
+            .orElseThrow(() -> new NotFoundException("Notification not found."));
         notification.markAsRead();
     }
 
@@ -46,14 +46,17 @@ public class NotificationService {
 }
 ```
 
-## Executor 실행 모드
+## Executor Execution Mode
 - ARCHITECT_CONFIRMED
-```
+````
 
 **Expected output:**
 
 ## 1. CTX Violation Judgment
 - No violation
+
+## 1b. Graph Impact Conformance
+- Not applicable
 
 ## 2. List of Identified Rules
 - Rule A: When looking up notifications, sort in descending order by creation date
@@ -61,8 +64,9 @@ public class NotificationService {
 ## 3. CTX Reflection Classification Result
 - Rule A → Local CTX
 
-## 4. CTX Reflection Proposal
-- Target file: ctx/back-end/domain/notification.ctx.md
+## 4. CTX Reflection Proposal List
+### Proposal 1
+- Target file path: ctx/back-end/domain/notification.ctx.md
 - Insertion location: lookup rules section
 - Sentence to add: "When looking up the notification list, sort in descending order by creation date (createdAt)."
 - AI malfunction if omitted: The AI looks up without sorting or sorts in ascending order, so the latest notification is displayed at the bottom
@@ -71,18 +75,18 @@ public class NotificationService {
 
 ## EXECUTOR_ONLY Review Invocation Example
 
-```
+````
 /ctx-reviewer
 
-## 참조된 Global CTX
+## Referenced Global CTX
 - ctx/back-end/api/api-design.ctx.md
 - ctx/back-end/api/api-response.ctx.md
 - ctx/back-end/api/error-handling.ctx.md
 
-## 참조된 Local CTX
+## Referenced Local CTX
 - ctx/back-end/domain/grade.ctx.md
 
-## 리뷰 대상 코드
+## Review Target Code
 ```java
 @RestController
 @RequiredArgsConstructor
@@ -99,9 +103,9 @@ public class GradeController {
 }
 ```
 
-## Executor 실행 모드
+## Executor Execution Mode
 - EXECUTOR_ONLY
-```
+````
 
 **Expected output:**
 
@@ -110,13 +114,16 @@ public class GradeController {
 - Violated rule: "All API responses are returned wrapped in CommonResponse."
 - Code where violation occurred: `return ResponseEntity.ok(GradeDto.from(grade));`
 
+## 1b. Graph Impact Conformance
+- Not applicable
+
 ## 2. List of Identified Rules
 - None
 
 ## 3. CTX Reflection Classification Result
 - Not applicable
 
-## 4. CTX Reflection Proposal
+## 4. CTX Reflection Proposal List
 - None
 
 ## EXECUTOR_ONLY Warning Mark
@@ -127,36 +134,36 @@ public class GradeController {
 
 ## Incorrect Invocation Example (case that stops)
 
-```
+````
 /ctx-reviewer
 
-## 참조된 Global CTX
-- API 응답 규칙 참조
+## Referenced Global CTX
+- See the API response rules
 
-## 참조된 Local CTX
-- 등급 관련 CTX
+## Referenced Local CTX
+- Grade-related CTX
 
-## 리뷰 대상 코드
+## Review Target Code
 ```java
-// 일부 코드만 발췌
+// only an excerpt of the code
 gradeService.findByUserId(userId);
 ```
 
-## Executor 실행 모드
-- (미명시)
-```
+## Executor Execution Mode
+- (not specified)
+````
 
 **Expected output:**
 
-## Review Stopped
+## Review Halted
 
-Stop reason:
+Halt reason:
 - The referenced CTX list was provided as descriptive text rather than file paths
 - The review target code was only partially provided (the full context cannot be understood)
 - The Executor execution mode is not specified
 
 Items that need confirmation:
-1. Please provide the exact paths of the Global CTX files (e.g., ctx/back-end/api/api-response.ctx.md)
-2. Please provide the exact paths of the Local CTX files
-3. Please provide the full class/method of the review target code
-4. Please specify the Executor execution mode (ARCHITECT_CONFIRMED or EXECUTOR_ONLY)
+1. The exact paths of the Global CTX files (e.g., ctx/back-end/api/api-response.ctx.md)
+2. The exact paths of the Local CTX files
+3. The full class/method of the review target code
+4. The Executor execution mode (ARCHITECT_CONFIRMED or EXECUTOR_ONLY)

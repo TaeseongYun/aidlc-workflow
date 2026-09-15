@@ -8,7 +8,7 @@
 #
 # Consumed by:
 #   - scripts/init-project.sh  (warns and continues in DEGRADED mode on a missing tool;
-#     auto-builds a missing graph on brownfield; passes --mode)
+#     auto-builds a missing graph on brownfield; calls without --mode, relying on auto-detect)
 #   - /team-ai-workflow-start skill (on a missing tool it opens an AskUserQuestion dialog offering
 #     install / proceed-in-degraded-mode / cancel — never a free-text "continue anyway" prompt)
 #
@@ -52,6 +52,11 @@ for arg in "$@"; do
     *)        PROJECT_ROOT="$arg" ;;
   esac
 done
+
+case "$MODE" in
+  auto|greenfield|brownfield) ;;
+  *) echo "ERROR: --mode must be auto|greenfield|brownfield (got '${MODE}')" >&2; exit 1 ;;
+esac
 
 # Resolve auto mode: brownfield if the project already has non-scaffold source files.
 resolve_mode() {

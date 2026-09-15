@@ -214,6 +214,9 @@ if [[ "${GATE_RC}" -eq 2 ]]; then
   echo "Hallucination Guard active in DEGRADED mode (no graph; VERIFY uses grep/Read)."
   echo "Install graphify to enable graph-backed verification: uv tool install \"graphifyy[mcp]\""
   echo "Audit loop: /ctx-hallucination-audit"
+elif [[ "${GATE_RC}" -eq 3 ]]; then
+  echo "Hallucination Guard active (graphify installed; graph deferred — run 'graphify .' to build it)."
+  echo "Audit loop: /ctx-hallucination-audit"
 else
   echo "Hallucination Guard active (graphify verified). Audit loop: /ctx-hallucination-audit"
 fi

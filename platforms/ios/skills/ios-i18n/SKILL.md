@@ -195,7 +195,7 @@ For any SwiftUI view or string resource touched by AI or quickly pasted in:
 
 ## Halt conditions
 
-Halt and report (per [skill-protocol.md](../../../_shared/skill-protocol.md)) when:
+Halt and report (per `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`) when:
 
 - A guard rule violation is detected and the correct fix is not determinable
   from the surrounding context (e.g., the correct string key is unknown).

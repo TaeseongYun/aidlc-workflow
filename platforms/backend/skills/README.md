@@ -1,6 +1,6 @@
 # Backend Detailed Skills
 
-**Reference-knowledge skills** that expand `guidance.md` (the team backend baseline) into 7 topics. Each skill
+**Reference-knowledge skills** that expand `guidance.md` (the team backend baseline) into 10 topics. Each skill
 follows the official skills format (`SKILL.md` + `reference.md`), auto-loads via `paths` when you touch the
 relevant files, and can also be invoked manually as `/backend-*`. Deep-dive material lives in each skill's `reference.md`.
 
@@ -20,10 +20,13 @@ on the key rules.
 | [backend-security-guard](backend-security-guard/SKILL.md) | **Vibe-coding security guard** — blocks vulnerable patterns in AI-generated code (secrets · SQLi · SSRF · deserialization · BOLA/BFLA · weak crypto · disabled security · hallucinated dependencies) | `**/*.java`, `**/*.kt`, `**/*.ts`, `**/*.py`, `**/application*.yml`, `**/.env*`, `**/Dockerfile` |
 | [backend-auth](backend-auth/SKILL.md) | AuthN/AuthZ — BOLA (object) · BFLA (function) · JWT verification · sessions · password hashing · least privilege | `**/*Security*`, `**/*Auth*`, `**/security/**`, `**/*Filter.java`, `**/*.guard.ts`, `**/middleware/**` |
 | [backend-reliability](backend-reliability/SKILL.md) | Reliability · observability — logging hygiene (no sensitive data) · resilience (timeout/retry/circuit) · rate limiting · dependency/supply-chain (SCA · hallucinated packages · SBOM) | `**/*Config*`, `**/logback*.xml`, `**/*Client*`, `**/build.gradle*`, `**/pom.xml`, `**/package.json` |
+| [backend-testing](backend-testing/SKILL.md) | Test generation + guard — JUnit5 + MockK/Mockito · pytest · go test · Vitest/Jest · Testcontainers (integration) · blocks the 10 AI-test failure modes | `**/src/test/**`, `**/*Test.kt`, `**/*Test.java`, `**/test_*.py`, `**/*_test.go`, `**/*.test.ts`, `**/*.spec.ts` |
+| [backend-observability](backend-observability/SKILL.md) | **Observability guard** — structured logging · correlation/trace IDs · metrics · error reporting · no PII/secrets in logs | `**/*.java`, `**/*.kt`, `**/*.py`, `**/*.go`, `**/*.ts`, `**/logback*.xml` |
+| [backend-contract-codegen](backend-contract-codegen/SKILL.md) | Contract codegen — OpenAPI/GraphQL → typed server stubs (openapi-generator · springdoc/FastAPI/oapi-codegen · DGS/gqlgen) + drift guard. The contract is the single source of truth; no hand-written duplicate DTOs | `**/openapi*.{yaml,yml,json}`, `**/*.graphql`, `**/*.graphqls`, `**/generated/**`, `**/*Api.kt`, `**/*DTO.java` |
 
 ## Vibe-guard gist
 
 AI-generated backend code is fast but frequently vulnerable (empirically ~40% of Copilot code has a
 security flaw, and AI-assisted commits leak secrets ~2x as often as humans'). `backend-security-guard` fills that
 gap as a **pre-merge review guard** — it auto-loads when you touch server source · config · Dockerfile and catches
-the most common vulnerable patterns. The other 5 skills are the deep rules this guard references.
+the most common vulnerable patterns. The other 9 skills are the deep rules this guard references.

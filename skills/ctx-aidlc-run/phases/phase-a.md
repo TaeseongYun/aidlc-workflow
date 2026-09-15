@@ -94,6 +94,7 @@ STEP 3. Analyze the request
   1. Executive Summary — write so a non-developer can grasp the whole context in 1-2 paragraphs
   2. Problem Statement — who, what, and why it is a problem, with evidence
   3. Target Users & Personas — primary/secondary users, JTBD, operator role
+     (prioritization frameworks when needed: `{{TEAM_AI_WORKFLOW_DIR}}/common/frameworks/` — JTBD, RICE, MoSCoW)
   4. Strategic Context — OKR linkage, competitive landscape, why now (only when applicable)
   5. Solution Overview — core features, user flow, brownfield connection points
   6. Scope Draft — included/excluded scope

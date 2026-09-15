@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Readiness Score 검증
-# 사용법: bash validate-readiness-score.sh <feature-dir>
-# status.md의 Readiness Score 테이블을 검증한다.
+# Readiness Score validation
+# Usage: bash validate-readiness-score.sh <feature-dir>
+# Validates the Readiness Score table in status.md.
 
 set -uo pipefail
 
@@ -20,42 +20,43 @@ error() { echo -e "${RED}[ERROR]${NC} $1"; ((ERRORS++)); }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; ((WARNINGS++)); }
 pass()  { echo -e "${GREEN}[PASS]${NC} $1"; }
 
-echo "=== Readiness Score 검증 ==="
+echo "=== Readiness Score Validation ==="
 
 if [[ ! -f "$STATUS_FILE" ]]; then
-  error "status.md 파일 없음"
+  error "status.md missing"
   exit 1
 fi
 
-echo "대상: $STATUS_FILE"
+echo "Target: $STATUS_FILE"
 echo ""
 
-# --- 1. Readiness Score 섹션 존재 ---
-echo "--- 1. Readiness Score 테이블 ---"
+# --- 1. Readiness Score section present ---
+echo "--- 1. Readiness Score table ---"
 if grep -q '## Readiness Score' "$STATUS_FILE" 2>/dev/null; then
-  pass "Readiness Score 섹션 존재"
+  pass "Readiness Score section present"
 else
-  error "Readiness Score 섹션 누락"
+  error "Readiness Score section missing"
   exit 1
 fi
 
-# --- 2. 합계 행 존재 및 점수 추출 ---
+# --- 2. Total row present and score extraction ---
 echo ""
-echo "--- 2. 합계 점수 ---"
+echo "--- 2. Total score ---"
 total_line=$(grep -i '합계\|total' "$STATUS_FILE" 2>/dev/null | head -1)
 if [[ -n "$total_line" ]]; then
-  # 테이블 행에서 숫자 추출: | 합계 | 배점 | 점수 | 판정 |
-  # bold(**) 제거 후 파이프 구분으로 파싱.
-  # 셀에 '120 (100+가점 20)'처럼 여러 숫자가 있어도 첫 정수 토큰만 사용한다
-  # (비숫자 일괄 제거 시 120,100,20 → 12010020 으로 이어붙는 버그 방지).
+  # Extract numbers from the table row: | Total | Max | Score | Verdict |
+  # Strip bold (**), then parse pipe-separated.
+  # Use only the first integer token even when a cell holds several numbers,
+  # e.g. '120 (100 + bonus 20)' (stripping all non-digits would concatenate
+  # 120,100,20 into 12010020).
   clean_line=$(echo "$total_line" | sed 's/\*\*//g')
   total_max=$(echo "$clean_line" | awk -F'|' '{print $3}' | grep -oE '[0-9]+' | head -1)
   total_score=$(echo "$clean_line" | awk -F'|' '{print $4}' | grep -oE '[0-9]+' | head -1)
 
   if [[ -n "$total_score" && -n "$total_max" ]]; then
-    pass "합계: ${total_score}/${total_max}"
+    pass "Total: ${total_score}/${total_max}"
 
-    # 판정 일관성 확인 (bold 제거 후 추출)
+    # Verdict consistency check (extract after stripping bold)
     verdict=$(echo "$clean_line" | grep -oE 'READY|CONDITIONAL|NOT_READY' | head -1)
 
     if [[ -n "$total_max" && "$total_max" -gt 0 ]]; then
@@ -72,68 +73,72 @@ if [[ -n "$total_line" ]]; then
 
       if [[ -n "$verdict" ]]; then
         if [[ "$verdict" == "$expected" ]]; then
-          pass "판정 일관성: $verdict (점수 ${total_score}/${total_max}, 기대값 $expected)"
+          pass "Verdict consistent: $verdict (score ${total_score}/${total_max}, expected $expected)"
         else
-          error "판정 불일치: 표기=$verdict, 점수 기준 기대값=$expected (${total_score}/${total_max})"
+          error "Verdict mismatch: stated=$verdict, expected from score=$expected (${total_score}/${total_max})"
         fi
       else
-        warn "판정(READY/CONDITIONAL/NOT_READY) 표기가 합계 행에 없음"
+        warn "Verdict (READY/CONDITIONAL/NOT_READY) not stated in the total row"
       fi
     fi
   else
-    warn "합계 행에서 점수를 추출할 수 없음"
+    warn "Cannot extract scores from the total row"
   fi
 else
-  error "합계(Total) 행 누락"
+  error "Total row missing"
 fi
 
-# --- 3. BLOCK 질문과 판정 교차 검증 ---
+# --- 3. Cross-check BLOCK questions against verdict ---
 echo ""
-echo "--- 3. BLOCK 질문 교차 검증 ---"
+echo "--- 3. BLOCK question cross-check ---"
 
 if [[ -f "$QFILE" ]]; then
-  # OPEN 상태인 BLOCK 질문 수 (Summary 테이블에서).
-  # grep -c 는 매치 0건일 때 stdout 에 "0" 을 찍고 exit 1 을 반환하므로
-  # "|| echo 0" 을 붙이면 "0\n0" 이 되어 (( )) 산술이 깨진다.
-  # 마지막 숫자 한 줄만 취해 정수로 정규화한다.
+  # Count of BLOCK questions in OPEN state (from the Summary table).
+  # grep -c prints "0" to stdout AND exits 1 on zero matches, so appending
+  # "|| echo 0" would yield "0\n0" and break (( )) arithmetic.
+  # Take only the last line and normalize to an integer.
   block_open=$(grep -ci 'OPEN.*BLOCK\|BLOCK.*OPEN' "$QFILE" 2>/dev/null | tail -1)
   block_open=${block_open:-0}
 
   if (( block_open > 0 )); then
-    echo "OPEN BLOCK 질문: ${block_open}건"
+    echo "OPEN BLOCK questions: ${block_open}"
 
-    # status.md에서 BLOCK 수 확인 (e.g. "BLOCK Questions: 2")
+    # Check the BLOCK count in status.md (e.g. "BLOCK Questions: 2")
     status_block=$(grep -i 'BLOCK Questions' "$STATUS_FILE" 2>/dev/null | grep -oE '[0-9]+' | head -1 || echo "")
     if [[ -n "$status_block" ]]; then
       if [[ "$status_block" -ne "$block_open" ]]; then
-        warn "BLOCK 수 불일치: status.md=${status_block}, questions.md=${block_open}"
+        warn "BLOCK count mismatch: status.md=${status_block}, questions.md=${block_open}"
       else
-        pass "BLOCK 수 일치: ${block_open}건"
+        pass "BLOCK count matches: ${block_open}"
       fi
     fi
 
-    # READY 판정인데 BLOCK이 있으면 오류
-    if [[ -n "${verdict:-}" && "$verdict" == "READY" ]]; then
-      error "READY 판정이지만 OPEN BLOCK 질문 ${block_open}건 존재"
+    # A READY verdict with open BLOCK questions is an error.
+    # When verdict extraction failed (total-row parse failure) this key cross-check
+    # would be silently skipped, so leave a warning.
+    if [[ -z "${verdict:-}" ]]; then
+      warn "Verdict not extracted — cannot perform READY x BLOCK cross-check"
+    elif [[ "$verdict" == "READY" ]]; then
+      error "Verdict is READY but ${block_open} OPEN BLOCK question(s) exist"
     fi
   else
-    pass "OPEN BLOCK 질문 없음"
+    pass "No OPEN BLOCK questions"
   fi
 else
-  warn "requirement-verification-questions.md 없어 BLOCK 교차 검증 생략"
+  warn "requirement-verification-questions.md missing — skipping BLOCK cross-check"
 fi
 
-# --- 4. 배점 합산 검증 ---
+# --- 4. Max-points sum check ---
 echo ""
-echo "--- 4. 배점 합산 ---"
+echo "--- 4. Max-points sum ---"
 
-# Readiness Score 테이블에서 배점 열의 숫자 합산
+# Sum the max-points column in the Readiness Score table
 score_section=$(sed -n '/## Readiness Score/,/^## /p' "$STATUS_FILE")
-point_values=$(echo "$score_section" | grep -E '^\|' | grep -v '합계\|total\|영역\|--' | grep -oE '\| *[0-9]+ *\|' | head -20)
+point_values=$(echo "$score_section" | grep -E '^\|' | grep -vi '합계\|total\|영역\|area\|--' | grep -oE '\| *[0-9]+ *\|' | head -20)
 
 if [[ -n "$point_values" ]]; then
-  # 개별 행의 배점(3번째 열) 추출 — bold(**) 제거 후 첫 정수 토큰만 사용
-  row_maxes=$(echo "$score_section" | sed 's/\*\*//g' | grep -E '^\|' | grep -v '합계\|total\|영역\|--' | awk -F'|' '{print $3}' | grep -oE '[0-9]+' )
+  # Extract per-row max points (3rd column) — strip bold (**), use only the first integer token
+  row_maxes=$(echo "$score_section" | sed 's/\*\*//g' | grep -E '^\|' | grep -vi '합계\|total\|영역\|area\|--' | awk -F'|' '{print $3}' | grep -oE '[0-9]+' )
 
   calc_total=0
   for val in $row_maxes; do
@@ -144,16 +149,16 @@ if [[ -n "$point_values" ]]; then
 
   if [[ -n "${total_max:-}" && "$calc_total" -gt 0 ]]; then
     if [[ "$calc_total" -eq "$total_max" ]]; then
-      pass "배점 합산 일치: ${calc_total}"
+      pass "Max-points sum matches: ${calc_total}"
     else
-      warn "배점 합산 불일치: 개별 합=${calc_total}, 합계 행=${total_max}"
+      warn "Max-points sum mismatch: per-row sum=${calc_total}, total row=${total_max}"
     fi
   fi
 fi
 
-# --- 5. UNCERTAIN 마커 교차 검증 ---
+# --- 5. UNCERTAIN marker cross-check ---
 echo ""
-echo "--- 5. UNCERTAIN 마커 ---"
+echo "--- 5. UNCERTAIN markers ---"
 
 uncertain_count=0
 for file in "$FEATURE_DIR"/*.md; do
@@ -162,24 +167,24 @@ for file in "$FEATURE_DIR"/*.md; do
   if (( count > 0 )); then
     uncertain_count=$((uncertain_count + count))
     fname=$(basename "$file")
-    warn "$fname: ⚠️ UNCERTAIN 마커 ${count}건 — Readiness Score 상한 적용 대상"
+    warn "$fname: ${count} UNCERTAIN marker(s) — subject to Readiness Score cap"
   fi
 done
 
 if (( uncertain_count == 0 )); then
-  pass "UNCERTAIN 마커 없음"
+  pass "No UNCERTAIN markers"
 fi
 
-# --- 결과 요약 ---
+# --- Result summary ---
 echo ""
-echo "=== 결과 ==="
-echo -e "오류: ${RED}${ERRORS}${NC}건, 경고: ${YELLOW}${WARNINGS}${NC}건"
+echo "=== Result ==="
+echo -e "Errors: ${RED}${ERRORS}${NC}, Warnings: ${YELLOW}${WARNINGS}${NC}"
 
 if (( ERRORS > 0 )); then
   echo -e "${RED}FAIL${NC}"
   exit 1
 elif (( WARNINGS > 0 )); then
-  echo -e "${YELLOW}PASS (경고 있음)${NC}"
+  echo -e "${YELLOW}PASS (with warnings)${NC}"
   exit 0
 else
   echo -e "${GREEN}PASS${NC}"

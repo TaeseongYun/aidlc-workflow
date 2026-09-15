@@ -4,7 +4,14 @@ The common execution protocol that all skills follow. Each skill's SKILL.md refe
 
 ## Common Structure Rules
 
-Every skill MUST include the following sections (order is free):
+Two tiers of skills follow this protocol:
+
+- **Contract skills** (fixed input format, e.g. ctx-updater, ctx-reviewer): MUST include all 8 sections below.
+- **Coordinator/loop skills** (free-form entry, e.g. team-ai-workflow-start, ctx-aidlc-run,
+  ctx-score-loop): sections 4's "input format" may be declared free-form; the remaining
+  sections are still required, in whatever heading style the skill uses.
+
+Every contract skill MUST include the following sections (order is free):
 1. Role definition (fixed - never change)
 2. Scope of responsibility (no actions beyond this)
 3. Absolute prohibition rules (Guardrail)
@@ -23,20 +30,29 @@ Input format validation is based on **logical structure**.
 ## Output Constraints
 
 - Do NOT change output order
-- Do NOT omit items (if absent, state "없음" or "해당 없음" explicitly)
+- Do NOT omit items (if absent, state "None" or "Not applicable" explicitly)
 - Code block usage follows per-skill rules
 
 ## Standard Output Format on Halt
 
 ```markdown
-## [동작명] 중단
+## [Action] Halted
 
-중단 사유:
-- (구체적인 중단 사유)
+Halt reason:
+- (specific halt reason)
 
-확인이 필요한 사항:
+Items that need confirmation:
 1. ...
 ```
+
+Terminology: "Halted"/"Stopped" and "Halt"/"Stop" are equivalent in this skill family —
+a fixed per-skill output format may use either; validators and consumers treat them identically.
+
+Backward compatibility: outputs and inputs using the pre-migration Korean
+equivalents ("없음" / "해당 없음", `## [동작명] 중단`, `중단 사유:`,
+`확인이 필요한 사항:`) are accepted as identical to the English forms.
+When responding to the user in Korean (per a skill's own response-language rule),
+render this template in Korean; the English form here is the documentation standard.
 
 On halt:
 - Do NOT propose alternatives

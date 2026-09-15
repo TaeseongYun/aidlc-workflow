@@ -1,4 +1,5 @@
 ---
+name: team-ai-workflow-start
 description: Entry point for team-ai-workflow on any account/repo. Detects state, sets up if needed, and routes to ctx-aidlc-roadmap / ctx-worktree / ctx-aidlc-run / ctx-domain-exec. Also bridges to oh-my-claudecode and Ouroboros workflows.
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Skill, AskUserQuestion
@@ -73,36 +74,37 @@ E. External orchestration detection (optional)
    - `.omc/` directory exists → OMC may be in use
    - `.ouroboros/` or Ouroboros-related files exist → Ouroboros may be in use
 
-F. 코드 그래프 전제조건 (Hallucination Guard — 권장 substrate)
-   - `bash <본체경로>/scripts/check-graphify.sh .` 를 실행하고 종료코드를 읽는다.
-   - 0 = 충족(graphify + `graphify-out/graph.json`), 2 = 도구 누락(→ degraded 가능), 3 = brownfield 그래프 미생성.
-   - graphify는 강력히 권장되지만 필수는 아니다. 없으면 VERIFY가 grep/Read로 degrade된다
-     (`common/graph-grounding.md`). 이 검사는 **다른 라우팅보다 먼저** 평가한다 (CASE 0 참조).
+F. Code graph prerequisites (Hallucination Guard — recommended substrate)
+   - Run `bash <core-path>/scripts/check-graphify.sh .` and read the exit code.
+   - 0 = satisfied (graphify + `graphify-out/graph.json`), 2 = tool missing (→ degraded possible), 3 = brownfield graph not built.
+   - graphify is strongly recommended but not mandatory. Without it, VERIFY degrades to grep/Read
+     (`common/graph-grounding.md`). Evaluate this check **before all other routing** (see CASE 0).
 
 ────────────────────────────────────
 REPORT FORMAT
 ────────────────────────────────────
 
-Output the diagnosis results in the following format.
+Output the diagnosis results in the following format
+(render headings/labels in Korean at runtime, per the response-language rule in CORE RULES).
 
 ```markdown
-## team-ai-workflow 진단
+## team-ai-workflow diagnosis
 
-### 환경
-- 본체 위치: <경로 또는 "미설치">
-- 글로벌 스킬: <설치됨 / 미설치>
-- 코드 그래프 전제조건: <충족 / graphify 도구 누락(degraded 가능) / 그래프 미생성>
-- 외부 연동: <OMC 감지 / Ouroboros 감지 / 없음>
+### Environment
+- Core location: <path or "not installed">
+- Global skills: <installed / not installed>
+- Code graph prerequisites: <satisfied / graphify tool missing (degraded possible) / graph not built>
+- External integration: <OMC detected / Ouroboros detected / none>
 
-### 현재 프로젝트 (<cwd>)
-- 초기화 상태: <완료 / 부분 / 미초기화>
-- 진행 중 feature: <N개 / 없음>
-- multi-feature 모드: <yes / no>
+### Current project (<cwd>)
+- Initialization state: <complete / partial / not initialized>
+- In-progress features: <N / none>
+- multi-feature mode: <yes / no>
 
-### 다음 단계 후보
-1. <상황별 권장 명령>
-2. <대안>
-3. <대안>
+### Next-step candidates
+1. <recommended command for the situation>
+2. <alternative>
+3. <alternative>
 ```
 
 ────────────────────────────────────
@@ -138,21 +140,23 @@ CASE 1: Core not installed
 - Recommended command:
   ```bash
   git clone https://github.com/TaeseongYun/aidlc-workflow.git ~/workspace/aidlc-workflow
+  echo 'export TEAM_AI_WORKFLOW_DIR="$HOME/workspace/aidlc-workflow"' >> ~/.zshrc
   bash ~/workspace/aidlc-workflow/scripts/install-skills.sh
   ```
+  (Diagnosis A finds the core via `TEAM_AI_WORKFLOW_DIR` — the env line makes the clone path detectable.)
 - No automatic execution. Run with the Bash tool only upon user approval.
 
 CASE 2: Core exists but global skills are not installed
 - Recommended command:
   ```bash
-  bash <본체경로>/scripts/install-skills.sh
+  bash <core-path>/scripts/install-skills.sh
   ```
 - Automatic execution allowed upon user approval.
 
 CASE 3: Global skills exist but the current project is not initialized
 - Recommended command:
   ```bash
-  bash <본체경로>/scripts/init-project.sh
+  bash <core-path>/scripts/init-project.sh
   ```
 - After automatic execution, propose auto-filling `ctx/INDEX.md` to the user.
 
@@ -182,98 +186,31 @@ CASE 9: Implementation complete, automatic iterative quality scoring needed
 EXTERNAL ORCHESTRATION (OMC / Ouroboros)
 ────────────────────────────────────
 
-team-ai-workflow handles the "What" of requirements analysis/design.
-The "How" of execution automation/iteration loops is handled by OMC or Ouroboros.
-The two do not conflict. Connect them with the following patterns.
+team-ai-workflow handles the "What" of requirements analysis/design; OMC or
+Ouroboros handles the "How" of automated execution. Three handoff patterns
+(details, configuration, and diagrams: `{{TEAM_AI_WORKFLOW_DIR}}/docs/omc-ouroboros-integration.md`):
 
-### Pattern 1 — Full automation to the end with OMC autopilot
+| Pattern | When | Handoff (after human GATEs) |
+|---|---|---|
+| 1. OMC autopilot | full implementation automation | GATE-2/3 passed → `/oh-my-claudecode:autopilot` on `requirements.md` + `unit-of-work.md` |
+| 2. Ouroboros evolve | measurable goal (tests, metrics) | `/ouroboros:seed` from requirements → `/ouroboros:evolve`; UOW Acceptance Criteria = Seed verification |
+| 3. OMC ralph | small (S size) single feature | GATE-3 passed → `/oh-my-claudecode:ralph`; UOW verification = termination condition |
 
-```text
-사용자 요청
-  ↓
-/team-ai-workflow-start   ← 진단 + 라우팅
-  ↓
-/ctx-aidlc-run            ← 요구사항/설계 (사람 GATE)
-  ↓ (GATE-2/3 통과)
-/oh-my-claudecode:autopilot ← 구현/테스트/검증 자동 반복
-```
-
-OMC autopilot takes `aidlc-docs/features/<slug>/requirements.md` and
-`unit-of-work.md` as input and performs the implementation.
-
-### Pattern 2 — Evolutionary implementation with Ouroboros evolve
-
-```text
-/ctx-aidlc-run            ← Seed가 될 requirements 생성
-  ↓
-/ouroboros:seed            ← requirements.md → Seed spec
-  ↓
-/ouroboros:evolve          ← 진화 루프
-```
-
-Ouroboros is most effective when there is a measurable goal (test pass rate,
-performance metrics, etc.). It uses the Acceptance Criteria of `unit-of-work.md`
-as the Seed's verification.
-
-### Pattern 3 — Complete a single feature with the ralph loop
-
-```text
-/ctx-aidlc-run            ← requirements + UOW 확정
-  ↓ (GATE-3 통과)
-/oh-my-claudecode:ralph   ← 검증 통과까지 반복 실행
-```
-
-Suitable for small (S size) features. Use the UOW's verification method as ralph's
-termination condition.
-
-### Precautions when connecting
-
-- GATE approval is always done by a human. OMC/Ouroboros does not auto-pass GATEs.
-- `audit.md` is respected as append-only by both systems. In case of conflict,
-  team-ai-workflow's audit rule takes precedence.
-- OMC's `.omc/state/` and Ouroboros's session state are kept in a space separate
-  from `aidlc-docs/`. They do not overwrite each other.
+Precautions: GATE approval is always human — OMC/Ouroboros never auto-pass one.
+`audit.md` stays append-only for both systems (team-ai-workflow's rule wins on
+conflict). `.omc/state/` and Ouroboros session state live outside `aidlc-docs/`.
 
 ────────────────────────────────────
 CROSS-ACCOUNT / CROSS-REPO PORTABILITY
 ────────────────────────────────────
 
-Checklist for operating identically across different accounts and different repositories.
+Same commands on any account/repo — full checklist in the README ("Using It on
+Other Accounts/Repos") and `{{TEAM_AI_WORKFLOW_DIR}}/docs/omc-ouroboros-integration.md`:
 
-1. **Unify the core clone location.** Recommended: `~/workspace/team-ai-workflow`.
-   If using a different location, specify it with the `TEAM_AI_WORKFLOW_DIR` environment variable.
-
-   ```bash
-   echo 'export TEAM_AI_WORKFLOW_DIR="$HOME/work/team-ai-workflow"' >> ~/.zshrc
-   ```
-
-2. **Skills must be installed globally.**
-
-   ```bash
-   bash "$TEAM_AI_WORKFLOW_DIR/scripts/install-skills.sh"
-   ```
-
-   After installation, `ctx-*.md` files are created in `~/.claude/commands/`.
-
-3. **When switching accounts**, global skills are based on the user's home directory, so they are retained as-is.
-   However, if using Claude Code multi-account, you must install identically under `~/.claude-personal/` or
-   a separate home path.
-
-4. **When switching repositories**, run `init-project.sh` once in each repo.
-
-   ```bash
-   cd /path/to/new-repo
-   bash "$TEAM_AI_WORKFLOW_DIR/scripts/init-project.sh"
-   ```
-
-5. **To update the core**, reinstall after `git pull`.
-
-   ```bash
-   cd "$TEAM_AI_WORKFLOW_DIR" && git pull
-   bash scripts/install-skills.sh
-   ```
-
-   `install-skills.sh` is idempotent, so it is safe to run multiple times.
+1. One core clone location, pointed to by `TEAM_AI_WORKFLOW_DIR` in the shell rc.
+2. Global install per account home: `CLAUDE_HOME=... CODEX_HOME=... bash "$TEAM_AI_WORKFLOW_DIR/scripts/install-skills.sh"` (idempotent; prunes removed skills).
+3. Per repo, once: `bash "$TEAM_AI_WORKFLOW_DIR/scripts/init-project.sh"`.
+4. To update: `git pull` in the core, then re-run the install script.
 
 ────────────────────────────────────
 EXECUTION FLOW
@@ -334,5 +271,5 @@ NON-GOALS
 - Requirements analysis/question extraction (→ `/ctx-aidlc-run`)
 - Multi-feature roadmap authoring (→ `/ctx-aidlc-roadmap`)
 - Implementation/test/review (→ `/ctx-domain-exec`, `/ctx-reviewer` and the other ctx-* skills)
-- Automatic code modification (→ `/ctx-updater`)
+- Applying CTX reflection proposals to CTX documents (→ `/ctx-updater`)
 - Direct invocation of external systems (the user invokes them with a separate skill)

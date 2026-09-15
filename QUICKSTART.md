@@ -156,7 +156,7 @@ Large features must be split into sessions by Phase to maintain quality.
 
 Application criteria: minimal=optional, standard=recommended, comprehensive=**required**
 
-Details: [docs/workflow-guide.md](docs/workflow-guide.md#세션-분리-기본-실행-모델)
+Details: [docs/workflow-guide.md](docs/workflow-guide.md#session-separation-default-execution-model)
 
 ## Next Steps
 

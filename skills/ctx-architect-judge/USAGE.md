@@ -14,18 +14,18 @@
 ```
 /ctx-architect-judge
 
-## 작업 요구사항
-- 사용자 등급(Grade) 조회 API에 캐싱 적용
+## Task Requirements
+- Apply caching to the user grade (Grade) lookup API
 
-## 제공된 Global CTX
-- @ctx/back-end/api/api-design.ctx.md                                                                                                                                                                                                                                                                       
-- @ctx/back-end/api/api-response.ctx.md                                                                                                                                                                                                                                                                     
-- @ctx/back-end/api/error-handling.ctx.md                                                                                                                                                                                                                                                                   
-- @ctx/back-end/api/swagger-global.ctx.md   
+## Provided Global CTX
+- @ctx/back-end/api/api-design.ctx.md
+- @ctx/back-end/api/api-response.ctx.md
+- @ctx/back-end/api/error-handling.ctx.md
+- @ctx/back-end/api/swagger-global.ctx.md
 
-## 제공된 Local CTX
-- .ctx/domains/grade/grade-domain.ctx.md
-- .ctx/domains/grade/grade-api.ctx.md
+## Provided Local CTX
+- @ctx/domains/grade/grade-domain.ctx.md
+- @ctx/domains/grade/grade-api.ctx.md
 ```
 
 **Expected output:**
@@ -34,15 +34,18 @@
 - Grade: The user grade lookup API belongs to the Grade domain
 
 ## 2. Local CTX That Must Be Referenced
-- .ctx/domains/grade/grade-domain.ctx.md
-- .ctx/domains/grade/grade-api.ctx.md
+- ctx/domains/grade/grade-domain.ctx.md
+- ctx/domains/grade/grade-api.ctx.md
 
 ## 3. Whether Global CTX Is Impacted
 - Impacted
-- When applying caching, compliance with the caching-policy.ctx.md rules is required
+- The cached lookup response passes through the response wrapper defined in api-response.ctx.md
 
 ## 4. Points That Cannot Be Judged / Require Additional Confirmation
 - None
+
+## 5. Next-Step Execution Condition
+- This output is judgment material and cannot proceed to the next step until the user's explicit approval command.
 
 ---
 
@@ -51,25 +54,25 @@
 ```
 /ctx-architect-judge
 
-## 작업 요구사항
-- 성능 개선
+## Task Requirements
+- Improve performance
 
-## 제공된 Global CTX
-- 전역 캐싱 정책 참조
+## Provided Global CTX
+- See the global caching policy
 
-## 제공된 Local CTX
-- 등급 관련 규칙 참조
+## Provided Local CTX
+- See the grade-related rules
 ```
 
 **Expected output:**
 
-## Judgment Stopped
+## Judgment Halted
 
-Stop reason:
+Halt reason:
 - The task requirement is abstract (cannot pin down which feature's performance to improve)
 - CTX was provided as descriptive text rather than file paths
 
-Questions that need confirmation:
-1. What is the specific API or feature that is the target of the performance improvement?
-2. Please provide the exact paths of the Global CTX files
-3. Please provide the exact paths of the Local CTX files
+Items that need confirmation:
+1. The specific API or feature that is the target of the performance improvement
+2. The exact paths of the Global CTX files
+3. The exact paths of the Local CTX files

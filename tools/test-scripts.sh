@@ -78,5 +78,32 @@ check "inventory: stdout summary"   "^cycles: orders ↔ payments" "$TMP/inv.out
 expect_rc 4 "inventory: refuses overwrite" python3 "$GI" "$TMP/proj"
 expect_rc 3 "inventory: no graph"          python3 "$GI" "$TMP"
 
+echo "--- check-graphify.sh ---"
+CG="$ROOT/scripts/check-graphify.sh"
+expect_rc 1 "check-graphify: rejects bad --mode" bash "$CG" --mode=nope "$TMP"
+mkdir -p "$TMP/cgproj"
+rc=0; bash "$CG" "$TMP/cgproj" >/dev/null 2>&1 || rc=$?
+if [[ $rc -eq 0 || $rc -eq 2 || $rc -eq 3 ]]; then echo "[PASS] check-graphify: tri-state exit ($rc)"; else echo "[FAIL] check-graphify: unexpected exit $rc"; fails=$((fails+1)); fi
+
+echo "--- harvest-assumptions.sh ---"
+HV="$ROOT/scripts/harvest-assumptions.sh"
+mkdir -p "$TMP/harvest"; printf 'This is ASSUME: a guess\nplain line\n' > "$TMP/harvest/doc.md"
+bash "$HV" "$TMP/harvest" > "$TMP/harvest.out"
+check  "harvest: finds marker"    "ASSUME: a guess" "$TMP/harvest.out"
+bash "$HV" "$TMP/cgproj" > "$TMP/harvest2.out"
+check  "harvest: clean scope"     "(none found" "$TMP/harvest2.out"
+expect_rc 0 "harvest: missing scope is a no-op" bash "$HV" "$TMP/nonexistent-scope"
+
+echo "--- worktree_alloc.py ---"
+expect_rc 0 "worktree_alloc: selftest" python3 "$ROOT/scripts/worktree_alloc.py" --selftest
+
+echo "--- run-logger.ts ---"
+# tsx is fetched by npx on demand; skip (do not fail) where that is unavailable.
+if npx --yes tsx --version >/dev/null 2>&1; then
+  expect_rc 0 "run-logger: selftest" npx --yes tsx "$ROOT/scripts/run-logger.ts" --selftest
+else
+  echo "[SKIP] run-logger: selftest — tsx unavailable (offline?)"
+fi
+
 echo ""
 if (( fails > 0 )); then echo "❌ $fails script check(s) failed"; exit 1; else echo "✅ all script checks passed"; fi

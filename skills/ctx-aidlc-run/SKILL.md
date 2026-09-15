@@ -1,4 +1,5 @@
 ---
+name: ctx-aidlc-run
 description: Run team-ai-workflow requirements/design workflow using project CTX and write outputs to aidlc-docs
 model: opus
 allowed-tools: Read, Write, Edit, Bash
@@ -83,6 +84,7 @@ Skip when no graph is available (greenfield before first implementation); VERIFY
 CORE RULES
 ────────────────────────────────────
 
+- Shared execution protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` (halt format, execution boundary).
 - `team-ai-workflow/` defines HOW to think.
 - Project `ctx/` defines WHAT is already true in this project.
 - `aidlc-docs/aidlc-state.md` and `aidlc-docs/audit.md` are shared project-level files.
@@ -129,32 +131,9 @@ On Phase transition:
 - The new session reads aidlc-state.md first, and references only the previous Phase's outputs.
 - Do not reference the previous session's conversation content.
 
-Session-separation notice message format (appended after the GATE approval message):
-
-```markdown
----
-### 세션 분리 안내
-
-Phase {현재} 작업이 완료되었습니다. 현재 depth level은 **{depth}**입니다.
-
-> {comprehensive: "세션을 분리해 주세요 (필수)." / standard: "세션 분리를 권장합니다." / minimal: "한 세션에서 계속 진행해도 됩니다."}
-
-다음 세션에서 아래를 입력하면 Phase {다음}으로 이어갑니다:
-
-\`\`\`
-/ctx-aidlc-run
-
-Phase {다음}을 시작한다.
-aidlc-state.md를 먼저 읽고 현재 상태를 확인해라.
-
-관련 산출물:
-- {이전 Phase 핵심 산출물 경로 목록}
-\`\`\`
-```
-
-- comprehensive depth: after the notice, **stop responding and wait for the user's next session**.
-- standard depth: after the notice, if the user says "continue", work may proceed in the same session.
-- minimal depth: output only the notice and automatically continue with the next Phase.
+Notice format + post-notice behavior by depth: read
+`{{TEAM_AI_WORKFLOW_DIR}}/templates/session-notice.md` at the moment a
+Phase-ending GATE passes (lazy — do not preload), then emit it filled in.
 
 ────────────────────────────────────
 EXECUTION FLOW
@@ -174,7 +153,7 @@ STEP LIFECYCLE (common to all STEPs) — each line is one `aidlc-log.sh` call (s
 - This pattern is applied automatically to all STEPs. Do not repeat it in individual STEPs.
 
 PHASE ROUTER (load only the current Phase's STEP text):
-- Determine the Phase: the user prompt first ("Phase B를 시작한다"), else `aidlc-state.md` (Current Phase / first unchecked STEP), else Phase A.
+- Determine the Phase: the user prompt first (e.g., "Phase B를 시작한다" — "start Phase B"), else `aidlc-state.md` (Current Phase / first unchecked STEP), else Phase A.
 - Read exactly one file, then execute its STEPs in order:
   - Phase A (STEP 1 ~ GATE-1): `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-aidlc-run/phases/phase-a.md`
   - Phase B (STEP 4 ~ GATE-3): `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-aidlc-run/phases/phase-b.md`

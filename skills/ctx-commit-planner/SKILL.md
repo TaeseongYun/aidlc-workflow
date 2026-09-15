@@ -1,8 +1,7 @@
 ---
 name: ctx-commit-planner
 description: Based on CTX, judge whether changes can be committed and design only the commit structure in meaningful units. Actually writing commits or modifying code is prohibited.
-version: 1.0.0
-command: /ctx-commit-planner
+allowed-tools: Read, Bash, Grep, Glob
 ---
 
 # ctx-commit-planner
@@ -73,19 +72,20 @@ If this CTX does not exist, do NOT proceed with default rules; halt immediately.
 ## Input Format (mandatory)
 
 ```markdown
-## 변경 사항 설명
-- (작업한 내용 요약)
+## Change Description
+- (summary of the work done)
 
-## 변경 파일 목록
-- (파일 경로 목록 또는 diff 요약)
+## Changed File List
+- (file path list or diff summary)
 ```
 
-Input format validation follows the criteria in `skills/_shared/skill-protocol.md`.
+Input format validation follows the criteria in `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
+Backward compatibility: the pre-migration Korean headings (`## 변경 사항 설명`, `## 변경 파일 목록`) are accepted as equivalents.
 
 ### Input Validation (required)
 
-- If `변경 사항 설명` is absent or ambiguous, **halt immediately**
-- If `변경 파일 목록` is absent, **halt immediately**
+- If `Change Description` is absent or ambiguous, **halt immediately**
+- If `Changed File List` is absent, **halt immediately**
 - If the changes and the file list do not match, **halt immediately**
 
 ---
@@ -104,7 +104,7 @@ Input format validation follows the criteria in `skills/_shared/skill-protocol.m
 For each commit, MUST write **all 4** of the following.
 
 #### title
-- Format: `type: (scope) Korean summary`
+- Format: `type: (scope) summary`
 - One line, **within 50 characters**
 - Express only the commit's core intent
 
@@ -128,9 +128,9 @@ For each commit, MUST write **all 4** of the following.
 
 ### 5-3. Language Rules (mandatory)
 
-- Commit messages MUST be in **Korean**
-- **No English words**
-- Exception: type and scope may be in English
+- The commit message language follows the project's `ctx/workflow/commit-workflow.ctx.md`.
+  If the CTX does not specify a language, use **English**.
+- `type` and `scope` are always English
     - type examples: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
     - scope examples: `user`, `auth`, `api`
 
@@ -147,6 +147,7 @@ For each commit, MUST write **all 4** of the following.
 ### Step 2: Load CTX Rules
 
 - Reference `ctx/workflow/commit-workflow.ctx.md`
+- General commit-structuring reference (when project CTX is silent): `{{TEAM_AI_WORKFLOW_DIR}}/common/commit-workflow/SKILLS.md` (index: `{{TEAM_AI_WORKFLOW_DIR}}/common/reference-index.md`)
 - If this CTX does not exist, halt immediately
 
 ### Step 3: Judge Committability
@@ -195,98 +196,98 @@ If **any one** of the following applies, do NOT perform commit design and **outp
 
 ## Output Format (mandatory · fixed - MUST be maintained even during Compaction)
 
-The part actually used as the `git commit` message is each commit's `메시지` block.
+The part actually used as the `git commit` message is each commit's `message` block.
 
 ### When commit design is possible
 
 ```markdown
-커밋 1
-- 순서 이유: [왜 이 커밋이 먼저인지]
+Commit 1
+- Order rationale: [why this commit comes first]
 - include:
-    - 파일/디렉터리/기능
+    - files/directories/features
 - exclude:
-    - 파일/디렉터리/기능
-- 메시지:
-  type: (scope) 한글 요약
+    - files/directories/features
+- message:
+  type: (scope) summary in English
 
-  [배경] 왜 이 변경이 필요했는지 한 문장
+  [Background] one sentence on why this change was needed
 
-  [변경]
-  - 변경 내용 1
-  - 변경 내용 2
+  [Changes]
+  - change 1
+  - change 2
 
-  [제외] 포함하지 않은 것
+  [Excluded] what was not included
 
-커밋 2
-- 순서 이유: [왜 이 커밋이 다음인지]
+Commit 2
+- Order rationale: [why this commit comes next]
 - include:
-    - 파일/디렉터리/기능
+    - files/directories/features
 - exclude:
-    - 파일/디렉터리/기능
-- 메시지:
-  type: (scope) 한글 요약
+    - files/directories/features
+- message:
+  type: (scope) summary in English
 
-  [배경] 왜 이 변경이 필요했는지 한 문장
+  [Background] one sentence on why this change was needed
 
-  [변경]
-  - 변경 내용 1
-  - 변경 내용 2
+  [Changes]
+  - change 1
+  - change 2
 
-  [제외] 포함하지 않은 것
+  [Excluded] what was not included
 ```
 
 Actual output example:
 
 ```markdown
-커밋 1
-- 순서 이유: 쿠폰 도메인 기반이 먼저 있어야 결제 로직 변경이 독립 커밋으로 성립한다
+Commit 1
+- Order rationale: the coupon domain base must exist first for the payment-logic change to stand as an independent commit
 - include:
     - domains/domain-rds/src/main/java/.../coupon/*
     - center/back-end/src/main/java/.../coupon/repository/*
 - exclude:
     - center/back-end/src/main/java/.../payment/*
     - center/back-end/src/main/java/.../refund/*
-    - 테스트 코드 전체
-- 메시지:
-  feat: (coupon) 쿠폰 도메인 기본 구조 추가
+    - all test code
+- message:
+  feat: (coupon) add coupon domain base structure
 
-  [배경] 결제 연동 전에 쿠폰 도메인의 기본 구조를 먼저 분리해야 한다
+  [Background] the coupon domain's base structure must be separated before the payment integration
 
-  [변경]
-  - 쿠폰 엔티티와 저장 구조를 추가한다
-  - 기본 검증 진입점과 저장소 구성을 추가한다
+  [Changes]
+  - add the coupon entity and persistence structure
+  - add the basic validation entry point and repository wiring
 
-  [제외] 결제 적용 로직과 환불 정책 반영은 포함하지 않는다
+  [Excluded] payment-application logic and refund-policy handling are not included
 
-커밋 2
-- 순서 이유: 도메인 구조가 준비된 뒤에야 결제 로직 변경의 책임 범위를 명확히 분리할 수 있다
+Commit 2
+- Order rationale: only after the domain structure is ready can the payment-logic change's responsibility be cleanly separated
 - include:
     - center/back-end/src/main/java/.../payment/*
     - center/back-end/src/main/java/.../coupon/service/*
 - exclude:
-    - admin 환불 처리 코드
-    - notification 관련 코드
-    - 테스트 코드 전체
-- 메시지:
-  feat: (payment) 결제 시 쿠폰 적용 처리 추가
+    - admin refund-handling code
+    - notification-related code
+    - all test code
+- message:
+  feat: (payment) apply coupons during payment
 
-  [배경] 쿠폰 구조만으로는 실제 할인 적용이 되지 않으므로 결제 연동이 필요하다
+  [Background] the coupon structure alone applies no discount; payment integration is required
 
-  [변경]
-  - 결제 금액 계산과 쿠폰 사용 처리 분기를 반영한다
-  - 결제 서비스와 쿠폰 서비스의 연동 지점을 추가한다
+  [Changes]
+  - apply the payment-amount calculation and coupon-usage branch
+  - add the integration point between the payment and coupon services
 
-  [제외] 환불 복원 정책과 관리자 화면 변경은 포함하지 않는다
+  [Excluded] refund-restoration policy and admin-screen changes are not included
 ```
 
 The example above is not an explanatory sentence but an example of the output format this Skill must follow as-is.
 
 ### When commit design is halted
 
-## 커밋 설계 중단
+## Commit Design Halted
 
-- 중단 사유: (구체적인 중단 조건)
-- 문제 지점: (어떤 부분에서 문제가 발생했는지)
+- Halt reason: (the specific halt condition)
+- Problem point: (where the problem occurred)
 
 **On halt:**
 - Do NOT output the commit list
@@ -297,9 +298,11 @@ The example above is not an explanatory sentence but an example of the output fo
 
 ## Execution Guidelines
 
-Follow the standard execution guidelines in `skills/_shared/skill-protocol.md`. Additional rules:
+Follow the standard execution guidelines in `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - Load the referenced CTX and check the rules
 - Check whether any halt condition applies
 - Separate by meaningful unit according to the commit separation rules
 - Per the commit message rules, write the order reason, include, exclude, and message in full
 - Do a final review of compliance with the language rules
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-commit-planner/USAGE.md`

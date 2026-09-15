@@ -24,14 +24,14 @@ STEP 6.5 Rules:
 - Module/component structure MUST map back to unit-of-work IDs (UOW-N).
 - Interaction flow diagrams follow `diagram-standards.md`. Include only when the flow is not self-evident.
 - Non-functional design covers only items relevant to this feature per `nfr-checklist.md`. Omit irrelevant items.
-- Open Items section lists anything that cannot be resolved without additional information. If none, write "없음".
+- Open Items section lists anything that cannot be resolved without additional information. If none, write "None".
 - Do NOT generate implementation code. This step produces design artifacts only.
 - For brownfield projects, reference existing code patterns from `ctx/` and align new design with established conventions.
 
 STEP 6.5 Section Skip Rules:
-- API Specification: skip if no API changes. Write "해당 없음".
-- Data Model: skip if no DB changes. Write "해당 없음".
-- Interaction Flow: skip if flow is self-evident from the module structure. Write "해당 없음".
+- API Specification: skip if no API changes. Write "Not applicable".
+- Data Model: skip if no DB changes. Write "Not applicable".
+- Interaction Flow: skip if flow is self-evident from the module structure. Write "Not applicable".
 - All other sections are mandatory.
 
 GATE-3.5. Technical Design Review
@@ -58,11 +58,11 @@ GATE-4. Infrastructure Design Review (conditional)
 STEP 7. Calculate Readiness Score
 - Calculate the score per `core/readiness-score.md`.
 - Base score is across 6 areas (total 100).
-- If GATE-2.5 was activated, add "사용자 스토리 품질" area (max 10 bonus points).
-- If GATE-2.7 was activated, add "시스템 구조 설계" area (max 10 bonus points).
+- If GATE-2.5 was activated, add a "User Story Quality" area (max 10 bonus points).
+- If GATE-2.7 was activated, add a "System Structure Design" area (max 10 bonus points).
 - Record the score and per-area breakdown in `status.md` Readiness Score table.
-- If BLOCK questions remain, "승인 항목 해결" area is capped at 5 points.
-- **Confidence warning marks**: For each scoring area, if answers with `[확신: 추정]` or `[확신: AI추천]` affect that area, add a warning mark (⚠) next to the area score. List affected questions in "불확실 영역" section of `status.md`.
+- If BLOCK questions remain, the "Resolution of approval items" area is capped at 5 points.
+- **Confidence warning marks**: For each scoring area, if answers with `[Confidence: Estimated]` or `[Confidence: AI-Recommended]` affect that area, add a warning mark (⚠) next to the area score. List affected questions in the "Uncertain Areas" section of `status.md`.
 - Calculate threshold based on actual total: READY >= 80%, CONDITIONAL >= 60%.
 - Set status based on score:
   - 80%+: `approved`

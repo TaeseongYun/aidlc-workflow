@@ -281,7 +281,7 @@ same schema component; a mapper between two classes that model the same API type
 
 ## Halt conditions
 
-Stop and surface a halt (per [skill-protocol.md](../../../_shared/skill-protocol.md)) when:
+Stop and surface a halt (per `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`) when:
 
 - The canonical schema file cannot be located (not in the repo, no submodule pointer, no registry
   reference). Do not proceed by inferring types from sample responses.

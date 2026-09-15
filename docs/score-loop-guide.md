@@ -120,3 +120,7 @@ A walkthrough example that carries one feature all the way from `/ctx-aidlc-run`
   - `requirements.md` / `requirement-verification-questions.md` / `unit-of-work.md` / `status.md` — `/ctx-aidlc-run` outputs
   - `dependency-check.md` — score-loop scoring input + Score History (75→82→92)
   - `LOOP-RUN.md` — per-round progress + stall/false-completion counterexamples
+
+---
+
+Background PRD: [docs/prd/pm-dependency-score-loop.md](prd/pm-dependency-score-loop.md)

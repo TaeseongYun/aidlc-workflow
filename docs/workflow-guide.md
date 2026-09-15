@@ -98,7 +98,7 @@ Related outputs:
 ### 2. Human answer/approval stage
 - Purpose:
   - Finalize items that a human must decide on, such as policy, UX, settlement, and refunds
-  - Review and approve outputs at each Gate (GATE-1 ~ GATE-5)
+  - Review and approve outputs at each Gate (GATE-0 ~ GATE-5, including conditional half-gates)
 - Input:
   - `aidlc-docs/features/<feature-slug>/requirement-verification-questions.md`
   - The outputs to be reviewed at each Gate
@@ -338,3 +338,8 @@ Feature:
 - Users must be able to register requests, check status, and confirm results
 - Operators must manage the approval policy and processing status
 ```
+
+## See also
+
+- Common engineering reference (per-topic guides + procedures): `common/reference-index.md`
+- Prioritization frameworks (JTBD, RICE, MoSCoW): `common/frameworks/`

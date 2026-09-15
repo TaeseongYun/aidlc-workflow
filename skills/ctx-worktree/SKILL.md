@@ -20,6 +20,7 @@ requests that separate operation.
 
 ## Guardrails
 
+- Shared execution protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` (halt format, execution boundary).
 - Always run `plan` before `create` and show its complete target list.
 - Never run `create` without explicit user approval of that target list.
 - Treat approval as valid only for the shown roadmap, base directory, and targets.

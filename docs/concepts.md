@@ -109,3 +109,23 @@ For a raw request, add:
         └── <feature-slug>/
             └── status.md
 ```
+
+## GATE: Human Approval Checkpoints
+
+A GATE is a hard stop where a human reviews the artifacts produced so far and explicitly
+approves or requests changes — the workflow never auto-passes one. Nine gates exist
+(GATE-0, 1, 2, 2.5, 2.7, 3, 3.5, 4, 5); 2.5 / 2.7 / 3.5 / 4 / 5 fire only when their
+trigger condition applies (personas, components, M/L technical design, infrastructure,
+build instructions). GATE-3 is the implementation-approval gate: `/ctx-domain-exec`,
+`/ctx-score-loop`, and OMC/Ouroboros handoffs all require it. The single source of
+truth for triggers, review targets, and pass conditions is
+[common/stage-gate-rules.md](../common/stage-gate-rules.md); the glossary in
+[terminology.md](terminology.md) lists all nine with one-line definitions.
+
+## Common Engineering Reference
+
+Stack-independent engineering guides (architecture, testing, commit/branch workflow,
+code review, CI/CD, releases, dependency management, incident postmortems) live under
+`common/<topic>/` — a deep `reference/guide.md` plus an actionable `SKILLS.md` per topic.
+Index: [common/reference-index.md](../common/reference-index.md).
+Precedence stays: project `ctx/` > platform guidance > common guides > general knowledge.

@@ -1,8 +1,7 @@
 ---
 name: ctx-domain-exec
-description: Judge the affected domains and reference CTX scope before development work. Writing code / proposing designs / speculation are forbidden.
-version: 1.1.0
-command: /ctx-domain-exec
+description: Implement approved requirements into code strictly within the provided CTX scope. Domain judgment, design proposals, and CTX creation/changes are forbidden.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # ctx-domain-exec
@@ -62,30 +61,31 @@ This Skill must operate in only **one of the following execution modes**.
 
 ---
 
-Input format validation follows the `skills/_shared/skill-protocol.md` standard.
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
+Backward compatibility: the pre-migration Korean headings (`## 실행 모드`, `## Architect 판단 결과`, `## 작업 요구사항`, `## 사용자 보증 선언 (필수)`, `## Global CTX (강제 참조)`, `## Local CTX (선택 참조)`) are accepted as equivalents.
 
 ## Input Format - Mode A: ARCHITECT_CONFIRMED
 
 ```markdown
-## 실행 모드
+## Execution Mode
 - ARCHITECT_CONFIRMED
 
-## Architect 판단 결과
+## Architect Judgment Result
 
-### 1. 영향 도메인 목록
-- (도메인명과 근거)
+### 1. Affected Domain List
+- (domain names and rationale)
 
-### 2. 반드시 참조해야 할 Local CTX
-- (CTX 파일 경로 목록)
+### 2. Local CTX That Must Be Referenced
+- (CTX file path list)
 
-### 3. Global CTX 영향 여부
-- (영향 있음/없음 및 해당 CTX 경로)
+### 3. Whether Global CTX Is Impacted
+- (impacted / not impacted, and the relevant CTX paths)
 
-### 4. 판단 불가 / 추가 확인 필요 지점
-- 없음
+### 4. Points That Cannot Be Judged / Require Additional Confirmation
+- None
 
-## 작업 요구사항
-- (구체적인 구현 요구사항)
+## Task Requirements
+- (concrete implementation requirements)
 ```
 
 ### Input Validation - Mode A
@@ -99,31 +99,31 @@ Input format validation follows the `skills/_shared/skill-protocol.md` standard.
 ## Input Format - Mode B: EXECUTOR_ONLY
 
 ```markdown
-## 실행 모드
+## Execution Mode
 - EXECUTOR_ONLY
 
-## 작업 요구사항
-- (구체적인 구현 요구사항)
+## Task Requirements
+- (concrete implementation requirements)
 
-## 사용자 보증 선언 (필수)
-- 이 작업은 단일 도메인 범위임을 보증한다
-- 참조할 Local CTX를 직접 명시한다
+## User Guarantee Declaration (required)
+- I guarantee this task is limited to a single domain scope
+- I explicitly specify the Local CTX to reference
 
-## Global CTX (강제 참조)
+## Global CTX (forced reference)
 - ctx/back-end/api/api-design.ctx.md
 - ctx/back-end/api/api-response.ctx.md
 - ctx/back-end/api/error-handling.ctx.md
-- (기타 프로젝트 Global CTX 전체)
+- (all other project Global CTX)
 
-## Local CTX (선택 참조)
-- (사용자가 명시한 CTX 파일 경로 목록)
+## Local CTX (optional reference)
+- (list of CTX file paths specified by the user)
 ```
 
 ### Input Validation - Mode B
 
 - If any one of the guarantee declarations is missing, **stop immediately**
 - If the Global CTX section is missing, **stop immediately**
-- If the user does not explicitly declare "No Local CTX", stop immediately
+- If the Local CTX section neither lists file paths nor explicitly declares "No Local CTX", **stop immediately**
 
 ---
 
@@ -190,12 +190,14 @@ In EXECUTOR_ONLY mode, the following section must be added.
 - Rules beyond the input CTX appear to be needed
 - In EXECUTOR_ONLY mode, a possibility of multiple domains is detected
 
-On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
 
 ---
 
 ## Execution Guidelines
 
-Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. Additional rules:
+Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - Check the input validation rules according to the execution mode
 - EXECUTOR_ONLY mode must include the judgment-omitted notice
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-domain-exec/USAGE.md`

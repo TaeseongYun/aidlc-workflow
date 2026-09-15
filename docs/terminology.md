@@ -41,10 +41,17 @@ These are the definitions of the core terms used in this project.
 
 | Term | Definition |
 |------|------------|
+| `GATE-0` | _roadmap review. Triggered only for a multi-feature `prepared-requirement` (Phase 0). |
 | `GATE-1` | planning-draft review. Triggered only for a `raw-request`. |
 | `GATE-2` | requirements + questions review. Always triggered. |
+| `GATE-2.5` | personas + stories review. Triggered when User Scenarios >= 3 or a new user type exists. |
+| `GATE-2.7` | application-design review. Triggered when UOW >= 3 is expected or new components are created. |
 | `GATE-3` | unit-of-work review. Always triggered. |
 | `GATE-3.5` | technical-design review. Triggered only when M/L-sized units exist. |
+| `GATE-4` | infrastructure-design review. Triggered when infrastructure changes are needed. |
+| `GATE-5` | build/test-instructions review. Triggered when M/L-sized units exist. |
+
+Full trigger/pass conditions: `common/stage-gate-rules.md` (single source of truth).
 
 ## Readiness Score
 
@@ -53,6 +60,14 @@ These are the definitions of the core terms used in this project.
 | `READY` (80+) | Ready to implement. |
 | `CONDITIONAL` (60-79) | Can proceed conditionally under ASSUME. Rework risk exists. |
 | `NOT_READY` (below 60) | Cannot implement. Questions must be resolved. |
+
+## Other scores
+
+| Term | Definition |
+|------|------------|
+| Dependency Score | Post-implementation 4-axis quality score iterated by `/ctx-score-loop`; complete when it exceeds 85 (`core/dependency-score.md`). |
+| Hallucination-Free Score | `/ctx-hallucination-audit` loop score; the loop repeats until it reaches at least 87 (`docs/hallucination-guard.md`). |
+| Sync Score | Upstream sync quality in `/ctx-aidlc-sync`; a PR opens only above 90. |
 
 ## Size
 

@@ -1,8 +1,7 @@
 ---
 name: ctx-reviewer
 description: Judge whether implemented code violates CTX and identify recurring rules. Implementing, modifying, or proposing designs is forbidden.
-version: 1.0.0
-command: /ctx-reviewer
+allowed-tools: Read, Bash, Grep, Glob
 ---
 
 # ctx-reviewer
@@ -45,21 +44,24 @@ This Skill **never performs** the following.
 ## Input Format (fixed)
 
 ```markdown
-## 참조된 Global CTX
-- (CTX 파일 경로 목록)
+## Referenced Global CTX
+- (CTX file path list)
 
-## 참조된 Local CTX
-- (CTX 파일 경로 목록)
+## Referenced Local CTX
+- (CTX file path list)
 
-## 리뷰 대상 코드
+## Review Target Code
 ```java
-// 구현된 코드
+// implemented code
 ```
-Input format validation follows the `skills/_shared/skill-protocol.md` standard.
 
-## Executor execution mode
+## Executor Execution Mode
 - ARCHITECT_CONFIRMED | EXECUTOR_ONLY
 ```
+
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
+Backward compatibility: the pre-migration Korean headings (`## 참조된 Global CTX`, `## 참조된 Local CTX`,
+`## 리뷰 대상 코드`, `## Executor 실행 모드`) are accepted as equivalents.
 
 ### Input Validation
 
@@ -76,6 +78,7 @@ This Skill must judge only in the following order.
 ### Step 0: Judge whether there is a CTX violation first (required)
 
 - First judge whether any one of the referenced Global CTX or Local CTX has been violated.
+- General review-dimension reference (when project CTX is silent): `{{TEAM_AI_WORKFLOW_DIR}}/common/code-review/SKILLS.md` (index: `{{TEAM_AI_WORKFLOW_DIR}}/common/reference-index.md`)
 - If there is a violation:
   - Quote the violated CTX rule sentence verbatim
   - State only in which code the violation occurred
@@ -145,12 +148,14 @@ The output must follow the format and order below.
 - Rule A → Global CTX | Local CTX | Do not reflect
 - (If none, "Not applicable")
 
-## 4. CTX Reflection Proposal
-- Target file: ...
+## 4. CTX Reflection Proposal List
+### Proposal 1
+- Target file path: ...
 - Insertion location: ...
 - Sentence to add: "..."
 - AI malfunction if omitted: ...
-- (If none, "None")
+
+(One `### Proposal N` block per proposal — this exact structure is `ctx-updater`'s enforced input. If none, "None")
 
 **Notes:**
 - Do not change the output order
@@ -176,11 +181,13 @@ When the Executor execution mode is EXECUTOR_ONLY, the following section must be
 - The review target code is only partially provided
 - The Executor execution mode is not specified
 
-On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
 
 ---
 
 ## Execution Guidelines
 
-Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. Additional rules:
+Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - EXECUTOR_ONLY mode must include the warning mark section
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-reviewer/USAGE.md`

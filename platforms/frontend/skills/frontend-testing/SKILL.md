@@ -242,4 +242,4 @@ Items requiring clarification:
 - MSW (Mock Service Worker): https://mswjs.io/docs/
 - Vitest: https://vitest.dev/
 - Playwright: https://playwright.dev/docs/intro
-- Skill protocol: [../../../skills/_shared/skill-protocol.md](../../../skills/_shared/skill-protocol.md)
+- Skill protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`

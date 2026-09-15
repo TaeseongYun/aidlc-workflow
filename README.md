@@ -101,7 +101,9 @@ Each feature's requirements, questions, Units of Work, and technical design are 
 - **GATE-0**: Multi-feature roadmap approval
 - **GATE-1**: Initial requirements clarification approval
 - **GATE-2, 3**: Final requirements and design approval
+- **GATE-4**: Infrastructure design approval (conditional)
 - **GATE-5**: Confirmation of implementation readiness
+- Conditional half-gates **2.5 / 2.7 / 3.5** fire only when their trigger applies (personas, components, M/L technical design) — full list in [common/stage-gate-rules.md](common/stage-gate-rules.md)
 
 ### Unit of Work: The Unit of Implementation
 
@@ -109,9 +111,10 @@ Decompose requirements into work units of S/M/L size. Each UOW specifies Accepta
 
 ### Platform Guidance: Per-Platform Architecture Baseline
 
-`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp) captures the architecture baseline the agent must load before designing (`/ctx-aidlc-run` STEP 6.5) or implementing (`/ctx-domain-exec`) on that platform. Declare the platform in `ctx/project-profile.ctx.md`; precedence is project `ctx/` > platform guidance > general knowledge. Each platform also ships detailed per-platform skills — figma-to-code, a vibe-coding security guard, testing, design-system, accessibility, i18n, observability, and contract-codegen — that auto-load when you touch the relevant files. The documents are self-contained markdown, so external repos can consume them via the installed path or raw GitHub URL — see [platforms/README.md](platforms/README.md).
+`platforms/<platform>/guidance.md` (android, ios, backend, frontend, flutter, rn, kmp) captures the architecture baseline the agent must load before designing (`/ctx-aidlc-run` STEP 6.5) or implementing (`/ctx-domain-exec`) on that platform. Declare the platform in `ctx/project-profile.ctx.md`; precedence is project `ctx/` > platform guidance > general knowledge. Each platform also ships detailed per-platform skills — figma-to-code, a vibe-coding security guard, testing, design-system, accessibility, i18n, observability, and contract-codegen. Platform skills are **opt-in**: install the ones for your stack with `bash scripts/install-skills.sh --platforms=android,ios` (or `--platforms=all`). The selection persists across plain re-runs; remove with `--platforms=none`. The documents are self-contained markdown, so external repos can also consume them via the installed path or raw GitHub URL — see [platforms/README.md](platforms/README.md).
 
 For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts.md).
+
 
 ---
 
@@ -131,6 +134,8 @@ For a detailed explanation of the concepts, see [docs/concepts.md](docs/concepts
 | `/ctx-commit-planner` | Design commit structure |
 | `/ctx-score-loop` | Automatic iterative scoring on dependency + 4 axes after implementation (complete when the score exceeds 85) |
 | `/ctx-hallucination-audit` | Hallucination Guard audit loop. Verify dev facts with graphify (codegraph fallback), isolate refuted claims, and repeat until the score reaches at least 87 |
+| `/ctx-aidlc-sync` | Port AWS AI-DLC upstream changes into this workflow repo (PRs only above a 90-point sync score) |
+| `/mobile-webview-bridge` | JS ↔ native WebView bridge for Android/iOS/KMP/RN/Flutter with one shared contract-first protocol (generator + guard modes) |
 
 > **Hallucination Guard (always on).** It verifies dev facts such as paths,
 > symbols, APIs, configuration keys, and versions against the code graph so AI
@@ -209,7 +214,7 @@ aidlc-workflow/
 │   ├── ctx-aidlc-run/
 │   ├── ctx-score-loop/
 │   ├── ctx-hallucination-audit/
-│   └── ... (12 skills)
+│   └── ... (one directory per skill — see the Skill List table)
 ├── tools/                      # Validation tools (evaluator, skill-validator)
 ├── scripts/                    # Installation and initialization
 │   ├── install-skills.sh       # Global skill installation
@@ -224,8 +229,8 @@ aidlc-workflow/
 │   ├── brownfield-guide.md
 │   ├── faq.md
 │   └── changelog/              # Per-version change history
-├── examples/                   # References (golden baselines, multi-feature coordination)
-├── QUICKSTART.md               # Korean quick start
+├── examples/                   # Golden baselines (CI-validated), filled outputs, score-loop walkthrough
+├── QUICKSTART.md               # Quick start guide
 └── README.md                   # This file
 ```
 
@@ -249,6 +254,8 @@ aidlc-docs/
     └── infrastructure-design.md (conditional)
 ```
 
+Worked examples: a fully-filled artifact set in [examples/filled-outputs/](examples/filled-outputs/), and a complete project layout in [examples/project-layout-example.md](examples/project-layout-example.md).
+
 ---
 
 ## Contributing
@@ -260,7 +267,7 @@ This workflow is a standard shared by all projects. Please propose improvements.
 1. **Submit issues**: use GitHub Issues for feature requests or bug reports
 2. **Submit PRs**: use a Pull Request for doc or skill improvements
 3. **How to make changes**:
-   - Edit only in the `skills/` directory
+   - Edit the source directories (`skills/`, `platforms/`, `common/`, `core/`, `docs/`, `templates/`, `extensions/`, `examples/`) — never the installed copies
    - Run `bash scripts/install-skills.sh` after editing
    - Use English for commit messages
 
@@ -276,8 +283,8 @@ Major updates:
 - **2026-09-14**: `mobile-webview-bridge` skill — JS ↔ native WebView bridge for Android/iOS/KMP/RN/Flutter with one shared contract-first protocol (envelope, handshake, security, threading, lifecycle), per-platform reference bindings, generator/guard modes, and an offline envelope validator ([details](docs/changelog/2026-09-14-mobile-webview-bridge-skill.md))
 - **2026-09-06**: Run-result logger — `scripts/run-logger.ts` records typed results to `aidlc-docs/run-log.ndjson` and a graphify-ingestible `run-log.md` mirror, so past outcomes are retrievable via `graphify query` (or local `recall` in degraded mode); wired into score-loop, hallucination-audit, aidlc-run, and session entry ([details](docs/changelog/2026-09-06-run-logger-and-graphify-rag.md))
 - **2026-09-03**: `graphify` is now a soft dependency — a missing tool degrades to grep/Read verification instead of blocking setup; added CI (`validate-skills.sh` + golden baselines) and made `validate-questions.sh` accept English field labels ([details](docs/changelog/2026-09-03-graphify-soft-dependency-and-ci.md))
-- **2026-08-27**: Added KMP (Kotlin Multiplatform) as the 7th platform — guidance + 13 skills (figma-to-kmp, vibe-coding security guard, testing, and more)
-- **2026-08-26**: Per-platform skill families across platforms (testing, design-system, accessibility, contract-codegen, observability, i18n)
+- **2026-08-27**: Added KMP (Kotlin Multiplatform) as the 7th platform — guidance + 13 skills (figma-to-kmp, vibe-coding security guard, testing, and more) ([details](docs/changelog/2026-08-27-kmp-platform.md))
+- **2026-08-26**: Per-platform skill families across platforms (testing, design-system, accessibility, contract-codegen, observability, i18n) ([details](docs/changelog/2026-08-26-platform-skill-families.md))
 - **2026-04-29**: Added the Phase 0 Roadmapping skill, formalized the multi-feature collaboration workflow
 - **2026-04-22**: Overconfidence prevention, strengthened verification, evaluation framework
 - **2026-04-14**: Lazy Loading + session separation as the default model, token diet

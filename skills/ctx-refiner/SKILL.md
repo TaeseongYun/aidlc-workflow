@@ -1,8 +1,7 @@
 ---
 name: ctx-refiner
 description: Refine CTX documents to leave only the minimal set of execution rules that does not trigger AI malfunction. Creating, expanding, or proposing designs for rules is forbidden.
-version: 1.0.0
-command: /ctx-refiner
+allowed-tools: Read, Grep, Glob
 ---
 
 # ctx-refiner
@@ -58,26 +57,27 @@ This Skill **never performs** the following.
 ## Input Format (enforced)
 
 ```markdown
-## 정제 대상 CTX
-- 파일 경로:
+## Refinement Target CTX
+- File paths:
     - ctx/...
     - ctx/...
 
-## 정제 목적
-- (예: 개발 전 최종 규칙 집합 생성)
+## Refinement Purpose
+- (e.g., generate the final rule set before development)
 
-## 적용 범위
-- Global CTX | Local CTX | 혼합
+## Applicable Scope
+- Global CTX | Local CTX | Mixed
 ```
 
-Input format validation follows the `skills/_shared/skill-protocol.md` standard.
+Input format validation follows the `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` standard.
+Backward compatibility: the pre-migration Korean headings (`## 정제 대상 CTX`, `파일 경로`, `## 정제 목적`, `## 적용 범위`) are accepted as equivalents.
 
 ### Input Validation (required)
 
-- If the `정제 대상 CTX` section is missing, **stop immediately**
-- If `파일 경로` is empty, **stop immediately**
-- If `정제 목적` is missing, **stop immediately**
-- If `적용 범위` is missing, **stop immediately**
+- If the `Refinement Target CTX` section is missing, **stop immediately**
+- If `File paths` is empty, **stop immediately**
+- If `Refinement Purpose` is missing, **stop immediately**
+- If `Applicable Scope` is missing, **stop immediately**
 
 ---
 
@@ -174,15 +174,15 @@ The output must follow the order below.
 ### 6-1. List of Deleted Rules (required)
 
 ```markdown
-## 삭제된 규칙
+## Deleted Rules
 
-### 삭제 1
-- 규칙 문장: "..."
-- 삭제 사유: AI 오작동과 직접 연결되지 않음 | 중복 | 애매함
+### Deletion 1
+- Rule sentence: "..."
+- Deletion reason: not directly connected to AI malfunction | duplicate | ambiguous
 
-### 삭제 2
-- 규칙 문장: "..."
-- 삭제 사유: ...
+### Deletion 2
+- Rule sentence: "..."
+- Deletion reason: ...
 ```
 
 If there are no deleted rules, state "None".
@@ -190,14 +190,14 @@ If there are no deleted rules, state "None".
 ### 6-2. List of Merged Rules (only if any exist)
 
 ```markdown
-## 병합된 규칙
+## Merged Rules
 
-### 병합 1
-- 병합 전:
-    - 규칙 A: "..."
-    - 규칙 B: "..."
-- 병합 후:
-    - 규칙 C: "..."
+### Merge 1
+- Before merge:
+    - Rule A: "..."
+    - Rule B: "..."
+- After merge:
+    - Rule C: "..."
 ```
 
 If there are no merged rules, state "None".
@@ -205,15 +205,15 @@ If there are no merged rules, state "None".
 ### 6-3. Final CTX (maintained by section)
 
 ```markdown
-## 최종 CTX
+## Final CTX
 
-### [섹션명]
+### [Section name]
 
-- 규칙: "..."
-    - 이 규칙이 없으면 AI는: (한 줄, 구체적인 실패 형태)
+- Rule: "..."
+    - Without this rule the AI would: (one line, concrete failure form)
 
-- 규칙: "..."
-    - 이 규칙이 없으면 AI는: (한 줄, 구체적인 실패 형태)
+- Rule: "..."
+    - Without this rule the AI would: (one line, concrete failure form)
 ```
 
 **Prohibitions:**
@@ -224,13 +224,13 @@ If there are no merged rules, state "None".
 ### 6-4. Refinement Result Judgment (required)
 
 ```markdown
-## 정제 판정
+## Refinement Judgment
 
-- 정제 전 규칙 수: N
-- 정제 후 규칙 수: M
-- 감소율: X%
-- 판정: 성공 | 실패
-- 사유: (왜 성공 또는 실패인지)
+- Rule count before refinement: N
+- Rule count after refinement: M
+- Reduction rate: X%
+- Judgment: success | failure
+- Reason: (why it succeeded or failed)
 ```
 
 ---
@@ -248,14 +248,14 @@ If **even one** of the following applies, refinement fails.
 ### Output on Failure (enforced)
 
 ```markdown
-## 정제 실패
+## Refinement Failed
 
-- 실패 사유:
-    - (구체적인 실패 조건 명시)
+- Failure reason:
+    - (state the specific failure condition)
 
-- 정제 전 규칙 수: N
-- 현재 규칙 수: M
-- 감소율: X%
+- Rule count before refinement: N
+- Current rule count: M
+- Reduction rate: X%
 ```
 
 **On failure:**
@@ -272,14 +272,16 @@ If **even one** of the following applies, refinement fails.
 - The refinement purpose is not specified
 - The application scope is not specified
 
-On stopping, the output follows the standard format of `skills/_shared/skill-protocol.md`.
+On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
 
 ---
 
 ## Execution Guidelines
 
-Follows the standard execution guidelines of `skills/_shared/skill-protocol.md`. Additional rules:
+Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - Apply Q1, Q2, Q3 to each rule to judge deletion/retention
 - Apply the merge rules strictly
 - Verify the failure conditions
 - On failure, do not output the final CTX
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-refiner/USAGE.md`

@@ -3,14 +3,15 @@ CORE RULES, INPUT LOADING STRATEGY and OUTPUT CONTRACT of SKILL.md apply to ever
 
 STEP 4. Extract requirement gaps
 - Apply `question-rules.md` format + full `question-governance.md` rules + `no-implicit-decisions.md`.
+- Structure the question file on `{{TEAM_AI_WORKFLOW_DIR}}/templates/requirement-verification-questions.md`.
 - Convert missing decisions into answerable questions.
 
 STEP 4 core rules:
 - Pin the Request Anchor (captured in STEP 2) at the top of `requirement-verification-questions.md`.
 - Every question MUST be assigned a P0/P1/P2 priority, type (policy/domain/scope), and scope tag.
 - `⚠️ RISK:` tags collected in STEP 1-C auto-promote related questions to P0. External integrations are minimum P1.
-- Question budget: comply with the per-depth-level cap. P2 is not counted in the budget; record it in the "AI 자동 결정 (P2)" section.
-- When over budget, sort by importance (P0+policy → P0+domain → P1+policy → P1+domain → P1+scope). The overflow goes to the "추가 질문 (다음 라운드)" section.
+- Question budget: comply with the per-depth-level cap. P2 is not counted in the budget; record it in the "AI Automatic Decisions (P2)" section.
+- When over budget, sort by importance (P0+policy → P0+domain → P1+policy → P1+domain → P1+scope). The overflow goes to the "Additional Questions (Next Round)" section.
 - Scope Drift Detection: do not generate questions outside the Request Anchor scope.
 - Include a summary table at the top of the question file.
 - Extension opt-in questions are handled separately, outside the budget.
@@ -23,6 +24,7 @@ STEP 4 per-classification mandatory rules:
   2. If it is still 0, get explicit confirmation from the user "no verification questions — whether GATE-2 may proceed as-is", record the answer in audit.md, then proceed.
 
 STEP 5. Write requirements
+- Structure the file on `{{TEAM_AI_WORKFLOW_DIR}}/templates/requirements.md`.
 - Write `requirements.md` with at least:
   - Goal
   - Background
@@ -42,7 +44,7 @@ STEP 5-V. Content Validation (automatic, before GATE-2)
 - Check for:
   - Logical contradictions between answers (e.g., "no refunds" in Q1 but "14-day refund window" in Q5).
   - Scope contradictions (e.g., "single component" but "full architecture change").
-  - Confidence-content mismatch (e.g., `[확신: 확실]` with uncertain language like "아마", "~일 수도").
+  - Confidence-content mismatch (e.g., `[Confidence: Certain]` with uncertain language like "아마" ("probably") or "~일 수도" ("might be")).
 - If contradictions found:
   1. List each contradiction with specific question references.
   2. Generate resolution questions (counted within question budget).
@@ -52,12 +54,12 @@ STEP 5-V. Content Validation (automatic, before GATE-2)
 
 GATE-2. Requirements Review
 - Use the `stage-gate-rules.md` approval message format. Include the Progress Line.
-- Specify unanswered BLOCK questions and `[확신: 추정/AI추천]` items in the gate message.
+- Specify unanswered BLOCK questions and `[Confidence: Estimated/AI-Recommended]` items in the gate message.
 - Do not proceed before user approval. On a change request, fix and re-present.
 - GATE-2 cannot be skipped regardless of request classification (`raw-request`/`prepared-requirement`/`change-on-existing-feature`). Direct entry into STEP 6 (UOW) is not allowed.
 - Do not pass if even 1 unanswered BLOCK question remains.
 - After GATE-2 approval:
-  - If security-baseline extension is enabled, create `extensions/security-baseline.md` using the extension template.
+  - If security-baseline extension is enabled, create `extensions/security/security-baseline.md` using the extension template.
   - Evaluate STEP 5.5 condition before proceeding to STEP 6.
 
 STEP 5.5. User Stories (conditional)

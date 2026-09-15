@@ -61,7 +61,7 @@ Any entry in the ledger's **Quarantine (REFUTED)** section:
 ## Rule 3 — Markers are unverified, not facts
 
 These workflow markers are all **unverified guesses**. Never present them as settled fact:
-`⚠️ UNCERTAIN: …`, `[확신: 추정]`, `[확신: AI추천]`, `⚠️ RISK:`, `⚠️ TODO:`. They are the raw input
+`⚠️ UNCERTAIN: …`, `[Confidence: Estimated]`, `[Confidence: AI-Recommended]` (legacy `[확신: 추정]` / `[확신: AI추천]`), `⚠️ RISK:`, `⚠️ TODO:`. They are the raw input
 for the audit loop (Rule 4). Do not delete them, and do not promote them to fact without user
 confirmation or a verified source.
 

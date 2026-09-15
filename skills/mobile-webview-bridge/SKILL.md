@@ -14,6 +14,7 @@ description: >
   native, or on "웹뷰 브리지 만들어줘", "JS ↔ 네이티브 통신", "웹뷰에서 네이티브 호출",
   "브리지 보안 리뷰", "webview bridge", "review my JS bridge". NOT for building
   the web page's UI, native networking unrelated to a WebView, or deep links.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 ROLE: WEBVIEW_BRIDGE_ENGINEER
@@ -180,6 +181,19 @@ thread on Android and iOS. A handler never blocks the delivery thread.
 
 Each platform reference appends only platform-specific checklist items — the
 core items above are not repeated there.
+
+## Guardrails & halt conditions
+
+Follows the shared execution protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` (halt format, execution boundary).
+
+- Never relax §1 contract-first or §4 security baseline items — they are absolute prohibitions, not preferences.
+- Generator mode writes bridge code only; never edit unrelated app code, build config, or CI.
+- Halt (protocol halt format) when: the platform cannot be detected and the user has not named one; the contract template is missing required fields; or a guard-mode fix would require weakening a [Critical] §9 item.
+
+## Output format
+
+- Generator mode: the filled contract file, per-platform bridge code for exactly one detected platform, and envelope examples self-checked with `scripts/validate_envelope.py`.
+- Guard mode: findings ordered by §9 severity, each with file:line evidence and the violated section (§N).
 
 ## References
 

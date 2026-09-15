@@ -1,4 +1,5 @@
 ---
+name: ctx-score-loop
 description: Dependency-aware score loop — implement once, then auto-iterate 4-axis scoring until >85 or stalled
 model: opus
 allowed-tools: Read, Write, Edit, Bash, Skill
@@ -17,6 +18,7 @@ Framework root: `{{TEAM_AI_WORKFLOW_DIR}}`
 - Cap overrides: `max_rounds`, `max_minutes` (optional, default 10/30)
 
 ## Hard Preconditions
+- Shared execution protocol: `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md` (halt format, execution boundary).
 - Run only on features that have passed GATE-3 (implementation approval). This loop **does NOT auto-pass GATEs.**
 - Scoring criteria: `{{TEAM_AI_WORKFLOW_DIR}}/core/dependency-score.md`
 - Scoring procedure: `{{TEAM_AI_WORKFLOW_DIR}}/core/dependency-score-eval.md`
