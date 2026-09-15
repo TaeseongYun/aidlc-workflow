@@ -159,7 +159,7 @@ Stop reason:
 - The Global CTX section is missing in EXECUTOR_ONLY mode
 - Global CTX must always be referenced and cannot be omitted
 
-Questions that need confirmation:
+Items that need confirmation:
 1. Please add the Global CTX (forced reference) section and request again
 2. Please include the project's Global CTX list
 
@@ -204,7 +204,7 @@ Stop reason:
   1. The transaction boundary between the Settlement and Payment domains is unclear
   2. The payment rollback policy on settlement failure is not specified in the CTX
 
-Questions that need confirmation:
+Items that need confirmation:
 1. Please clearly define the transaction boundary between the two domains
 2. Please decide the payment rollback policy on settlement failure and add it to the CTX
 3. After the above items are resolved, please perform the Architect judgment again
@@ -247,6 +247,6 @@ Stop reason:
   3. Notification domain (notification sending)
 - The single-domain guarantee does not match the actual requirement
 
-Questions that need confirmation:
+Items that need confirmation:
 1. Please use `/ctx-architect-judge` to judge the domain scope first
 2. Or split the requirement into a single-domain scope and request again

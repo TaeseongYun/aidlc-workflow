@@ -123,7 +123,7 @@ Backward compatibility: the pre-migration Korean headings (`## 실행 모드`, `
 
 - If any one of the guarantee declarations is missing, **stop immediately**
 - If the Global CTX section is missing, **stop immediately**
-- If the user does not explicitly declare "No Local CTX", stop immediately
+- If the Local CTX section neither lists file paths nor explicitly declares "No Local CTX", **stop immediately**
 
 ---
 

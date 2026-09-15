@@ -24,8 +24,8 @@
 - @ctx/back-end/api/swagger-global.ctx.md
 
 ## Provided Local CTX
-- .ctx/domains/grade/grade-domain.ctx.md
-- .ctx/domains/grade/grade-api.ctx.md
+- @ctx/domains/grade/grade-domain.ctx.md
+- @ctx/domains/grade/grade-api.ctx.md
 ```
 
 **Expected output:**
@@ -34,12 +34,12 @@
 - Grade: The user grade lookup API belongs to the Grade domain
 
 ## 2. Local CTX That Must Be Referenced
-- .ctx/domains/grade/grade-domain.ctx.md
-- .ctx/domains/grade/grade-api.ctx.md
+- ctx/domains/grade/grade-domain.ctx.md
+- ctx/domains/grade/grade-api.ctx.md
 
 ## 3. Whether Global CTX Is Impacted
 - Impacted
-- When applying caching, compliance with the caching-policy.ctx.md rules is required
+- The cached lookup response passes through the response wrapper defined in api-response.ctx.md
 
 ## 4. Points That Cannot Be Judged / Require Additional Confirmation
 - None

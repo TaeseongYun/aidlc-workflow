@@ -47,17 +47,17 @@
 ### Coding Conventions
 
 - Rule: "Declare the @Entity annotation on Entity classes."
-  - Without this rule, the AI: omits @Entity so JPA does not recognize the class and table mapping fails
+  - Without this rule the AI would: omits @Entity so JPA does not recognize the class and table mapping fails
 
 - Rule: "Specify @JoinColumn on association fields."
-  - Without this rule, the AI: omits JoinColumn and unpredictable FK column names are generated
+  - Without this rule the AI would: omits JoinColumn and unpredictable FK column names are generated
 
 - Rule: "Repository interfaces extend JpaRepository."
-  - Without this rule, the AI: extends CrudRepository and paging/sorting methods are missing
+  - Without this rule the AI would: extends CrudRepository and paging/sorting methods are missing
 
 ## Refinement Judgment
 
-- Rules before refinement: 8
+- Rule count before refinement: 8
 - Rules after refinement: 3
 - Reduction rate: 62.5%
 - Judgment: success
@@ -91,7 +91,7 @@
   - The rule count did not decrease substantially (reduction rate 5%)
   - Only 1 rule is deletable; all the rest are directly connected to AI malfunction
 
-- Rules before refinement: 20
+- Rule count before refinement: 20
 - Current rule count: 19
 - Reduction rate: 5%
 ```

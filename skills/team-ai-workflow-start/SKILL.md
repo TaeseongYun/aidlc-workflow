@@ -271,5 +271,5 @@ NON-GOALS
 - Requirements analysis/question extraction (→ `/ctx-aidlc-run`)
 - Multi-feature roadmap authoring (→ `/ctx-aidlc-roadmap`)
 - Implementation/test/review (→ `/ctx-domain-exec`, `/ctx-reviewer` and the other ctx-* skills)
-- Automatic code modification (→ `/ctx-updater`)
+- Applying CTX reflection proposals to CTX documents (→ `/ctx-updater`)
 - Direct invocation of external systems (the user invokes them with a separate skill)

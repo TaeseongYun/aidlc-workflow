@@ -1,6 +1,6 @@
 ---
 name: ctx-updater
-description: Update existing code or documents according to requirements. Judging domains, changing designs, and interpreting or creating CTX are forbidden.
+description: Mechanically apply ctx-reviewer's CTX Reflection Proposal List to CTX documents — insert the proposed sentences at the specified locations, nothing else. Judgment, interpretation, rewriting, and code changes are forbidden.
 allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
