@@ -4,7 +4,14 @@ The common execution protocol that all skills follow. Each skill's SKILL.md refe
 
 ## Common Structure Rules
 
-Every skill MUST include the following sections (order is free):
+Two tiers of skills follow this protocol:
+
+- **Contract skills** (fixed input format, e.g. ctx-updater, ctx-reviewer): MUST include all 8 sections below.
+- **Coordinator/loop skills** (free-form entry, e.g. team-ai-workflow-start, ctx-aidlc-run,
+  ctx-score-loop): sections 4's "input format" may be declared free-form; the remaining
+  sections are still required, in whatever heading style the skill uses.
+
+Every contract skill MUST include the following sections (order is free):
 1. Role definition (fixed - never change)
 2. Scope of responsibility (no actions beyond this)
 3. Absolute prohibition rules (Guardrail)
@@ -37,6 +44,9 @@ Halt reason:
 Items that need confirmation:
 1. ...
 ```
+
+Terminology: "Halted"/"Stopped" and "Halt"/"Stop" are equivalent in this skill family —
+a fixed per-skill output format may use either; validators and consumers treat them identically.
 
 Backward compatibility: outputs and inputs using the pre-migration Korean
 equivalents ("없음" / "해당 없음", `## [동작명] 중단`, `중단 사유:`,

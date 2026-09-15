@@ -11,7 +11,7 @@
 
 ## Normal Review Invocation Example (ARCHITECT_CONFIRMED)
 
-```
+````
 /ctx-reviewer
 
 ## Referenced Global CTX
@@ -48,12 +48,15 @@ public class NotificationService {
 
 ## Executor Execution Mode
 - ARCHITECT_CONFIRMED
-```
+````
 
 **Expected output:**
 
 ## 1. CTX Violation Judgment
 - No violation
+
+## 1b. Graph Impact Conformance
+- Not applicable
 
 ## 2. List of Identified Rules
 - Rule A: When looking up notifications, sort in descending order by creation date
@@ -61,8 +64,9 @@ public class NotificationService {
 ## 3. CTX Reflection Classification Result
 - Rule A → Local CTX
 
-## 4. CTX Reflection Proposal
-- Target file: ctx/back-end/domain/notification.ctx.md
+## 4. CTX Reflection Proposal List
+### Proposal 1
+- Target file path: ctx/back-end/domain/notification.ctx.md
 - Insertion location: lookup rules section
 - Sentence to add: "When looking up the notification list, sort in descending order by creation date (createdAt)."
 - AI malfunction if omitted: The AI looks up without sorting or sorts in ascending order, so the latest notification is displayed at the bottom
@@ -71,7 +75,7 @@ public class NotificationService {
 
 ## EXECUTOR_ONLY Review Invocation Example
 
-```
+````
 /ctx-reviewer
 
 ## Referenced Global CTX
@@ -101,7 +105,7 @@ public class GradeController {
 
 ## Executor Execution Mode
 - EXECUTOR_ONLY
-```
+````
 
 **Expected output:**
 
@@ -110,13 +114,16 @@ public class GradeController {
 - Violated rule: "All API responses are returned wrapped in CommonResponse."
 - Code where violation occurred: `return ResponseEntity.ok(GradeDto.from(grade));`
 
+## 1b. Graph Impact Conformance
+- Not applicable
+
 ## 2. List of Identified Rules
 - None
 
 ## 3. CTX Reflection Classification Result
 - Not applicable
 
-## 4. CTX Reflection Proposal
+## 4. CTX Reflection Proposal List
 - None
 
 ## EXECUTOR_ONLY Warning Mark
@@ -127,7 +134,7 @@ public class GradeController {
 
 ## Incorrect Invocation Example (case that stops)
 
-```
+````
 /ctx-reviewer
 
 ## Referenced Global CTX
@@ -144,19 +151,19 @@ gradeService.findByUserId(userId);
 
 ## Executor Execution Mode
 - (not specified)
-```
+````
 
 **Expected output:**
 
-## Review Stopped
+## Review Halted
 
-Stop reason:
+Halt reason:
 - The referenced CTX list was provided as descriptive text rather than file paths
 - The review target code was only partially provided (the full context cannot be understood)
 - The Executor execution mode is not specified
 
 Items that need confirmation:
-1. Please provide the exact paths of the Global CTX files (e.g., ctx/back-end/api/api-response.ctx.md)
-2. Please provide the exact paths of the Local CTX files
-3. Please provide the full class/method of the review target code
-4. Please specify the Executor execution mode (ARCHITECT_CONFIRMED or EXECUTOR_ONLY)
+1. The exact paths of the Global CTX files (e.g., ctx/back-end/api/api-response.ctx.md)
+2. The exact paths of the Local CTX files
+3. The full class/method of the review target code
+4. The Executor execution mode (ARCHITECT_CONFIRMED or EXECUTOR_ONLY)

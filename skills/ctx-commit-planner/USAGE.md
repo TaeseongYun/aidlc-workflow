@@ -19,24 +19,25 @@
 ### Output
 
 ```markdown
-## Commit Design Result
-
-### Commit 1
-- title: feat: (grade) add user grade lookup feature
-- body:
-  - Administrators need to be able to look up user grades
-  - Implement the grade lookup service method and controller endpoint
-  - Grade update/delete features are not included in this commit
+Commit 1
+- Order rationale: a single commit contains the entire grade lookup feature
 - include:
-  - GradeController.java (lookup endpoint)
-  - GradeService.java (lookup method)
-  - GradeResponse.java (response DTO)
+    - GradeController.java (lookup endpoint)
+    - GradeService.java (lookup method)
+    - GradeResponse.java (response DTO)
 - exclude:
-  - Grade create/update/delete code
-  - Test code
+    - Grade create/update/delete code
+    - Test code
+- message:
+  feat: (grade) add user grade lookup feature
 
-## Commit Order Explanation
-- A single commit contains the entire grade lookup feature
+  [Background] administrators need to be able to look up user grades
+
+  [Changes]
+  - implement the grade lookup service method
+  - add the controller endpoint and response DTO
+
+  [Excluded] grade update/delete features are not included
 ```
 
 ---
@@ -63,60 +64,73 @@
 ### Output
 
 ```markdown
-## Commit Design Result
-
-### Commit 1
-- title: refactor: (cscenter) add inquiry type enum
-- body:
-  - Inquiry types need to be managed in code
-  - Create the new inquiry type Enum class
-  - Applying it to the service/controller proceeds in the next commits
+Commit 1
+- Order rationale: the Enum must exist first so the service can reference it
 - include:
-  - InquiryType.java (new Enum)
+    - InquiryType.java (new Enum)
 - exclude:
-  - InquiryService.java
-  - InquiryController.java
-  - Test code
+    - InquiryService.java
+    - InquiryController.java
+    - Test code
+- message:
+  refactor: (cscenter) add inquiry type enum
 
-### Commit 2
-- title: refactor: (cscenter) apply type enum to inquiry service
-- body:
-  - The inquiry service needs to use the new type Enum
-  - Change the existing string-based type handling to the Enum
-  - Controller changes proceed in the next commit
+  [Background] inquiry types need to be managed in code
+
+  [Changes]
+  - create the new inquiry type Enum class
+
+  [Excluded] applying it to the service/controller proceeds in the next commits
+
+Commit 2
+- Order rationale: after the Enum exists, the service can switch to it
 - include:
-  - InquiryService.java (type Enum applied)
+    - InquiryService.java (type Enum applied)
 - exclude:
-  - InquiryController.java
-  - Test code
+    - InquiryController.java
+    - Test code
+- message:
+  refactor: (cscenter) apply type enum to inquiry service
 
-### Commit 3
-- title: refactor: (cscenter) improve inquiry controller response format
-- body:
-  - A consistent response format needs to be provided to clients
-  - Reflect the type Enum in the controller response
-  - Test code is added in the next commit
+  [Background] the inquiry service needs to use the new type Enum
+
+  [Changes]
+  - change the existing string-based type handling to the Enum
+
+  [Excluded] controller changes proceed in the next commit
+
+Commit 3
+- Order rationale: after the service change, the controller reflects that change
 - include:
-  - InquiryController.java (response format change)
+    - InquiryController.java (response format change)
 - exclude:
-  - Test code
+    - Test code
+- message:
+  refactor: (cscenter) improve inquiry controller response format
 
-### Commit 4
-- title: test: (cscenter) add inquiry service unit tests
-- body:
-  - The refactored service logic needs verification
-  - Write new unit tests for the inquiry service
-  - Controller tests are not included in this commit
+  [Background] a consistent response format needs to be provided to clients
+
+  [Changes]
+  - reflect the type Enum in the controller response
+
+  [Excluded] test code is added in the next commit
+
+Commit 4
+- Order rationale: tests are added after the feature implementation is complete
 - include:
-  - InquiryServiceTest.java (new tests)
+    - InquiryServiceTest.java (new tests)
 - exclude:
-  - Controller tests
-  - Integration tests
+    - Controller tests
+    - Integration tests
+- message:
+  test: (cscenter) add inquiry service unit tests
 
-## Commit Order Explanation
-- Commit 1 → 2: the Enum must exist first so the service can reference it
-- Commit 2 → 3: after the service change, the controller reflects that change
-- Commit 3 → 4: tests are added after the feature implementation is complete
+  [Background] the refactored service logic needs verification
+
+  [Changes]
+  - write new unit tests for the inquiry service
+
+  [Excluded] controller tests are not included
 ```
 
 ---

@@ -44,6 +44,9 @@
 ## 4. Points That Cannot Be Judged / Require Additional Confirmation
 - None
 
+## 5. Next-Step Execution Condition
+- This output is judgment material and cannot proceed to the next step until the user's explicit approval command.
+
 ---
 
 ## Incorrect Invocation Example (case that stops)
@@ -63,13 +66,13 @@
 
 **Expected output:**
 
-## Judgment Stopped
+## Judgment Halted
 
-Stop reason:
+Halt reason:
 - The task requirement is abstract (cannot pin down which feature's performance to improve)
 - CTX was provided as descriptive text rather than file paths
 
-Questions that need confirmation:
-1. What is the specific API or feature that is the target of the performance improvement?
-2. Please provide the exact paths of the Global CTX files
-3. Please provide the exact paths of the Local CTX files
+Items that need confirmation:
+1. The specific API or feature that is the target of the performance improvement
+2. The exact paths of the Global CTX files
+3. The exact paths of the Local CTX files

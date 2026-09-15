@@ -1,6 +1,6 @@
 ---
 name: ctx-domain-exec
-description: Judge the affected domains and reference CTX scope before development work. Writing code / proposing designs / speculation are forbidden.
+description: Implement approved requirements into code strictly within the provided CTX scope. Domain judgment, design proposals, and CTX creation/changes are forbidden.
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 

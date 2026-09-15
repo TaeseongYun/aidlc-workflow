@@ -140,8 +140,10 @@ CASE 1: Core not installed
 - Recommended command:
   ```bash
   git clone https://github.com/TaeseongYun/aidlc-workflow.git ~/workspace/aidlc-workflow
+  echo 'export TEAM_AI_WORKFLOW_DIR="$HOME/workspace/aidlc-workflow"' >> ~/.zshrc
   bash ~/workspace/aidlc-workflow/scripts/install-skills.sh
   ```
+  (Diagnosis A finds the core via `TEAM_AI_WORKFLOW_DIR` — the env line makes the clone path detectable.)
 - No automatic execution. Run with the Bash tool only upon user approval.
 
 CASE 2: Core exists but global skills are not installed

@@ -111,6 +111,32 @@ check_skill_dir() {
     fi
   fi
 
+  # USAGE-01: USAGE.md examples must carry the labels their SKILL.md enforces —
+  # every real contract defect found in audits lived in a USAGE example that
+  # modeled a pre-migration output shape.
+  if [[ "$family" == "workflow" && -f "$skill_dir/USAGE.md" ]]; then
+    local usage_required=""
+    case "$skill_name" in
+      ctx-reviewer)       usage_required="### Proposal 1|Target file path:|## 1b" ;;
+      ctx-updater)        usage_required="Target file path:|Reflection Success" ;;
+      ctx-commit-planner) usage_required="Order rationale:|- message:|\[Background\]" ;;
+      ctx-architect-judge) usage_required="## 5" ;;
+      ctx-domain-exec)    usage_required="Guarantee" ;;
+    esac
+    if [[ -n "$usage_required" ]]; then
+      local usage_missing=""
+      IFS='|' read -r -a req_arr <<< "$usage_required"
+      for req in "${req_arr[@]}"; do
+        grep -q -- "$req" "$skill_dir/USAGE.md" || usage_missing="$usage_missing '$req'"
+      done
+      if [[ -z "$usage_missing" ]]; then
+        pass "USAGE-01: $skill_name — USAGE examples carry the enforced labels"
+      else
+        fail "USAGE-01: $skill_name — USAGE.md missing enforced label(s):$usage_missing"
+      fi
+    fi
+  fi
+
   # SCOPE-01: No cross-skill references.
   # Workflow family: no reference to another workflow skill's sources.
   # Platform family: no reference to ANOTHER platform's skills (same-platform links allowed).

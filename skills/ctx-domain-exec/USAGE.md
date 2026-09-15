@@ -88,7 +88,7 @@ Confirmed that the implementation above does not go beyond the CTX scope provide
 - Look up by notification ID and update the readAt field to the current time
 
 ## User Guarantee Declaration (required)
-- I guarantee that this task is within a single-domain scope
+- I guarantee this task is limited to a single domain scope
 - I specify the Local CTX to reference directly
 
 ## Global CTX (forced reference)
@@ -144,7 +144,7 @@ Confirmed that the implementation above does not go beyond the CTX scope provide
 - Implement the payment cancellation feature
 
 ## User Guarantee Declaration (required)
-- I guarantee that this task is within a single-domain scope
+- I guarantee this task is limited to a single domain scope
 - I specify the Local CTX to reference directly
 
 ## Local CTX (optional reference)
@@ -223,7 +223,7 @@ Questions that need confirmation:
 - Send a notification when a friend registers a program
 
 ## User Guarantee Declaration (required)
-- I guarantee that this task is within a single-domain scope
+- I guarantee this task is limited to a single domain scope
 - I specify the Local CTX to reference directly
 
 ## Global CTX (forced reference)
