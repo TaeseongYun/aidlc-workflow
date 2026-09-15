@@ -199,3 +199,5 @@ On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}
 Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - Check the input validation rules according to the execution mode
 - EXECUTOR_ONLY mode must include the judgment-omitted notice
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-domain-exec/USAGE.md`

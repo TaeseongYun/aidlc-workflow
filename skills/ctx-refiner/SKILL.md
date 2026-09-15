@@ -283,3 +283,5 @@ Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_s
 - Apply the merge rules strictly
 - Verify the failure conditions
 - On failure, do not output the final CTX
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-refiner/USAGE.md`

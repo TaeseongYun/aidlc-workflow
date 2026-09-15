@@ -274,8 +274,8 @@ aidlc-docs/
 - **2026-09-14**：`mobile-webview-bridge` 技能——面向 Android/iOS/KMP/RN/Flutter 的 JS ↔ 原生 WebView 桥接，共享同一套契约优先协议（信封、握手、安全、线程、生命周期），附各平台参考绑定、generator/guard 两种模式以及离线信封验证器（[详情](docs/changelog/2026-09-14-mobile-webview-bridge-skill.md)）
 - **2026-09-06**：运行结果日志器——`scripts/run-logger.ts` 将类型化结果记录到 `aidlc-docs/run-log.ndjson` 以及可供 graphify 摄取的 `run-log.md` 镜像，使历史结果可通过 `graphify query`（降级模式下用本地 `recall`）检索；已接入 score-loop、hallucination-audit、aidlc-run 和会话入口（[详情](docs/changelog/2026-09-06-run-logger-and-graphify-rag.md)）
 - **2026-09-03**：`graphify` 改为软依赖——缺少该工具时降级为 grep/Read 验证，不再阻塞设置；新增 CI（`validate-skills.sh` + golden baselines），并让 `validate-questions.sh` 接受英文字段标签（[详情](docs/changelog/2026-09-03-graphify-soft-dependency-and-ci.md)）
-- **2026-08-27**：新增 KMP（Kotlin Multiplatform）作为第 7 个平台——guidance + 13 个技能（figma-to-kmp、vibe-coding 安全守卫、测试等）
-- **2026-08-26**：跨平台每平台技能家族（测试、设计系统、无障碍、contract-codegen、可观测性、i18n）
+- **2026-08-27**：新增 KMP（Kotlin Multiplatform）作为第 7 个平台——guidance + 13 个技能（figma-to-kmp、vibe-coding 安全守卫、测试等）（[详情](docs/changelog/2026-08-27-kmp-platform.md)）
+- **2026-08-26**：跨平台每平台技能家族（测试、设计系统、无障碍、contract-codegen、可观测性、i18n）（[详情](docs/changelog/2026-08-26-platform-skill-families.md)）
 - **2026-04-29**：新增 Phase 0 路线图规划技能，正式化多功能协作工作流
 - **2026-04-22**：过度自信预防、强化验证、评估框架
 - **2026-04-14**：延迟加载 + 会话分离作为默认模型，Token 精简

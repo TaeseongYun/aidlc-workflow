@@ -304,3 +304,5 @@ Follow the standard execution guidelines in `{{TEAM_AI_WORKFLOW_DIR}}/skills/_sh
 - Separate by meaningful unit according to the commit separation rules
 - Per the commit message rules, write the order reason, include, exclude, and message in full
 - Do a final review of compliance with the language rules
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-commit-planner/USAGE.md`

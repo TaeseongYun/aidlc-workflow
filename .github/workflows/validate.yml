@@ -51,13 +51,16 @@ jobs:
           test ! -e "$XH/skills/ctx-run"                   # legacy skill pruned
           test ! -e "$CH/commands/ctx-run.md"
           test -f "$CH/commands/user-own-command.md"       # user files untouched
-          ! grep -r "{{TEAM_AI_WORKFLOW_DIR}}" "$CH/commands" "$XH/skills"
+          # NOTE: '! grep' is exempt from set -e, so invert explicitly.
+          if grep -r "{{TEAM_AI_WORKFLOW_DIR}}" "$CH/commands" "$XH/skills"; then
+            echo "placeholder leak in installed copies"; exit 1
+          fi
           # init-project: must succeed, create the scaffold, and be idempotent
           ( cd "$PROJ" && git init -q . && bash "$GITHUB_WORKSPACE/scripts/init-project.sh" )
           test -f "$PROJ/ctx/INDEX.md"
           test -f "$PROJ/aidlc-docs/aidlc-state.md"
           ( cd "$PROJ" && bash "$GITHUB_WORKSPACE/scripts/init-project.sh" )
-          [ "$(grep -c '^aidlc-docs/$' "$PROJ/.gitignore" || true)" -le 1 ]
+          [ "$(grep -c '^graphify-out/$' "$PROJ/.gitignore" || true)" -le 1 ]
 
       # 2.6 Shell static analysis (errors only — the class of bug that has
       #     already shipped twice: dead grep -P, ((VAR++)) under set -e).

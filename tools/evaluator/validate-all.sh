@@ -32,9 +32,9 @@ run_validator() {
   echo ""
 
   if bash "$SCRIPT_DIR/$script" "$FEATURE_DIR"; then
-    ((TOTAL_PASS++))
+    TOTAL_PASS=$((TOTAL_PASS+1))
   else
-    ((TOTAL_FAIL++))
+    TOTAL_FAIL=$((TOTAL_FAIL+1))
   fi
 
   echo ""

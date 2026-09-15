@@ -279,8 +279,8 @@ aidlc-docs/
 - **2026-09-14**: `mobile-webview-bridge` 스킬 — 하나의 공유 contract-first 프로토콜(envelope, handshake, 보안, 스레딩, 라이프사이클)로 Android/iOS/KMP/RN/Flutter를 지원하는 JS ↔ 네이티브 WebView 브리지. 플랫폼별 레퍼런스 바인딩, generator/guard 모드, 오프라인 envelope 검증기 포함 ([상세](docs/changelog/2026-09-14-mobile-webview-bridge-skill.md))
 - **2026-09-06**: 실행 결과 로거 — `scripts/run-logger.ts`가 타입이 지정된 결과를 `aidlc-docs/run-log.ndjson`과 graphify가 수집 가능한 `run-log.md` 미러에 기록하여, 과거 결과를 `graphify query`(degraded 모드에서는 로컬 `recall`)로 조회할 수 있게 함. score-loop, hallucination-audit, aidlc-run, 세션 진입에 연결 ([상세](docs/changelog/2026-09-06-run-logger-and-graphify-rag.md))
 - **2026-09-03**: `graphify`를 소프트 의존성으로 전환 — 도구가 없어도 설정을 차단하지 않고 grep/Read 검증으로 degrade. CI(`validate-skills.sh` + golden baselines) 추가, `validate-questions.sh`가 영어 필드 라벨을 허용하도록 수정 ([상세](docs/changelog/2026-09-03-graphify-soft-dependency-and-ci.md))
-- **2026-08-27**: KMP (Kotlin Multiplatform)를 7번째 플랫폼으로 추가 — guidance + 13개 스킬 (figma-to-kmp, vibe-coding security guard, testing 등)
-- **2026-08-26**: 전 플랫폼 대상 플랫폼별 스킬 패밀리 (testing, design-system, accessibility, contract-codegen, observability, i18n)
+- **2026-08-27**: KMP (Kotlin Multiplatform)를 7번째 플랫폼으로 추가 — guidance + 13개 스킬 (figma-to-kmp, vibe-coding security guard, testing 등) ([상세](docs/changelog/2026-08-27-kmp-platform.md))
+- **2026-08-26**: 전 플랫폼 대상 플랫폼별 스킬 패밀리 (testing, design-system, accessibility, contract-codegen, observability, i18n) ([상세](docs/changelog/2026-08-26-platform-skill-families.md))
 - **2026-04-29**: Phase 0 Roadmapping 스킬 추가, 멀티 피처 협업 워크플로우 공식화
 - **2026-04-22**: 과신 방지, 강화된 검증, 평가 프레임워크
 - **2026-04-14**: Lazy Loading + 세션 분리를 기본 모델로 채택, 토큰 절감

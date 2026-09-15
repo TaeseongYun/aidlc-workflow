@@ -168,3 +168,5 @@ Stopped proposal:
 ## Execution Guidelines
 
 Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`.
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-updater/USAGE.md`

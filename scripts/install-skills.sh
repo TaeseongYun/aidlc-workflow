@@ -26,10 +26,11 @@ WORKFLOW_DIR="${ROOT_DIR}"
 WORKFLOW_DIR_SED=$(printf '%s' "${WORKFLOW_DIR}" | sed 's/[&|\\]/\\&/g')
 
 PLATFORMS=""
+PLATFORMS_GIVEN=0
 for arg in "$@"; do
   case "$arg" in
-    --platforms=*) PLATFORMS="${arg#--platforms=}" ;;
-    *) echo "Unknown argument: $arg" >&2; echo "Usage: install-skills.sh [--platforms=android,ios|all]" >&2; exit 2 ;;
+    --platforms=*) PLATFORMS="${arg#--platforms=}"; PLATFORMS_GIVEN=1 ;;
+    *) echo "Unknown argument: $arg" >&2; echo "Usage: install-skills.sh [--platforms=android,ios|all|none]" >&2; exit 2 ;;
   esac
 done
 
@@ -85,8 +86,20 @@ echo "Installed _shared (skill protocol)"
 # Pruning only ever touches names recorded in the manifest (or the known legacy
 # list below) — user-authored commands/skills in the same directories are never removed.
 MANIFEST="${CODEX_TARGET_DIR}/.aidlc-manifest"
+# Platform opt-in persists across runs: a plain re-run keeps the previous
+# --platforms selection instead of silently pruning it. --platforms=none clears.
+PLATFORMS_FILE="${CODEX_TARGET_DIR}/.aidlc-platforms"
 LEGACY_REMOVED=("ctx-run")
 INSTALLED_NAMES=()
+
+if [[ $PLATFORMS_GIVEN -eq 0 && -f "$PLATFORMS_FILE" ]]; then
+  PLATFORMS="$(paste -sd, "$PLATFORMS_FILE" 2>/dev/null || true)"
+  [[ -n "$PLATFORMS" ]] && echo "Keeping previously selected platforms: ${PLATFORMS} (pass --platforms=none to remove)"
+fi
+if [[ "$PLATFORMS" == "none" ]]; then
+  PLATFORMS=""
+  rm -f "$PLATFORMS_FILE"
+fi
 
 prune_stale() {
   # Seed with the legacy list so prev is never an empty array
@@ -96,7 +109,7 @@ prune_stale() {
   local name keep
   for name in "${prev[@]}"; do
     keep=0
-    for cur in "${INSTALLED_NAMES[@]}"; do [[ "$cur" == "$name" ]] && keep=1 && break; done
+    for cur in ${INSTALLED_NAMES[@]+"${INSTALLED_NAMES[@]}"}; do [[ "$cur" == "$name" ]] && keep=1 && break; done
     if [[ $keep -eq 0 ]]; then
       if [[ -d "${CODEX_TARGET_DIR}/${name}" || -f "${CLAUDE_COMMANDS_TARGET_DIR}/${name}.md" ]]; then
         rm -rf "${CODEX_TARGET_DIR:?}/${name}"
@@ -105,7 +118,7 @@ prune_stale() {
       fi
     fi
   done
-  printf '%s\n' "${INSTALLED_NAMES[@]}" > "$MANIFEST"
+  printf '%s\n' ${INSTALLED_NAMES[@]+"${INSTALLED_NAMES[@]}"} > "$MANIFEST"
 }
 
 # Workflow skills: every directory under skills/ with a SKILL.md.
@@ -132,13 +145,18 @@ if [[ -n "$PLATFORMS" ]]; then
     echo "No platforms found for --platforms=${PLATFORMS}" >&2
     exit 2
   fi
+  # Validate every platform name BEFORE installing anything, so an unknown
+  # platform cannot leave a partially-updated target behind.
+  for p in ${platform_list[@]+"${platform_list[@]}"}; do
+    [[ -n "$p" ]] || continue
+    if [[ ! -d "${PLATFORMS_DIR}/${p}/skills" ]]; then
+      echo "Unknown platform: ${p} (no ${PLATFORMS_DIR}/${p}/skills)" >&2
+      exit 2
+    fi
+  done
   for p in ${platform_list[@]+"${platform_list[@]}"}; do
     [[ -n "$p" ]] || continue
     pdir="${PLATFORMS_DIR}/${p}/skills"
-    if [[ ! -d "$pdir" ]]; then
-      echo "Unknown platform: ${p} (no ${pdir})" >&2
-      exit 2
-    fi
     count=0
     for src in "$pdir"/*/; do
       [[ -d "$src" ]] || continue
@@ -147,6 +165,7 @@ if [[ -n "$PLATFORMS" ]]; then
     done
     echo "Platform ${p}: ${count} skill(s) installed"
   done
+  printf '%s\n' ${platform_list[@]+"${platform_list[@]}"} | grep -v '^$' > "$PLATFORMS_FILE" || true
 fi
 
 prune_stale

@@ -34,8 +34,11 @@ skills/                       # Skill source files (you edit here)
 ├── ctx-aidlc-run/            # Phase A-C analysis
 └── ... (one directory per skill; see README Skill List)
 
-common/                       # Shared rules (rules library)
-core/                         # Core analysis logic
+common/                       # Shared rules (rules library) + engineering reference
+core/                         # Core analysis logic + scoring schemas
+platforms/                    # Per-platform guidance + skill packs (7 platforms)
+extensions/                   # Opt-in rule packs + hallucination guard
+examples/                     # Golden baselines (CI-validated) + filled outputs
 docs/                         # User guides, concepts, changelog
 templates/                    # Document templates
 tools/                        # Validation tools
@@ -50,9 +53,8 @@ scripts/
 - Installed copies anywhere
 
 **Always edit**:
-- `skills/` directory in this repo
-- Common rule files under `common/` and `core/`
-- Docs under `docs/`
+- The source directories in this repo: `skills/`, `platforms/`, `common/`, `core/`,
+  `docs/`, `templates/`, `extensions/`, `examples/` (golden baselines are CI-validated)
 
 ---
 
@@ -251,7 +253,7 @@ Link from main `README.md`:
 
 Before submitting a PR, ensure:
 
-- [ ] Edited only under `skills/`, `common/`, `core/`, `docs/`, `templates/`
+- [ ] Edited only under the source directories (`skills/`, `platforms/`, `common/`, `core/`, `docs/`, `templates/`, `extensions/`, `examples/`), never installed copies
 - [ ] Ran `bash scripts/install-skills.sh` and tested locally
 - [ ] Commit message in English
 - [ ] No hardcoded paths (use placeholders like `{{TEAM_AI_WORKFLOW_DIR}}`)

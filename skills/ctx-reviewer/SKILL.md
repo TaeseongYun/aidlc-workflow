@@ -189,3 +189,5 @@ On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}
 
 Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. Additional rules:
 - EXECUTOR_ONLY mode must include the warning mark section
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-reviewer/USAGE.md`

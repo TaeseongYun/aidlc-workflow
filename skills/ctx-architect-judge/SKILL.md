@@ -149,3 +149,5 @@ On stopping, the output follows the standard format of `{{TEAM_AI_WORKFLOW_DIR}}
 ## Execution Guidelines
 
 Follows the standard execution guidelines of `{{TEAM_AI_WORKFLOW_DIR}}/skills/_shared/skill-protocol.md`. For the unique procedure, use "Judgment Procedure".
+
+Worked invocation/halt examples: `{{TEAM_AI_WORKFLOW_DIR}}/skills/ctx-architect-judge/USAGE.md`

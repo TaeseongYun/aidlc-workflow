@@ -8,7 +8,7 @@
 #
 # Consumed by:
 #   - scripts/init-project.sh  (warns and continues in DEGRADED mode on a missing tool;
-#     auto-builds a missing graph on brownfield; passes --mode)
+#     auto-builds a missing graph on brownfield; calls without --mode, relying on auto-detect)
 #   - /team-ai-workflow-start skill (on a missing tool it opens an AskUserQuestion dialog offering
 #     install / proceed-in-degraded-mode / cancel — never a free-text "continue anyway" prompt)
 #

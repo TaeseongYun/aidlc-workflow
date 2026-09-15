@@ -139,3 +139,6 @@ kotlinx.serialization, Koin, `expect`/`actual`.
 - [kmp-testing](skills/kmp-testing/SKILL.md) — `commonTest`, kotlin.test, Turbine, `runTest`, `runComposeUiTest`
 - [kmp-observability](skills/kmp-observability/SKILL.md) — Kermit/Napier, structured logging, expect/actual crash reporting
 - [kmp-contract-codegen](skills/kmp-contract-codegen/SKILL.md) — OpenAPI → Ktor client, Apollo Kotlin (GraphQL), drift guard
+
+
+Detailed per-topic skills for this platform: [skills/README.md](skills/README.md)

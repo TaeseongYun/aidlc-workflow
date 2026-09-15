@@ -4,7 +4,7 @@ Language rules for this repo and for the artifacts the workflow produces.
 Two layers, one rule each:
 
 1. **Repository content** (skills, rules, templates, docs, commit messages in THIS repo): **English**.
-   Source of truth: [CONTRIBUTING.md](../CONTRIBUTING.md) "Language Rules".
+   Source of truth: [CONTRIBUTING.md](../CONTRIBUTING.md) "Language Policy".
 2. **Runtime artifacts** (the `aidlc-docs/` a team produces in ITS project): body text in the
    team's working language; **all structural labels in English** so they can be parsed by
    code/automation and validated by `tools/evaluator/`.

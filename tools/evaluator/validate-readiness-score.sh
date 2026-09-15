@@ -134,11 +134,11 @@ echo "--- 4. Max-points sum ---"
 
 # Sum the max-points column in the Readiness Score table
 score_section=$(sed -n '/## Readiness Score/,/^## /p' "$STATUS_FILE")
-point_values=$(echo "$score_section" | grep -E '^\|' | grep -v '합계\|total\|영역\|--' | grep -oE '\| *[0-9]+ *\|' | head -20)
+point_values=$(echo "$score_section" | grep -E '^\|' | grep -vi '합계\|total\|영역\|area\|--' | grep -oE '\| *[0-9]+ *\|' | head -20)
 
 if [[ -n "$point_values" ]]; then
   # Extract per-row max points (3rd column) — strip bold (**), use only the first integer token
-  row_maxes=$(echo "$score_section" | sed 's/\*\*//g' | grep -E '^\|' | grep -v '합계\|total\|영역\|--' | awk -F'|' '{print $3}' | grep -oE '[0-9]+' )
+  row_maxes=$(echo "$score_section" | sed 's/\*\*//g' | grep -E '^\|' | grep -vi '합계\|total\|영역\|area\|--' | awk -F'|' '{print $3}' | grep -oE '[0-9]+' )
 
   calc_total=0
   for val in $row_maxes; do
