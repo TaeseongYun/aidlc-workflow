@@ -143,8 +143,23 @@ function readEntries(project: string): RunLogEntry[] {
 }
 
 function validate(e: Partial<RunLogEntry>): RunLogEntry {
+  // Type-strict: valid-JSON-with-wrong-types must be rejected BEFORE the append,
+  // otherwise the poisoned line breaks every later mirror rebuild.
   for (const k of ["feature", "skill", "phase", "kind", "result"] as const) {
-    if (!e[k] || String(e[k]).trim() === "") fail(`missing required field: ${k}`);
+    if (typeof e[k] !== "string" || (e[k] as string).trim() === "")
+      fail(`field ${k} must be a non-empty string`);
+  }
+  for (const k of ["feature", "skill", "phase", "kind"] as const) {
+    if (/[\r\n]/.test(e[k] as string))
+      fail(`field ${k} must be single-line (newlines break the markdown mirror)`);
+  }
+  for (const k of ["detail", "ts"] as const) {
+    if (e[k] !== undefined && typeof e[k] !== "string") fail(`field ${k} must be a string`);
+  }
+  for (const k of ["artifacts", "refs"] as const) {
+    const v = e[k];
+    if (v !== undefined && (!Array.isArray(v) || v.some((x) => typeof x !== "string")))
+      fail(`field ${k} must be an array of strings`);
   }
   if (!KINDS.includes(e.kind as Kind)) fail(`--kind must be one of: ${KINDS.join(", ")}`);
   if (e.confidence && !CONFIDENCES.includes(e.confidence))
@@ -187,16 +202,19 @@ function renderMirror(entries: RunLogEntry[]): string {
   }
   if (entries.length === 0) out.push("_No entries yet._", "");
   for (const feat of order) {
-    out.push(`## Feature: ${feat}`, "");
+    out.push(`## Feature: ${String(feat ?? "").replace(/\s*[\r\n]+\s*/g, " ")}`, "");
     for (const e of byFeature.get(feat)!) {
       // NDJSON keeps raw text; the mirror flattens newlines so a multi-line
-      // result cannot break the bullet structure graphify ingests.
-      const oneLine = (s: string) => s.replace(/\s*\n\s*/g, " ");
-      out.push(`### ${e.ts} — ${e.skill} · ${e.phase} · ${e.kind}`);
+      // value cannot break the heading/bullet structure graphify ingests.
+      // Defensive on types too: pre-validation entries (or hand-edits) with
+      // wrong-typed fields must degrade, not brick every later rebuild.
+      const oneLine = (s: unknown) => String(s ?? "").replace(/\s*[\r\n]+\s*/g, " ");
+      const asList = (v: unknown) => (Array.isArray(v) ? v : [v]).map(oneLine).join(", ");
+      out.push(`### ${oneLine(e.ts)} — ${oneLine(e.skill)} · ${oneLine(e.phase)} · ${oneLine(e.kind)}`);
       out.push(`- Result: ${oneLine(e.result)}`);
       if (e.detail) out.push(`- Detail: ${oneLine(e.detail)}`);
-      if (e.artifacts?.length) out.push(`- Artifacts: ${e.artifacts.join(", ")}`);
-      if (e.refs?.length) out.push(`- Refs: ${e.refs.join(", ")}`);
+      if (e.artifacts && (!Array.isArray(e.artifacts) || e.artifacts.length)) out.push(`- Artifacts: ${asList(e.artifacts)}`);
+      if (e.refs && (!Array.isArray(e.refs) || e.refs.length)) out.push(`- Refs: ${asList(e.refs)}`);
       const tags: string[] = [];
       if (e.confidence) tags.push(`Confidence: ${e.confidence}`);
       if (e.mode) tags.push(`Mode: ${e.mode}`);

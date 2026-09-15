@@ -29,6 +29,7 @@ PLATFORMS=""
 PLATFORMS_GIVEN=0
 for arg in "$@"; do
   case "$arg" in
+    --platforms=) echo "Empty --platforms= is ambiguous: pass a platform list, 'all', or 'none'." >&2; exit 2 ;;
     --platforms=*) PLATFORMS="${arg#--platforms=}"; PLATFORMS_GIVEN=1 ;;
     *) echo "Unknown argument: $arg" >&2; echo "Usage: install-skills.sh [--platforms=android,ios|all|none]" >&2; exit 2 ;;
   esac
