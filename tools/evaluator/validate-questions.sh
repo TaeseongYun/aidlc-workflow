@@ -66,61 +66,62 @@ for qid in $question_ids; do
     grab {print}
   ' "$QFILE" | head -30)
 
-  # 분류 (유형) 필드 — labels are bilingual (KR: 분류/유형, EN: Type/Category)
+  # Type field — labels are bilingual (KR: 분류/유형, EN: Type/Category)
   if echo "$block" | grep -qi '분류:\|유형:\|Type:\|Category:' 2>/dev/null; then
     type_val=$(echo "$block" | grep -oiE '(분류|유형|Type|Category): *(policy|domain|scope)' | head -1)
     if [[ -n "$type_val" ]]; then
-      pass "$qnum: 분류 필드 있음 ($type_val)"
+      pass "$qnum: type field present ($type_val)"
     else
-      warn "$qnum: 분류 값이 policy/domain/scope 중 하나가 아님"
+      warn "$qnum: type value is not one of policy/domain/scope"
     fi
   else
-    error "$qnum: 분류(유형) 필드 누락"
+    error "$qnum: type field missing"
   fi
 
-  # 영향도 필드 (KR: 영향도, EN: Impact)
+  # Impact field (KR: 영향도, EN: Impact)
   if echo "$block" | grep -qi '영향도:\|Impact:' 2>/dev/null; then
-    pass "$qnum: 영향도 필드 있음"
+    pass "$qnum: impact field present"
   else
-    warn "$qnum: 영향도 필드 누락"
+    warn "$qnum: impact field missing"
   fi
 
-  # 미응답 시 필드 (KR: 미응답 시, EN: If unanswered)
+  # If-unanswered field (KR: 미응답 시, EN: If unanswered)
   if echo "$block" | grep -qi '미응답 시:\|If unanswered:' 2>/dev/null; then
     fallback=$(echo "$block" | grep -oiE '(미응답 시|If unanswered): *(BLOCK|ASSUME|AI-RECOMMEND|DEFER)' | head -1)
-    pass "$qnum: 미응답 시 필드 있음 ($fallback)"
+    pass "$qnum: if-unanswered field present ($fallback)"
   else
-    error "$qnum: 미응답 시 필드 누락"
+    error "$qnum: if-unanswered field missing"
   fi
 
-  # 범위(Scope Tag) 필드 (KR: 범위, EN: Scope)
+  # Scope Tag field (KR: 범위, EN: Scope)
   if echo "$block" | grep -qi '범위:\|Scope:' 2>/dev/null; then
-    pass "$qnum: 범위 필드 있음"
+    pass "$qnum: scope field present"
   else
-    warn "$qnum: 범위(Scope Tag) 필드 누락"
+    warn "$qnum: scope (Scope Tag) field missing"
   fi
 
-  # 우선순위 필드 (KR: 우선순위, EN: Priority)
+  # Priority field (KR: 우선순위, EN: Priority)
   if echo "$block" | grep -qi '우선순위:\|Priority:' 2>/dev/null; then
     priority_val=$(echo "$block" | grep -oiE '(우선순위|Priority): *P[0-2]' | head -1)
     if [[ -n "$priority_val" ]]; then
-      pass "$qnum: 우선순위 필드 있음 ($priority_val)"
+      pass "$qnum: priority field present ($priority_val)"
     else
-      warn "$qnum: 우선순위 값이 P0/P1/P2 형식이 아님"
+      warn "$qnum: priority value is not in P0/P1/P2 format"
     fi
   else
-    warn "$qnum: 우선순위 필드 누락"
+    warn "$qnum: priority field missing"
   fi
 done
 
-# --- 4. policy 질문에 AI 추천이 없는지 ---
+# --- 4. No AI recommendation on policy questions ---
 echo ""
-echo "--- 4. policy 질문 AI 추천 금지 ---"
+echo "--- 4. No AI recommendation on policy questions ---"
 
-# policy 질문 식별 → 해당 블록에 AI 추천이 있으면 위반.
-# 거버넌스 정본(question-governance.md): policy/domain/scope 분류는 '유형:' 필드가 담는다
-# ('분류:'는 ops/scope 등 영역 태그라 policy 판정에 쓰면 false negative).
-# 각 질문 블록을 추출해 블록 내부에서 'policy' 유형 여부를 판정한다.
+# Identify policy questions → an AI recommendation inside such a block is a violation.
+# Governance source of truth (question-governance.md): the '유형:' field carries the
+# policy/domain/scope classification ('분류:' is an area tag like ops/scope — using it
+# for policy detection yields false negatives).
+# Extract each question block and decide 'policy' type inside the block.
 policy_found=0
 for qid in $question_ids; do
   qnum="${qid%.}"
@@ -130,61 +131,61 @@ for qid in $question_ids; do
     grab {print}
   ' "$QFILE" | head -30)
 
-  # 'policy' 유형 질문만 대상 (KR 유형/분류, EN Type/Category — 값이 policy인 경우)
+  # Only 'policy'-type questions (KR 유형/분류, EN Type/Category — value is policy)
   if echo "$block" | grep -qiE '(유형|분류|Type|Category): *policy' 2>/dev/null; then
     policy_found=$((policy_found + 1))
     if echo "$block" | grep -qi 'AI 추천:\|AI-RECOMMEND' 2>/dev/null; then
-      error "$qnum: policy 질문에 AI 추천이 포함됨 (governance 위반)"
+      error "$qnum: policy question contains an AI recommendation (governance violation)"
     else
-      pass "$qnum: policy 질문 — AI 추천 없음"
+      pass "$qnum: policy question — no AI recommendation"
     fi
   fi
 done
 if (( policy_found == 0 )); then
-  echo "policy 유형 질문 없음 (검사 대상 0건)"
+  echo "No policy-type questions (0 checked)"
 fi
 
-# --- 5. BLOCK 질문 현황 ---
+# --- 5. BLOCK question status ---
 echo ""
-echo "--- 5. BLOCK 질문 현황 ---"
+echo "--- 5. BLOCK question status ---"
 block_open=$(grep -ci 'BLOCK' "$QFILE" 2>/dev/null || true)
 # Answer label is bilingual (KR: [답변], EN: [Answer])
 answered=$(grep -cE '\[(답변|Answer)\]:.+' "$QFILE" 2>/dev/null || true)
 unanswered=$(grep -cE '\[(답변|Answer)\]: *$' "$QFILE" 2>/dev/null || true)
 
-echo "BLOCK 언급: ${block_open}회"
-echo "답변 완료: ${answered}건"
-echo "미답변: ${unanswered}건"
+echo "BLOCK mentions: ${block_open}"
+echo "Answered: ${answered}"
+echo "Unanswered: ${unanswered}"
 
 if (( unanswered > 0 )); then
-  warn "미답변 질문 ${unanswered}건 존재 — GATE-2 통과 조건 확인 필요"
+  warn "${unanswered} unanswered question(s) — check GATE-2 pass conditions"
 fi
 
-# --- 6. 확신도 태그 통계 ---
+# --- 6. Confidence tag statistics ---
 echo ""
-echo "--- 6. 확신도 태그 통계 ---"
+echo "--- 6. Confidence tag statistics ---"
 # Confidence tag is bilingual (KR: [확신: 확실/추정/AI추천/미정], EN: [Confidence: certain/estimated/ai-recommended/undecided])
 certain=$(grep -ciE '\[(확신: 확실|Confidence: certain)\]' "$QFILE" 2>/dev/null || true)
 estimated=$(grep -ciE '\[(확신: 추정|Confidence: estimated)\]' "$QFILE" 2>/dev/null || true)
 ai_rec=$(grep -ciE '\[(확신: AI추천|Confidence: ai-recommended)\]' "$QFILE" 2>/dev/null || true)
 deferred=$(grep -ciE '\[(확신: 미정|Confidence: undecided)\]' "$QFILE" 2>/dev/null || true)
 
-echo "확실: ${certain}, 추정: ${estimated}, AI추천: ${ai_rec}, 미정: ${deferred}"
+echo "certain: ${certain}, estimated: ${estimated}, ai-recommended: ${ai_rec}, undecided: ${deferred}"
 
 if (( deferred > 0 )); then
-  warn "미정 답변 ${deferred}건 — Readiness Score 차감 대상"
+  warn "${deferred} undecided answer(s) — subject to Readiness Score deduction"
 fi
 
-# --- 결과 요약 ---
+# --- Result summary ---
 echo ""
-echo "=== 결과 ==="
-echo -e "오류: ${RED}${ERRORS}${NC}건, 경고: ${YELLOW}${WARNINGS}${NC}건"
+echo "=== Result ==="
+echo -e "Errors: ${RED}${ERRORS}${NC}, Warnings: ${YELLOW}${WARNINGS}${NC}"
 
 if (( ERRORS > 0 )); then
   echo -e "${RED}FAIL${NC}"
   exit 1
 elif (( WARNINGS > 0 )); then
-  echo -e "${YELLOW}PASS (경고 있음)${NC}"
+  echo -e "${YELLOW}PASS (with warnings)${NC}"
   exit 0
 else
   echo -e "${GREEN}PASS${NC}"
